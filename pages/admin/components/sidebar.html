@@ -17,9 +17,9 @@
     height: 100vh;
     position: fixed;
     top: 0;
-    left: 0; 
+    left: 0;
     width: 250px;
-    background-color: #343a40;
+    background-color: #007bff; /* Primary color */
     color: white;
     padding-top: 20px;
     display: flex;
@@ -31,9 +31,21 @@
     text-decoration: none;
     display: block;
     padding: 10px 20px;
+    transition: background-color 0.3s, color 0.3s;
    }
    .sidebar a:hover {
-    background-color: #495057;
+    background-color: #0056b3;
+    color: #ffffff;
+   }
+   .sidebar .logo {
+    text-align: center;
+    margin-bottom: 20px;
+   }
+   .sidebar .logo img {
+    max-width: 150px;
+   }
+   .sidebar .nav-links {
+    flex-grow: 1;
    }
    .logout {
     margin: 20px;
@@ -44,6 +56,7 @@
     border: none;
     color: white;
     font-size: 16px;
+    transition: color 0.3s;
    }
    .logout button:hover {
     color: #dc3545;
@@ -52,15 +65,14 @@
  </head>
  <body>
   <nav id="sidebar" class="sidebar">
-   <div>
-    <div class="text-center mb-4">
-     <img
-      src="../../assets/images/bxu-logo.png"
-      alt="BXU Logo"
-      class="img-fluid"
-      style="max-width: 150px"
-     />
-    </div>
+   <div class="logo">
+    <img
+     src="../../assets/images/bxu-logo.png"
+     alt="BXU Logo"
+     class="img-fluid"
+    />
+   </div>
+   <div class="nav-links">
     <a href="#" onclick="loadContent('dashboard.html')"
      ><i class="bi bi-speedometer2"></i> Dashboard</a
     >
