@@ -61,7 +61,7 @@
    </main>
   </div>
 
-  <script>
+    <script>
    function loadContent(page) {
     fetch(`components/${page}`)
      .then((res) => res.text())
@@ -75,12 +75,16 @@
    fetch("components/header.html")
     .then((res) => res.text())
     .then((data) => (document.getElementById("header").innerHTML = data));
-   fetch("components/widgets.html")
-    .then((res) => res.text())
-    .then((data) => (document.getElementById("widgets").innerHTML = data));
 
-   // Load default content
-   loadContent("dashboard.html");
+   // Load content based on hash
+   window.addEventListener("hashchange", function () {
+    const page = window.location.hash.substring(1) || "dashboard.html";
+    loadContent(page);
+   });
+
+   // Load default content or based on initial hash
+   const initialPage = window.location.hash.substring(1) || "dashboard.html";
+   loadContent(initialPage);
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
  </body>
