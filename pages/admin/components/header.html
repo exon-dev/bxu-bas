@@ -15,11 +15,16 @@
   <style>
    .header {
     background-color: #f8f9fa;
-    padding: 10px 10px;
+    padding: 10px 16px;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: fixed;
+    top: 0;
+    left: 250px; /* Adjust this value to match the width of the sidebar */
+    right: 0;
+    z-index: 1000;
    }
    .profile {
     display: flex;
@@ -62,8 +67,6 @@
     const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     const date = now.toLocaleDateString(undefined, dateOptions);
     const time = now.toLocaleTimeString();
-    console.log("Date:", date); // Debugging line
-    console.log("Time:", time); // Debugging line
     document.getElementById("currentDate").textContent = date;
     document.getElementById("currentTime").textContent = time;
    }
