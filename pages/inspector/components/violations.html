@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Violators</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link
+   rel="stylesheet"
+   href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/css/bootstrap.min.css"
+  />
+ </head>
+ <body>
+  <div class="">
+   <h4>Violatiors</h4>
+   <p>Inspect busienss and create violations for business violators</p>
+
+   <button
+    class="btn btn-primary"
+    id="openModalBtn"
+    data-bs-toggle="modal"
+    data-bs-target="#violatorModal"
+   >
+    Add Violator
+   </button>
+
+   <!-----ADD VIOLATORS IN HERE----->
+  </div>
+
+  <!-- Modal Structure -->
+  <div
+   class="modal fade"
+   id="violatorModal"
+   tabindex="-1"
+   aria-labelledby="violatorModalLabel"
+   aria-hidden="true"
+  >
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="violatorModalLabel">Add New Violator</h5>
+      <button
+       type="button"
+       class="btn-close"
+       data-bs-dismiss="modal"
+       aria-label="Close"
+      ></button>
+     </div>
+     <div class="modal-body">
+      <form id="violatorForm">
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="name" class="form-label">Name:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="name"
+          name="name"
+          required
+         />
+        </div>
+        <div class="col-md-6">
+         <label for="typeOfInspection" class="form-label">Type of Inspection:</label>
+         <select
+          class="form-select"
+          id="typeOfInspection"
+          name="typeOfInspection"
+          required
+         >
+          <option value="regular">Regular</option>
+          <option value="night">Night</option>
+          <option value="special_change_address">
+           Special (Change Address)
+          </option>
+          <option value="special_verification">Special (Verification)</option>
+          <option value="special_complaint">Special (Complaint)</option>
+          <option value="special_retirement">Special (Retirement)</option>
+          <option value="joint">Joint</option>
+         </select>
+        </div>
+       </div>
+
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="status" class="form-label">Status:</label>
+         <select class="form-select" id="status" name="status" required>
+          <option value="low_income">Low Income</option>
+          <option value="with_permit">With Permit</option>
+          <option value="without_permit">Without Permit</option>
+          <option value="already_closed">Already Closed</option>
+          <option value="already_closed_new_business">
+           Already Closed but New Business Operating
+          </option>
+          <option value="still_operating">Still Operating</option>
+         </select>
+        </div>
+        <div class="col-md-6">
+         <label for="violationStatus" class="form-label">Violation Status:</label>
+         <select
+          class="form-select"
+          id="violationStatus"
+          name="violationStatus"
+          required
+         >
+          <option value="with_violation">With Violation</option>
+          <option value="without_violation">Without Violation</option>
+         </select>
+        </div>
+       </div>
+
+       <div class="row mb-3" id="natureOfViolationContainer" style="display: none">
+        <div class="col-md-12">
+         <label for="natureOfViolation" class="form-label">Nature of Violation:</label>
+         <select
+          class="form-select"
+          id="natureOfViolation"
+          name="natureOfViolation"
+         >
+          <option value="no_mayors_permit">NO MAYOR'S PERMIT</option>
+          <option value="non_display_of_mayors_permit">
+           NON-DISPLAY OF MAYOR'S PERMIT
+          </option>
+          <option value="displaying_dilapidated_mayors_permit">
+           DISPLAYING DILAPIDATED MAYOR'S PERMIT
+          </option>
+          <option value="displaying_counterfeit_mayors_permit">
+           DISPLAYING A COUNTERFEIT MAYOR'S PERMIT
+          </option>
+          <option value="understatement_of_gross_sales">
+           UNDERSTATEMENT AND/OR INCORRECT DECLARATION OF GROSS SALES OR RECEIPTS
+          </option>
+          <option value="falsification_of_business_permit">
+           FALSIFICATION AND/OR ALTERATION OF BUSINESS PERMIT
+          </option>
+          <option value="sidewalk_obstruction">
+           SIDEWALK/STREET/SIDESTREET OBSTRUCTION
+          </option>
+          <option value="non_posting_of_notice">NON-POSTING OF NOTICE</option>
+          <option value="non_declaration_of_business">
+           NON-DECLARATION OF TYPE OR NATURE OF BUSINESS
+          </option>
+          <option value="drinking_in_public_places">
+           DRINKING IN PUBLIC PLACES
+          </option>
+          <option value="unauthorized_serving_of_liquor">
+           UNAUTHORIZED SERVING OF LIQUOR
+          </option>
+          <option value="unauthorized_selling_of_liquor">
+           UNAUTHORIZED SELLING OF LIQUOR
+          </option>
+         </select>
+        </div>
+       </div>
+
+       <div class="row mb-3" id="inspectionReportContainer" style="display: none">
+        <div class="col-md-12">
+         <label for="inspectionReportFormNo" class="form-label">Inspection Report Form No.:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="inspectionReportFormNo"
+          name="inspectionReportFormNo"
+         />
+        </div>
+       </div>
+
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="violationReceiptNo" class="form-label">Violation Receipt No.:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="violationReceiptNo"
+          name="violationReceiptNo"
+          required
+         />
+        </div>
+        <div class="col-md-6">
+         <label for="dateOfViolation" class="form-label">Date of Violation:</label>
+         <input
+          type="date"
+          class="form-control"
+          id="dateOfViolation"
+          name="dateOfViolation"
+          required
+         />
+        </div>
+       </div>
+
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="dueDate" class="form-label">Due Date:</label>
+         <input
+          type="date"
+          class="form-control"
+          id="dueDate"
+          name="dueDate"
+          required
+         />
+        </div>
+        <div class="col-md-6">
+         <label for="phoneNumber" class="form-label">Phone Number:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="phoneNumber"
+          name="phoneNumber"
+          required
+         />
+        </div>
+       </div>
+
+       <div class="row mb-3">
+        <div class="col-md-12">
+         <label for="email" class="form-label">Email:</label>
+         <input
+          type="email"
+          class="form-control"
+          id="email"
+          name="email"
+          required
+         />
+        </div>
+       </div>
+
+       <button type="submit" class="btn btn-primary">Add Violator</button>
+      </form>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/js/bootstrap.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const violationStatus = document.getElementById('violationStatus');
+      const natureOfViolationContainer = document.getElementById('natureOfViolationContainer');
+
+      violationStatus.addEventListener('change', function () {
+        if (violationStatus.value === 'with_violation') {
+          natureOfViolationContainer.style.display = 'block';
+        } else {
+          natureOfViolationContainer.style.display = 'none';
+        }
+      });
+    });
+  </script>
+ </body>
+</html>

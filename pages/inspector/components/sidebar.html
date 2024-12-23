@@ -91,17 +91,8 @@
     <a href="#" onclick="loadContent('violations.html', this)"
      ><i class="bi bi-exclamation-triangle"></i> Violations</a
     >
-    <a href="#" onclick="loadContent('inspector.html', this)"
-     ><i class="bi bi-person"></i> Inspectors</a
-    >
     <a href="#" onclick="loadContent('notifications.html', this)"
      ><i class="bi bi-bell"></i> Notifications</a
-    >
-    <a href="#" onclick="loadContent('reports.html', this)"
-     ><i class="bi bi-file-earmark-text"></i> Reports</a
-    >
-    <a href="#" onclick="loadContent('settings.html', this)"
-     ><i class="bi bi-gear"></i> Settings</a
     >
     <a href="#" onclick="loadContent('profile.html', this)"
      ><i class="bi bi-person"></i> Profile</a
@@ -142,10 +133,10 @@
      .catch((error) => console.error("Error loading content:", error));
    }
 
-   window.logout = function () {
+   function logout() {
     // Add your logout logic here
     alert("Logging out...");
-   };
+   }
 
    // Debugging: Check if the logout function is defined
    console.log("Logout function defined:", typeof logout === "function");
