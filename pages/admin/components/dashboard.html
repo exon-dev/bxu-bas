@@ -12,13 +12,23 @@
    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
    rel="stylesheet"
   />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-   href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+   href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
    rel="stylesheet"
   />
+  <link
+   rel="stylesheet"
+   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.3.0/css/all.min.css"
+   integrity="sha512-UJqci0ZyYcQ0AOJkcIkUCxLS2L6eNcOr7ZiypuInvEhO9uqIDi349MEFrqBzoy1QlfcjfURHl+WTMjEdWcv67A=="
+   crossorigin="anonymous"
+   referrerpolicy="no-referrer"
+  />
+  <link rel="stylesheet" href="/css/admin/dashboard.css" />
   <style>
    body {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif !important;
    }
    .widget {
     background-color: #fff;
@@ -34,59 +44,66 @@
   </style>
  </head>
  <body id="dashboard">
-  <div>
+  <div class="mt-5">
    <h4>Dashboard</h4>
   </div>
-  <div class="mt-4">
-   <div class="row">
-    <div class="col-md-3">
-     <div class="widget">
-      <h5>Total Violations</h5>
-      <p>123</p>
-     </div>
-    </div>
-    <div class="col-md-3">
-     <div class="widget">
-      <h5>Upcoming Due Violations</h5>
-      <p>45</p>
-     </div>
-    </div>
-    <div class="col-md-3">
-     <div class="widget">
-      <h5>Overdue Violations</h5>
-      <p>10</p>
-     </div>
-    </div>
-    <div class="col-md-3">
-     <div class="widget">
-      <h5>Inspectors</h5>
-      <p>8</p>
+  <div class="row mt-4">
+   <div class="col-md-4 col-xl-3">
+    <div class="card bg-c-blue order-card">
+     <div class="card-block">
+      <h6 class="m-b-20">Total Violators</h6>
+      <div class="d-flex align-items-center gap-2">
+       <h2 class="text-right">
+        <i class="fa fa-users f-left text-white"></i>
+       </h2>
+       <h2>486</h2>
+      </div>
+      <p class="m-b-0">Resolved Violations: <span class="f-right">351</span></p>
      </div>
     </div>
    </div>
-   <div class="row">
-    <div class="col-md-6">
-     <div class="widget">
-      <h5>Recent Notifications</h5>
-      <ul>
-       <li>Notification 1</li>
-       <li>Notification 2</li>
-       <li>Notification 3</li>
-      </ul>
-     </div>
-    </div>
-    <div class="col-md-6">
-     <div class="widget">
-      <h5>Violation Statistics</h5>
-      <p>Chart or graph goes here</p>
+
+   <div class="col-md-4 col-xl-3">
+    <div class="card bg-c-green order-card">
+     <div class="card-block">
+      <h6 class="m-b-20">Number of Resolved Violations</h6>
+      <div class="d-flex align-items-center gap-2">
+       <h2 class="text-right">
+        <i class="fa fa-check-circle text-white"></i>
+       </h2>
+       <h2>351</h2>
+      </div>
+      <p class="m-b-0">Total Violators: <span class="f-right">486</span></p>
      </div>
     </div>
    </div>
-   <div class="row">
-    <div class="col-md-12">
-     <div class="widget">
-      <h5>Inspector Activity</h5>
-      <p>Recent inspector activities go here</p>
+
+   <div class="col-md-4 col-xl-3">
+    <div class="card bg-c-yellow order-card">
+     <div class="card-block">
+      <h6 class="m-b-20">Overdue Violators</h6>
+      <div class="d-flex align-items-center gap-2">
+       <h2 class="text-right">
+        <i class="fa fa-exclamation-triangle text-white"></i>
+       </h2>
+       <h2>120</h2>
+      </div>
+      <p class="m-b-0">Total Violators: <span class="f-right">486</span></p>
+     </div>
+    </div>
+   </div>
+
+   <div class="col-md-4 col-xl-3">
+    <div class="card bg-c-pink order-card">
+     <div class="card-block">
+      <h6 class="m-b-20">Number of Inspectors</h6>
+      <div class="d-flex align-items-center gap-2">
+       <h2 class="text-right">
+        <i class="fa fa-user-tie text-white"></i>
+       </h2>
+       <h2>25</h2>
+      </div>
+      <p class="m-b-0">Total Violators: <span class="f-right">486</span></p>
      </div>
     </div>
    </div>
