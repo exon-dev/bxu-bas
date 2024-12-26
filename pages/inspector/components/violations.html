@@ -4,27 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Violators</title>
-  <link rel="stylesheet" href="styles.css" />
   <link
    rel="stylesheet"
    href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/css/bootstrap.min.css"
   />
  </head>
+ <style>
+  body {
+   font-family: "Poppins", Arial, sans-serif !important;
+   background-color: #f4f4f9;
+   margin: 0;
+   padding: 0;
+  }
+  .card {
+   border-radius: 10px;
+   -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+   box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+   border: none;
+   margin-bottom: 30px;
+   -webkit-transition: all 0.3s ease-in-out;
+   transition: all 0.3s ease-in-out;
+  }
+ </style>
  <body>
-  <div class="">
-   <h4>Violators</h4>
-   <p>Inspect busienss and create violations for business violators</p>
-
-   <button
-    class="btn btn-primary"
-    id="openModalBtn"
-    data-bs-toggle="modal"
-    data-bs-target="#violatorModal"
-   >
-    Add Violator
-   </button>
-
-   <!-----ADD VIOLATORS IN HERE----->
+  <div class="card">
+   <div class="card-body">
+    <h4>Violators</h4>
+    <p>Inspect busienss and create violations for business violators</p>
+    <button
+     class="btn btn-primary"
+     id="openModalBtn"
+     data-bs-toggle="modal"
+     data-bs-target="#violatorModal"
+    >
+     Add Violator
+    </button>
+   </div>
   </div>
 
   <!-- Modal Structure -->
@@ -35,7 +50,7 @@
    aria-labelledby="violatorModalLabel"
    aria-hidden="true"
   >
-   <div class="modal-dialog modal-dialog-centered">
+   <div class="modal-dialog modal-lg">
     <div class="modal-content">
      <div class="modal-header">
       <h5 class="modal-title" id="violatorModalLabel">Add New Violator</h5>
@@ -60,7 +75,9 @@
          />
         </div>
         <div class="col-md-6">
-         <label for="typeOfInspection" class="form-label">Type of Inspection:</label>
+         <label for="typeOfInspection" class="form-label"
+          >Type of Inspection:</label
+         >
          <select
           class="form-select"
           id="typeOfInspection"
@@ -95,7 +112,9 @@
          </select>
         </div>
         <div class="col-md-6">
-         <label for="violationStatus" class="form-label">Violation Status:</label>
+         <label for="violationStatus" class="form-label"
+          >Violation Status:</label
+         >
          <select
           class="form-select"
           id="violationStatus"
@@ -108,53 +127,209 @@
         </div>
        </div>
 
-       <div class="row mb-3" id="natureOfViolationContainer" style="display: none">
+       <div class="row mb-3" id="natureOfViolationContainer">
         <div class="col-md-12">
-         <label for="natureOfViolation" class="form-label">Nature of Violation:</label>
-         <select
-          class="form-select"
-          id="natureOfViolation"
-          name="natureOfViolation"
+         <label class="form-label" for="natureOfViolationAccordion"
+          >Nature of Violation:</label
          >
-          <option value="no_mayors_permit">NO MAYOR'S PERMIT</option>
-          <option value="non_display_of_mayors_permit">
-           NON-DISPLAY OF MAYOR'S PERMIT
-          </option>
-          <option value="displaying_dilapidated_mayors_permit">
-           DISPLAYING DILAPIDATED MAYOR'S PERMIT
-          </option>
-          <option value="displaying_counterfeit_mayors_permit">
-           DISPLAYING A COUNTERFEIT MAYOR'S PERMIT
-          </option>
-          <option value="understatement_of_gross_sales">
-           UNDERSTATEMENT AND/OR INCORRECT DECLARATION OF GROSS SALES OR RECEIPTS
-          </option>
-          <option value="falsification_of_business_permit">
-           FALSIFICATION AND/OR ALTERATION OF BUSINESS PERMIT
-          </option>
-          <option value="sidewalk_obstruction">
-           SIDEWALK/STREET/SIDESTREET OBSTRUCTION
-          </option>
-          <option value="non_posting_of_notice">NON-POSTING OF NOTICE</option>
-          <option value="non_declaration_of_business">
-           NON-DECLARATION OF TYPE OR NATURE OF BUSINESS
-          </option>
-          <option value="drinking_in_public_places">
-           DRINKING IN PUBLIC PLACES
-          </option>
-          <option value="unauthorized_serving_of_liquor">
-           UNAUTHORIZED SERVING OF LIQUOR
-          </option>
-          <option value="unauthorized_selling_of_liquor">
-           UNAUTHORIZED SELLING OF LIQUOR
-          </option>
-         </select>
+         <div class="accordion" id="natureOfViolationAccordion">
+          <div class="accordion-item">
+           <h2 class="accordion-header" id="headingOne">
+            <button
+             class="accordion-button"
+             type="button"
+             data-bs-toggle="collapse"
+             data-bs-target="#collapseOne"
+             aria-expanded="true"
+             aria-controls="collapseOne"
+            >
+             Select Violations
+            </button>
+           </h2>
+           <div
+            id="collapseOne"
+            class="accordion-collapse collapse show"
+            aria-labelledby="headingOne"
+            data-bs-parent="#natureOfViolationAccordion"
+           >
+            <div class="accordion-body">
+             <div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="no_mayors_permit"
+                name="natureOfViolation"
+                value="no_mayors_permit"
+               />
+               <label class="form-check-label" for="no_mayors_permit"
+                >NO MAYOR'S PERMIT</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="non_display_of_mayors_permit"
+                name="natureOfViolation"
+                value="non_display_of_mayors_permit"
+               />
+               <label
+                class="form-check-label"
+                for="non_display_of_mayors_permit"
+                >NON-DISPLAY OF MAYOR'S PERMIT</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="displaying_dilapidated_mayors_permit"
+                name="natureOfViolation"
+                value="displaying_dilapidated_mayors_permit"
+               />
+               <label
+                class="form-check-label"
+                for="displaying_dilapidated_mayors_permit"
+                >DISPLAYING DILAPIDATED MAYOR'S PERMIT</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="displaying_counterfeit_mayors_permit"
+                name="natureOfViolation"
+                value="displaying_counterfeit_mayors_permit"
+               />
+               <label
+                class="form-check-label"
+                for="displaying_counterfeit_mayors_permit"
+                >DISPLAYING A COUNTERFEIT MAYOR'S PERMIT</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="understatement_of_gross_sales"
+                name="natureOfViolation"
+                value="understatement_of_gross_sales"
+               />
+               <label
+                class="form-check-label"
+                for="understatement_of_gross_sales"
+                >UNDERSTATEMENT AND/OR INCORRECT DECLARATION OF GROSS SALES OR
+                RECEIPTS</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="falsification_of_business_permit"
+                name="natureOfViolation"
+                value="falsification_of_business_permit"
+               />
+               <label
+                class="form-check-label"
+                for="falsification_of_business_permit"
+                >FALSIFICATION AND/OR ALTERATION OF BUSINESS PERMIT</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="sidewalk_obstruction"
+                name="natureOfViolation"
+                value="sidewalk_obstruction"
+               />
+               <label class="form-check-label" for="sidewalk_obstruction"
+                >SIDEWALK/STREET/SIDESTREET OBSTRUCTION</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="non_posting_of_notice"
+                name="natureOfViolation"
+                value="non_posting_of_notice"
+               />
+               <label class="form-check-label" for="non_posting_of_notice"
+                >NON-POSTING OF NOTICE</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="non_declaration_of_business"
+                name="natureOfViolation"
+                value="non_declaration_of_business"
+               />
+               <label class="form-check-label" for="non_declaration_of_business"
+                >NON-DECLARATION OF TYPE OR NATURE OF BUSINESS</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="drinking_in_public_places"
+                name="natureOfViolation"
+                value="drinking_in_public_places"
+               />
+               <label class="form-check-label" for="drinking_in_public_places"
+                >DRINKING IN PUBLIC PLACES</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="unauthorized_serving_of_liquor"
+                name="natureOfViolation"
+                value="unauthorized_serving_of_liquor"
+               />
+               <label
+                class="form-check-label"
+                for="unauthorized_serving_of_liquor"
+                >UNAUTHORIZED SERVING OF LIQUOR</label
+               >
+              </div>
+              <div class="form-check">
+               <input
+                class="form-check-input"
+                type="checkbox"
+                id="unauthorized_selling_of_liquor"
+                name="natureOfViolation"
+                value="unauthorized_selling_of_liquor"
+               />
+               <label
+                class="form-check-label"
+                for="unauthorized_selling_of_liquor"
+                >UNAUTHORIZED SELLING OF LIQUOR</label
+               >
+              </div>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
         </div>
        </div>
 
-       <div class="row mb-3" id="inspectionReportContainer" style="display: none">
+       <div
+        class="row mb-3"
+        id="inspectionReportContainer"
+        style="display: none"
+       >
         <div class="col-md-12">
-         <label for="inspectionReportFormNo" class="form-label">Inspection Report Form No.:</label>
+         <label for="inspectionReportFormNo" class="form-label"
+          >Inspection Report Form No.:</label
+         >
          <input
           type="text"
           class="form-control"
@@ -166,7 +341,9 @@
 
        <div class="row mb-3">
         <div class="col-md-6">
-         <label for="violationReceiptNo" class="form-label">Violation Receipt No.:</label>
+         <label for="violationReceiptNo" class="form-label"
+          >Violation Receipt No.:</label
+         >
          <input
           type="text"
           class="form-control"
@@ -176,7 +353,9 @@
          />
         </div>
         <div class="col-md-6">
-         <label for="dateOfViolation" class="form-label">Date of Violation:</label>
+         <label for="dateOfViolation" class="form-label"
+          >Date of Violation:</label
+         >
          <input
           type="date"
           class="form-control"
@@ -230,22 +409,74 @@
    </div>
   </div>
 
+  <div class="mt-3"></div>
+   <section class="card">
+    <div class="card-body">
+     <h4>List of Violators</h4>
+     <table class="table">
+      <thead>
+       <tr>
+        <th scope="col" style="background-color: #f4f4f9">Name</th>
+        <th scope="col" style="background-color: #f4f4f9">Business</th>
+        <th scope="col" style="background-color: #f4f4f9">Business ID</th>
+        <th scope="col" style="background-color: #f4f4f9">Business Type</th>
+        <th scope="col" style="background-color: #f4f4f9">Type of Violation</th>
+        <th scope="col" style="background-color: #f4f4f9">Date Issued</th>
+        <th scope="col" style="background-color: #f4f4f9">Due Date</th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td>John Doe</td>
+        <td>Doe Enterprises</td>
+        <td>12345</td>
+        <td>Retail</td>
+        <td>Late Payment</td>
+        <td>2023-01-15</td>
+        <td>2023-02-15</td>
+       </tr>
+       <tr>
+        <td>Jane Smith</td>
+        <td>Smith & Co.</td>
+        <td>67890</td>
+        <td>Wholesale</td>
+        <td>Unlicensed Operation</td>
+        <td>2023-02-01</td>
+        <td>2023-03-01</td>
+       </tr>
+       <tr>
+        <td>Bob Johnson</td>
+        <td>Johnson Services</td>
+        <td>11223</td>
+        <td>Service</td>
+        <td>Health Code Violation</td>
+        <td>2023-03-10</td>
+        <td>2023-04-10</td>
+       </tr>
+      </tbody>
+     </table>
+    </div>
+   </section>
+  </div>
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/js/bootstrap.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const violationStatus = document.getElementById('violationStatus');
-      const natureOfViolationContainer = document.getElementById('natureOfViolationContainer');
+   document.addEventListener("DOMContentLoaded", function () {
+    const violationStatus = document.getElementById("violationStatus");
+    const natureOfViolationContainer = document.getElementById(
+     "natureOfViolationContainer"
+    );
 
-      violationStatus.addEventListener('change', function () {
-        if (violationStatus.value === 'with_violation') {
-          natureOfViolationContainer.style.display = 'block';
-        } else {
-          natureOfViolationContainer.style.display = 'none';
-        }
-      });
+    violationStatus.addEventListener("change", function () {
+     if (violationStatus.value === "with_violation") {
+      natureOfViolationContainer.style.display = "block";
+     } else {
+      natureOfViolationContainer.style.display = "none";
+     }
     });
+   });
   </script>
  </body>
 </html>

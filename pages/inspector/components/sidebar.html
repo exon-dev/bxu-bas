@@ -20,13 +20,14 @@
    body {
     font-family: "Poppins", sans-serif;
    }
+
    .sidebar {
     height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
     width: 250px;
-    background-color: #222d31; /* Primary color */
+    background-color: #222d31;
     color: white;
     padding-top: 20px;
     display: flex;
@@ -34,6 +35,7 @@
     justify-content: space-between;
     z-index: 1000;
    }
+
    .sidebar a {
     color: white;
     text-decoration: none;
@@ -41,28 +43,30 @@
     padding: 10px 20px;
     transition: background-color 0.3s, color 0.3s;
    }
+
    .sidebar a:hover {
     background-color: #0056b3;
     color: #ffffff;
    }
-   .sidebar a.active {
-    background-color: #0056b3;
-    color: #ffffff;
-   }
+
    .sidebar .logo {
     text-align: center;
     margin-bottom: 20px;
    }
+
    .sidebar .logo img {
     max-width: 150px;
    }
+
    .sidebar .nav-links {
     flex-grow: 1;
    }
+
    .logout {
     margin: 20px;
     text-align: center;
    }
+
    .logout button {
     background-color: transparent;
     border: none;
@@ -70,78 +74,125 @@
     font-size: 16px;
     transition: color 0.3s;
    }
+
    .logout button:hover {
     color: #dc3545;
+   }
+
+   .sidebar .active {
+    background-color: #0056b3;
+    color: white;
+   }
+
+   .nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+    transition: background-color 0.3s;
+   }
+
+   .nav-links a:hover {
+    background-color: #0056b3;
+   }
+
+   .nav-links a.active {
+    background-color: #0056b3;
+    color: white;
    }
   </style>
  </head>
  <body>
-  <nav id="sidebar" class="sidebar">
+  <div class="sidebar">
    <div class="logo">
-    <img
-     src="../../assets/images/bxu-logo.png"
-     alt="BXU Logo"
-     class="img-fluid"
-    />
+    <h5>BXU BAS</h5>
    </div>
    <div class="nav-links">
-    <a href="#dashboard.html" onclick="loadContent('dashboard.html', this)"
+    <a href="#dashboard" class="active"
      ><i class="bi bi-speedometer2"></i> Dashboard</a
     >
-    <a href="#violations.html" onclick="loadContent('violations.html', this)"
+    <a href="#violations"
      ><i class="bi bi-exclamation-triangle"></i> Violations</a
     >
-    <a
-     href="#notifications.html"
-     onclick="loadContent('notifications.html', this)"
-     ><i class="bi bi-bell"></i> Notifications</a
-    >
-    <a href="#profile.html" onclick="loadContent('profile.html', this)"
-     ><i class="bi bi-person"></i> Profile</a
-    >
+    <a href="#notifications"><i class="bi bi-bell"></i> Notifications</a>
+    <a href="#profile"><i class="bi bi-person"></i> Profile</a>
    </div>
    <div class="logout">
     <button onclick="logout()">
      <i class="bi bi-box-arrow-right"></i> Logout
     </button>
    </div>
-  </nav>
-
-  <div id="content" style="margin-left: 250px; padding: 70px 20px 20px 20px">
-   <!-- Content will be loaded here -->
   </div>
 
+  <div
+   id="content"
+   style="margin-left: 250px; padding: 70px 20px 20px 20px"
+  ></div>
+
   <script>
+   // Function to load content and highlight the active link
    function loadContent(page, element) {
+    // Prevent default link behavior
+    if (event) {
+     event.preventDefault();
+    }
+
     // Fetch the content of the page
-    fetch(page)
-     .then((response) => response.text())
+    fetch(`components/${page}`)
+     .then((response) => {
+      if (!response.ok) {
+       throw new Error("Network response was not ok");
+      }
+      return response.text();
+     })
      .then((data) => {
       // Insert the content into the content area
       const contentDiv = document.getElementById("content");
-      if (contentDiv) {
-       contentDiv.innerHTML = data;
+      contentDiv.innerHTML = data;
 
-       // Remove 'active' class from all links
-       const links = document.querySelectorAll(".sidebar a");
-       links.forEach((link) => link.classList.remove("active"));
+      // Remove 'active' class from all links
+      const links = document.querySelectorAll(".nav-links a");
+      links.forEach((link) => link.classList.remove("active"));
 
-       // Add 'active' class to the clicked link
+      // Add 'active' class to the clicked link
+      if (element) {
        element.classList.add("active");
-      } else {
-       console.error("Content div not found");
       }
      })
-     .catch((error) => console.error("Error loading content:", error));
+     .catch((error) => {
+      console.error("Error loading content:", error);
+      const contentDiv = document.getElementById("content");
+      contentDiv.innerHTML =
+       "<h2>Error loading the page. Please try again.</h2>";
+     });
    }
 
-   function logout() {
-    // Add your logout logic here
+   // Example logout function
+   window.logout = function () {
     alert("Logging out...");
-   }
+   };
 
-   // Debugging: Check if the logout function is defined
-   console.log("Logout function defined:", typeof logout === "function");
+   // Load the default content on page load
+   window.onload = function () {
+    const hash = window.location.hash || "#dashboard"; // Default to dashboard if no hash
+    const page = hash.substring(1) + ".html"; // Get the page name from the hash
+    loadContent(page); // Load the initial content based on the hash
+   };
+
+   // Add event listeners to the links
+   document.querySelectorAll(".nav-links a").forEach((link) => {
+    link.addEventListener("click", function (event) {
+     const page = this.getAttribute("href").substring(1) + ".html"; // Get the page name from the href
+     loadContent(page, this); // Pass the actual event object
+    });
+   });
+
+   // Store the current page in local storage
+   localStorage.setItem("currentPage", page);
+
+   // On page load, check local storage
+   const currentPage = localStorage.getItem("currentPage") || "dashboard.html";
+   loadContent(currentPage);
   </script>
  </body>
 </html>

@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BXU BAS: Inspector</title>
+  <title>BXU BAS: Dashboard</title>
   <link
    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
    rel="stylesheet"
@@ -12,33 +12,18 @@
    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
    rel="stylesheet"
   />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-   href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+   href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
    rel="stylesheet"
+  />
   />
   <link rel="stylesheet" href="css/main.css" />
   <style>
    body {
     font-family: "Poppins", sans-serif;
-   }
-   .sidebar {
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 250px;
-    background-color: #343a40;
-    color: white;
-    padding-top: 20px;
-   }
-   .sidebar a {
-    color: white;
-    text-decoration: none;
-    display: block;
-    padding: 10px 20px;
-   }
-   .sidebar a:hover {
-    background-color: #495057;
+    background-color: #eff3fc;
    }
    .main-content {
     margin-left: 250px;
@@ -48,43 +33,98 @@
  </head>
  <body>
   <div class="dashboard">
+   <!-- Include Header -->
+   <div id="header"></div>
+
    <!-- Include Sidebar -->
    <div id="sidebar"></div>
 
    <!-- Main Content -->
    <main class="main-content">
-    <!-- Include Header -->
-    <div id="header"></div>
-
-    <!-- Include Content -->
-    <div id="content"></div>
+    <div id="content" style="padding: 20px">
+     <!-- Content will be loaded here -->
+    </div>
    </main>
   </div>
 
   <script>
-   function loadContent(page) {
-    fetch(`components/${page}`)
-     .then((res) => res.text())
-     .then((data) => (document.getElementById("content").innerHTML = data));
-   }
-
-   // Dynamically load sections
-   fetch("components/sidebar.html")
-    .then((res) => res.text())
-    .then((data) => (document.getElementById("sidebar").innerHTML = data));
+   // Load the header
    fetch("components/header.html")
     .then((res) => res.text())
-    .then((data) => (document.getElementById("header").innerHTML = data));
+    .then((data) => {
+     document.getElementById("header").innerHTML = data;
+    });
 
-   // Load content based on hash
-   window.addEventListener("hashchange", function () {
-    const page = window.location.hash.substring(1) || "dashboard.html";
-    loadContent(page);
-   });
+   // Load the sidebar
+   fetch("components/sidebar.html")
+    .then((res) => res.text())
+    .then((data) => {
+     document.getElementById("sidebar").innerHTML = data;
 
-   // Load default content or based on initial hash
-   const initialPage = window.location.hash.substring(1) || "dashboard.html";
-   loadContent(initialPage);
+     // Add event listeners to the links
+     const links = document.querySelectorAll(".nav-links a");
+     links.forEach((link) => {
+      link.addEventListener("click", (event) => {
+       event.preventDefault(); // Prevent default behavior here
+       const page = link.getAttribute("href").substring(1) + ".html"; // Get the page name from the href
+       loadContent(page, link, event); // Pass the actual event object
+      });
+     });
+
+     // Load the default content on page load
+     const hash = window.location.hash || "#dashboard"; // Default to dashboard if no hash
+     const page = hash.substring(1) + ".html"; // Get the page name from the hash
+     const activeLink =
+      document.querySelector(`.nav-links a[href="${hash}"]`) ||
+      document.querySelector(".nav-links a.active");
+
+     // Call loadContent with a mock event object for initial load
+     loadContent(page, activeLink, { preventDefault: () => {} }); // Mock event
+    });
+
+   // Function to load content
+   function loadContent(page, element, event) {
+    // Prevent default anchor behavior
+    event.preventDefault();
+
+    // Adjust the path to include 'components/'
+    const fullPath = `components/${page}`; // This assumes the files are in the components directory
+
+    console.log("Fetching content from:", fullPath); // Log the page being fetched
+
+    // Fetch the content of the page
+    fetch(fullPath)
+     .then((response) => {
+      if (!response.ok) {
+       throw new Error("Network response was not ok: " + response.statusText);
+      }
+      return response.text();
+     })
+     .then((data) => {
+      // Insert the content into the content area
+      const contentDiv = document.getElementById("content");
+      if (contentDiv) {
+       contentDiv.innerHTML = data;
+
+       // Remove 'active' class from all links
+       const links = document.querySelectorAll(".nav-links a");
+       links.forEach((link) => link.classList.remove("active"));
+
+       // Add 'active' class to the clicked link
+       element.classList.add("active");
+      } else {
+       console.error("Content div not found");
+      }
+     })
+     .catch((error) => {
+      console.error("Error loading content:", error);
+      const contentDiv = document.getElementById("content");
+      if (contentDiv) {
+       contentDiv.innerHTML =
+        "<h2>Error loading the page. Please try again.</h2>";
+      }
+     });
+   }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
  </body>
