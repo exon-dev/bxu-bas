@@ -27,8 +27,8 @@
     top: 0;
     left: 0;
     width: 250px;
-    background-color: #222d31;
-    color: white;
+    background-color: white;
+    color: #222d31;
     padding-top: 20px;
     display: flex;
     flex-direction: column;
@@ -37,7 +37,8 @@
    }
 
    .sidebar a {
-    color: white;
+    color: #222d31;
+    border-radius: 8px;
     text-decoration: none;
     display: block;
     padding: 10px 20px;
@@ -45,8 +46,14 @@
    }
 
    .sidebar a:hover {
-    background-color: #0056b3;
-    color: #ffffff;
+    background-color: rgba(
+     67,
+     155,
+     255,
+     0.5
+    ) !important; /* Ensure lighter hover effect */
+    color: #ffffff !important;
+    border-radius: 8px;
    }
 
    .sidebar .logo {
@@ -70,7 +77,7 @@
    .logout button {
     background-color: transparent;
     border: none;
-    color: white;
+    color: #222d31;
     font-size: 16px;
     transition: color 0.3s;
    }
@@ -80,12 +87,13 @@
    }
 
    .sidebar .active {
-    background-color: #0056b3;
+    background-color: #439bff;
+    border-radius: 8px;
     color: white;
    }
 
    .nav-links a {
-    color: white;
+    color: #222d31;
     text-decoration: none;
     padding: 10px 20px;
     display: block;
@@ -93,11 +101,12 @@
    }
 
    .nav-links a:hover {
-    background-color: #0056b3;
+    background-color: #439bff;
+    border-radius: 8px;
    }
 
    .nav-links a.active {
-    background-color: #0056b3;
+    background-color: #439bff;
     color: white;
    }
   </style>
@@ -107,7 +116,7 @@
    <div class="logo">
     <h5>BXU BAS</h5>
    </div>
-   <div class="nav-links">
+   <div class="nav-links px-3">
     <a href="#dashboard" class="active"
      ><i class="bi bi-speedometer2"></i> Dashboard</a
     >
