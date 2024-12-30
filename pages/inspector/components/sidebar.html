@@ -21,20 +21,21 @@
     font-family: "Poppins", sans-serif;
    }
 
-   .sidebar {
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 250px;
-    background-color: white;
-    color: #222d31;
-    padding-top: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    z-index: 1000;
-   }
+  .sidebar {
+   height: 100vh;
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 250px;
+   background-color: white;
+   color: #222d31;
+   padding-top: 20px;
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+   z-index: 1000;
+   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Add right shadow */
+  }
 
    .sidebar a {
     color: #222d31;
@@ -120,8 +121,8 @@
     <a href="#dashboard" class="active"
      ><i class="bi bi-speedometer2"></i> Dashboard</a
     >
-    <a href="#violations"
-     ><i class="bi bi-exclamation-triangle"></i> Violations</a
+    <a href="#inspections"
+     ><i class="bi bi-exclamation-triangle"></i> Inspection</a
     >
     <a href="#notifications"><i class="bi bi-bell"></i> Notifications</a>
     <a href="#profile"><i class="bi bi-person"></i> Profile</a>

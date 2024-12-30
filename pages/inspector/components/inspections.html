@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Violators</title>
+  <title>Inspections</title>
   <link
    rel="stylesheet"
    href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/css/bootstrap.min.css"
@@ -29,15 +29,15 @@
  <body>
   <div class="card">
    <div class="card-body">
-    <h4>Violators</h4>
-    <p>Inspect busienss and create violations for business violators</p>
+    <h4>Business Inspection</h4>
+    <p>Inspect business and create violations for business violators</p>
     <button
      class="btn btn-primary"
      id="openModalBtn"
      data-bs-toggle="modal"
      data-bs-target="#violatorModal"
     >
-     Add Violator
+     Add Inspection
     </button>
    </div>
   </div>
@@ -53,7 +53,7 @@
    <div class="modal-dialog modal-lg modal-dialog-centered"> 
     <div class="modal-content">
      <div class="modal-header">
-      <h5 class="modal-title" id="violatorModalLabel">Add New Violator</h5>
+      <h5 class="modal-title" id="violatorModalLabel">Business Inspection</h5>
       <button
        type="button"
        class="btn-close"
@@ -402,7 +402,7 @@
         </div>
        </div>
 
-       <button type="submit" class="btn btn-primary">Add Violator</button>
+       <button type="submit" class="btn btn-primary">Add Inspection</button>
       </form>
      </div>
     </div>
@@ -480,3 +480,42 @@
   </script>
  </body>
 </html>
+<section class="card mt-3">
+ <div class="card-body">
+ <h4>Inspected Businesses</h4>
+ <table class="table">
+  <thead>
+  <tr>
+   <th scope="col" style="background-color: #f4f4f9">Business ID</th>
+   <th scope="col" style="background-color: #f4f4f9">Inspector ID</th>
+   <th scope="col" style="background-color: #f4f4f9">Inspection Date</th>
+   <th scope="col" style="background-color: #f4f4f9">Type of Inspection</th>
+   <th scope="col" style="background-color: #f4f4f9">With Violations</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+   <td>12345</td>
+   <td>1</td>
+   <td>2023-01-10</td>
+   <td>Regular</td>
+   <td>Yes</td>
+  </tr>
+  <tr>
+   <td>67890</td>
+   <td>2</td>
+   <td>2023-02-05</td>
+   <td>Night</td>
+   <td>No</td>
+  </tr>
+  <tr>
+   <td>11223</td>
+   <td>3</td>
+   <td>2023-03-15</td>
+   <td>Special (Verification)</td>
+   <td>Yes</td>
+  </tr>
+  </tbody>
+ </table>
+ </div>
+</section>
