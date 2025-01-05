@@ -115,6 +115,7 @@
     const response = await fetch(CONFIG.API_BASE_URL + "/admin-login", {
      method: "POST",
      headers: {
+      Accept: "applicaton/json",
       "Content-Type": "application/json",
      },
      body: JSON.stringify({
@@ -122,10 +123,10 @@
       password,
      }),
     });
-    console.log(response);
+
     const data = await response.json();
 
-    console.log(data);
+    console.log("Data: ", data);
     // Check if the login is successful
     if (response.ok) {
      Toastify({
@@ -136,7 +137,7 @@
       close: true, // Show close button
      }).showToast();
      setTimeout(() => {
-      window.location.href = "admin/admin.html";
+      window.location.href = "../admin/admin.html";
      }, 3000);
     } else {
      // Show a Toastify notification for invalid login
