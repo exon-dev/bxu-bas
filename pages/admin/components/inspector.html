@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inspector</title>
+  <title>Inspector Management</title>
   <link
    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
    rel="stylesheet"
@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-   href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+   href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
    rel="stylesheet"
   />
   <style>
@@ -30,22 +30,19 @@
    .btn-primary {
     background-color: #007bff;
     border-color: #007bff;
-    /* border-radius: 20px; */
    }
    .btn-primary:hover {
     background-color: #0056b3;
     border-color: #0056b3;
    }
    .form-control {
-    border-radius: 20px;
+    border-radius: 10px;
    }
    .card {
     border-radius: 10px;
-    -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
-    box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border: none;
     margin-bottom: 30px;
-    -webkit-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
    }
    .footer {
@@ -55,7 +52,7 @@
     border-top: 1px solid #e9ecef;
    }
    tr:hover {
-    background-color: #f1f1f1; /* Hover effect for table rows */
+    background-color: #f1f1f1;
    }
   </style>
  </head>
@@ -63,8 +60,10 @@
   <div class="">
    <div class="card">
     <div class="card-body">
-     <h4 class="card-title">Inspector</h4>
-     <p class="card-text">Manage inspector users throughout BXU BAS System</p>
+     <h4 class="card-title">Inspector Management</h4>
+     <p class="card-text">
+      Manage inspector users throughout the BXU BAS System
+     </p>
      <button
       id="showFormButton"
       class="btn btn-primary mb-3"
@@ -154,34 +153,16 @@
      <table class="table">
       <thead>
        <tr>
-        <th scope="col" style="background-color: #f4f4f9">No.</th>
-        <th scope="col" style="background-color: #f4f4f9">Email</th>
-        <th scope="col" style="background-color: #f4f4f9">Full Name</th>
-        <th scope="col" style="background-color: #f4f4f9">Date Created</th>
-        <th scope="col" style="background-color: #f4f4f9">Date Updated</th>
-        <th scope="col" style="background-color: #f4f4f9">
-         No. of Inspections
-        </th>
+        <th scope="col">No.</th>
+        <th scope="col">Email</th>
+        <th scope="col">Full Name</th>
+        <th scope="col">Date Created</th>
+        <th scope="col">Date Updated</th>
+        <th scope="col">No. of Inspections</th>
        </tr>
       </thead>
       <tbody id="inspectorList">
-       <!-- Inspector rows will be added here dynamically -->
-       <tr>
-        <td>1</td>
-        <td>example@example.com</td>
-        <td>John Doe</td>
-        <td>2023-01-01</td>
-        <td>2023-01-10</td>
-        <td>5</td>
-       </tr>
-       <tr>
-        <td>2</td>
-        <td>example2@example.com</td>
-        <td>Jane Smith</td>
-        <td>2023-01-05</td>
-        <td>2023-01-15</td>
-        <td>3</td>
-       </tr>
+       <!-- Inspector rows will be dynamically added here -->
       </tbody>
      </table>
     </div>
@@ -189,68 +170,56 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- script for adding new inspectors -->
+
   <script type="module">
-   document.addEventListener("DOMContentLoaded", function () {
-    const addInspectorForm = document.getElementById("addInspectorForm");
-    const inspectorList = document.getElementById("inspectorList");
-
-    addInspectorForm.addEventListener("submit", function (event) {
-     event.preventDefault();
-
-     const email = document.getElementById("email").value;
-     const firstName = document.getElementById("firstName").value;
-     const lastName = document.getElementById("lastName").value;
-     const contactNumber = document.getElementById("contactNumber").value;
-
-     // Here you can add your logic to save the inspector details
-     // For example, you can send the data to the server using fetch or AJAX
-
-     // For demonstration, we'll add a new row to the table
-     const newRow = document.createElement("tr");
-     newRow.innerHTML = `
-       <th scope="row">${inspectorList.children.length + 1}</th>
-       <td>${email}</td>
-       <td>${firstName} ${lastName}</td>
-       <td>${new Date().toLocaleDateString()}</td>
-       <td>${new Date().toLocaleDateString()}</td>
-       <td>0</td>
-     `;
-     inspectorList.appendChild(newRow);
-
-     // Display a success message
-     document.getElementById("message").innerHTML = `
-       <div class="alert alert-success" role="alert">
-         Inspector added successfully!
-       </div>
-     `;
-
-     // Clear the form
-     addInspectorForm.reset();
-
-     // Hide the modal
-     const addInspectorModal = new bootstrap.Modal(
-      document.getElementById("addInspectorModal")
-     );
-     addInspectorModal.hide();
-    });
-   });
-  </script>
-
-  <!-- script for rendering all inspectors -->
-  <script type="module">
-   // list of inspectors
    import CONFIG from "/scripts/config.js";
+
    const apiUrl = CONFIG.API_BASE_URL;
 
-   const res = await fetch(apiUrl + "/inspectors", {
-    method: "GET",
-    headers: {
-     Accept: "application/json",
-     "Content-Type": "application/json",
-     Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-   });
+   const inspectorList = document.getElementById("inspectorList");
+   const messageDiv = document.getElementById("message");
+
+   // Fetch and display inspectors
+   const fetchInspectors = async () => {
+    try {
+     const response = await fetch(`${apiUrl}/admin/inspectors`, {
+      method: "GET",
+      headers: {
+       Accept: "application/json",
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+
+     if (!response.ok) {
+      throw new Error("Failed to fetch inspectors");
+     }
+
+     const inspectors = await response.json();
+
+     inspectorList.innerHTML = "";
+     inspectors.inspectors.forEach((inspector, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+            <th scope="row">${index + 1}</th>
+            <td>${inspector.email}</td>
+            <td>${inspector.first_name} ${inspector.last_name}</td>
+            <td>${new Date(inspector.created_at).toLocaleDateString()}</td>
+            <td>${new Date(inspector.updated_at).toLocaleDateString()}</td>
+            <td>${0}</td> <!-- Placeholder for number of inspections -->
+          `;
+      inspectorList.appendChild(row);
+     });
+    } catch (error) {
+     messageDiv.innerHTML = `
+          <div class="alert alert-danger" role="alert">
+            Error fetching inspectors: ${error.message}
+          </div>
+        `;
+    }
+   };
+
+   fetchInspectors();
   </script>
  </body>
 </html>

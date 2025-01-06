@@ -34,7 +34,7 @@
     flex-direction: column;
     justify-content: space-between;
     z-index: 1000;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Add right shadow */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
    }
 
    .sidebar a {
@@ -47,12 +47,7 @@
    }
 
    .sidebar a:hover {
-    background-color: rgba(
-     67,
-     155,
-     255,
-     0.5
-    ) !important; /* Ensure lighter hover effect */
+    background-color: rgba(67, 155, 255, 0.5) !important;
     color: #ffffff !important;
     border-radius: 8px;
    }
@@ -138,18 +133,19 @@
 
   <div
    id="content"
-   style="margin-left: 250px; padding: 70px 20px 20px 20px"
+   style="margin-left: 250px; padding: 100px 20px 20px 20px"
   ></div>
 
   <script>
-   // Function to load content and highlight the active link
-   function loadContent(page, element) {
-    // Prevent default link behavior
+   function loadContent(page, element, event) {
     if (event) {
      event.preventDefault();
     }
 
-    // Fetch the content of the page
+    console.log("working"); // This will now print to the console when a link is clicked
+
+    localStorage.setItem("currentPage", page);
+
     fetch(`components/${page}`)
      .then((response) => {
       if (!response.ok) {
@@ -158,15 +154,15 @@
       return response.text();
      })
      .then((data) => {
-      // Insert the content into the content area
       const contentDiv = document.getElementById("content");
       contentDiv.innerHTML = data;
 
-      // Remove 'active' class from all links
+      // Dynamically load the page-specific script
+      loadPageScript(page);
+
       const links = document.querySelectorAll(".nav-links a");
       links.forEach((link) => link.classList.remove("active"));
 
-      // Add 'active' class to the clicked link
       if (element) {
        element.classList.add("active");
       }
@@ -179,32 +175,40 @@
      });
    }
 
-   // Example logout function
+   // Dynamically load the page-specific script
+   function loadPageScript(page) {
+    const scriptPath = `components/${page.replace(".html", ".js")}`;
+    const scriptElement = document.createElement("script");
+    scriptElement.src = scriptPath;
+
+    // Append the script to the document
+    scriptElement.onload = () => {
+     console.log(`Script for ${page} loaded successfully.`);
+    };
+
+    scriptElement.onerror = () => {
+     console.error(`Error loading script for ${page}.`);
+    };
+
+    document.body.appendChild(scriptElement);
+   }
+
    window.logout = function () {
     alert("Logging out...");
    };
 
-   // Load the default content on page load
    window.onload = function () {
-    const hash = window.location.hash || "#dashboard"; // Default to dashboard if no hash
-    const page = hash.substring(1) + ".html"; // Get the page name from the hash
-    loadContent(page); // Load the initial content based on the hash
-   };
+    const currentPage = localStorage.getItem("currentPage") || "dashboard.html";
+    loadContent(currentPage);
 
-   // Add event listeners to the links
-   document.querySelectorAll(".nav-links a").forEach((link) => {
-    link.addEventListener("click", function (event) {
-     const page = this.getAttribute("href").substring(1) + ".html"; // Get the page name from the href
-     loadContent(page, this); // Pass the actual event object
+    // Fix: Add the event listeners here to ensure that the "working" log prints when clicked
+    document.querySelectorAll(".nav-links a").forEach((link) => {
+     link.addEventListener("click", function (event) {
+      const page = this.getAttribute("href").substring(1) + ".html";
+      loadContent(page, this, event);
+     });
     });
-   });
-
-   // Store the current page in local storage
-   localStorage.setItem("currentPage", page);
-
-   // On page load, check local storage
-   const currentPage = localStorage.getItem("currentPage") || "dashboard.html";
-   loadContent(currentPage);
+   };
   </script>
  </body>
 </html>
