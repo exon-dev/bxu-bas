@@ -11,7 +11,7 @@
    rel="stylesheet"
   />
   <link
-   href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+   href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
    rel="stylesheet"
   />
   <style>
@@ -35,8 +35,13 @@
    .table {
     margin-top: 20px;
    }
+   .spinner {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+   }
    tr:hover {
-    background-color: #f1f1f1; /* Hover effect for table rows */
+    background-color: #f1f1f1;
    }
    .footer {
     text-align: center;
@@ -46,115 +51,153 @@
    }
    .card {
     border-radius: 10px;
-    -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
-    box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+    box-shadow: 0 1px 2.94px rgba(4, 26, 55, 0.16);
     border: none;
     margin-bottom: 30px;
-    -webkit-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
    }
   </style>
  </head>
  <body id="violations">
-  <section class="">
+  <section>
    <div class="card">
     <div class="card-body">
      <h4>Business Inspections</h4>
-     <p>Inspect business and create violations for business violators</p>
+     <p>Inspect businesses and create violations for business violators.</p>
     </div>
    </div>
   </section>
   <div class="mt-3">
-   <section class="card mt-3">
+   <section class="card">
     <div class="card-body">
      <h4>Inspected Businesses</h4>
+     <!-- <div class="spinner" id="loading-inspections">
+      <div class="spinner-border text-primary" role="status">
+       <span class="visually-hidden">Loading...</span>
+      </div>
+     </div> -->
      <table class="table">
       <thead>
        <tr>
-        <th scope="col" style="background-color: #f4f4f9">Business ID</th>
-        <th scope="col" style="background-color: #f4f4f9">Inspector ID</th>
-        <th scope="col" style="background-color: #f4f4f9">Inspection Date</th>
-        <th scope="col" style="background-color: #f4f4f9">
-         Type of Inspection
-        </th>
-        <th scope="col" style="background-color: #f4f4f9">With Violations</th>
+        <th>Business Name</th>
+        <th>Business ID</th>
+        <th>Inspector ID</th>
+        <th>Inspection Date</th>
+        <th>Type of Inspection</th>
+        <th>With Violations</th>
        </tr>
       </thead>
-      <tbody>
-       <tr>
-        <td>12345</td>
-        <td>1</td>
-        <td>2023-01-10</td>
-        <td>Regular</td>
-        <td>Yes</td>
-       </tr>
-       <tr>
-        <td>67890</td>
-        <td>2</td>
-        <td>2023-02-05</td>
-        <td>Night</td>
-        <td>No</td>
-       </tr>
-       <tr>
-        <td>11223</td>
-        <td>3</td>
-        <td>2023-03-15</td>
-        <td>Special (Verification)</td>
-        <td>Yes</td>
-       </tr>
-      </tbody>
+      <tbody></tbody>
      </table>
     </div>
    </section>
   </div>
-  <div class="mt-3">
+  <!-- <div class="mt-3">
    <section class="card">
     <div class="card-body">
      <h4>List of Violators</h4>
+     <div class="spinner" id="loading-violators">
+      <div class="spinner-border text-primary" role="status">
+       <span class="visually-hidden">Loading...</span>
+      </div>
+     </div>
      <table class="table">
       <thead>
        <tr>
-        <th scope="col" style="background-color: #f4f4f9">Name</th>
-        <th scope="col" style="background-color: #f4f4f9">Business</th>
-        <th scope="col" style="background-color: #f4f4f9">Business ID</th>
-        <th scope="col" style="background-color: #f4f4f9">Business Status</th>
-        <th scope="col" style="background-color: #f4f4f9">Type of Violation</th>
-        <th scope="col" style="background-color: #f4f4f9">Date Issued</th>
-        <th scope="col" style="background-color: #f4f4f9">Due Date</th>
+        <th>Owner Name</th>
+        <th>Business Name</th>
+        <th>Business ID</th>
+        <th>Status</th>
+        <th>Violation Details</th>
+        <th>Inspection Date</th>
+        <th>Due Date</th>
        </tr>
       </thead>
-      <tbody>
-       <tr>
-        <td>John Doe</td>
-        <td>Doe Enterprises</td>
-        <td>12345</td>
-        <td>low Income</td>
-        <td>Late Payment</td>
-        <td>2023-01-15</td>
-        <td>2023-02-15</td>
-       </tr>
-       <tr>
-        <td>Jane Smith</td>
-        <td>Smith & Co.</td>
-        <td>67890</td>
-        <td>Still operating</td>
-        <td>Unlicensed Operation</td>
-        <td>2023-02-01</td>
-        <td>2023-03-01</td>
-       </tr>
-       <tr>
-        <td>Bob Johnson</td>
-        <td>Johnson Services</td>
-        <td>11223</td>
-        <td>With Permit</td>
-        <td>Health Code Violation</td>
-        <td>2023-03-10</td>
-        <td>2023-04-10</td>
-       </tr>
-      </tbody>
+      <tbody></tbody>
      </table>
     </div>
    </section>
-  </div>
+  </div> -->
+  <script type="module">
+   import CONFIG from "/scripts/config.js";
+   const apiUrl = CONFIG.API_BASE_URL;
+
+   const fetchInspections = async () => {
+    try {
+     const response = await fetch(`${apiUrl}/admin/inspections`, {
+      method: "GET",
+      headers: {
+       Accept: "application/json",
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+
+     if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+     }
+
+     const data = await response.json();
+     console.log("Fetched Data:", data); // Debugging API response
+
+     // Validate and process inspections
+     const inspections = data.inspections || [];
+     if (!Array.isArray(inspections)) {
+      throw new Error("Invalid API response: `inspections` is not an array");
+     }
+
+     // Update the inspected businesses table
+     const inspectedBusinessesTableBody =
+      document.querySelector("table.table tbody");
+     inspectedBusinessesTableBody.innerHTML = ""; // Clear existing rows
+
+     inspections.forEach((inspection) => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${inspection.business.business_name || "N/A"}</td>
+        <td>${inspection.business_id || "N/A"}</td>
+        <td>${inspection.inspector_id || "N/A"}</td>
+        <td>${inspection.inspection_date || "N/A"}</td>
+        <td>${inspection.type_of_inspection || "N/A"}</td>
+        <td>${inspection.with_violations ? "Yes" : "No"}</td>
+      `;
+
+      inspectedBusinessesTableBody.appendChild(row);
+     });
+
+     // Update the violators table
+     const violatorsTableBody = document
+      .querySelectorAll("table.table")[1]
+      .querySelector("tbody");
+     violatorsTableBody.innerHTML = ""; // Clear existing rows
+
+     inspections
+      .filter((inspection) => inspection.with_violations) // Filter inspections with violations
+      .forEach((inspection) => {
+       const business = inspection.business || {};
+       const owner = business.owner || {};
+
+       const row = document.createElement("tr");
+
+       row.innerHTML = `
+          <td>${owner.first_name || "N/A"} ${owner.last_name || ""}</td>
+          <td>${business.business_name || "N/A"}</td>
+          <td>${inspection.business_id || "N/A"}</td>
+          <td>${business.status || "N/A"}</td>
+          <td>Violation Details</td>
+          <td>${inspection.inspection_date || "N/A"}</td>
+          <td>Due Date</td>
+        `;
+
+       violatorsTableBody.appendChild(row);
+      });
+    } catch (err) {
+     console.error("Error fetching inspections:", err.message);
+    }
+   };
+
+   fetchInspections();
+  </script>
  </body>
 </html>

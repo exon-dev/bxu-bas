@@ -8,65 +8,96 @@
    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
    rel="stylesheet"
   />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-   href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+   href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
    rel="stylesheet"
   />
   <style>
    body {
-    font-family: "Poppins", sans-serif !important;
-    background-color: #eff3fc;
+    font-family: "Poppins", sans-serif;
+    background-color: #f9fbff;
    }
    .container {
-    max-width: 900px;
-    margin-top: 50px;
+    max-width: 800px;
+    margin-top: 40px;
    }
-   .modal-header {
-    background-color: #007bff;
-    color: white;
+   .card {
+    border-radius: 12px;
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); */
+    border: none;
+    overflow: hidden;
+   }
+   .card-header {
+    /* background: linear-gradient(135deg, #007bff, #0056b3); */
+    /* color: white; */
+    padding: 1rem;
    }
    .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
    }
    .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+    background: linear-gradient(135deg, #0056b3, #003c82);
    }
    .form-control {
     border-radius: 10px;
+    padding: 0.8rem;
+    border: 1px solid #dfe3ec;
+    transition: box-shadow 0.3s ease;
    }
-   .card {
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: none;
-    margin-bottom: 30px;
-    transition: all 0.3s ease-in-out;
+   .form-control:focus {
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
    }
-   .footer {
-    text-align: center;
+   .modal-content {
+    border-radius: 12px;
+    padding: 1.5rem;
+   }
+   .modal-header {
+    border-bottom: none;
+   }
+   .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+   }
+   .modal-body label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+   }
+   #successModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050;
+    background-color: white;
     padding: 20px;
-    background-color: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    display: none;
    }
-   tr:hover {
-    background-color: #f1f1f1;
+   #successModal p {
+    margin: 0;
+    font-weight: 500;
+    color: #28a745;
+   }
+   .table th,
+   .table td {
+    vertical-align: middle;
    }
   </style>
  </head>
- <body id="inspector">
+ <body>
   <div class="">
    <div class="card">
     <div class="card-body">
-     <h4 class="card-title">Inspector Management</h4>
-     <p class="card-text">
-      Manage inspector users throughout the BXU BAS System
-     </p>
+     <h4>Inspector Management</h4>
+    </div>
+    <div class="card-body">
+     <p>Manage inspector users throughout the BXU BAS System.</p>
      <button
-      id="showFormButton"
-      class="btn btn-primary mb-3"
+      class="btn btn-primary"
       data-bs-toggle="modal"
       data-bs-target="#addInspectorModal"
      >
@@ -99,22 +130,12 @@
       <div class="modal-body">
        <form id="addInspectorForm">
         <div class="mb-3">
-         <label for="email" class="form-label">Email</label>
-         <input
-          type="email"
-          class="form-control"
-          id="email"
-          placeholder="Enter email"
-          required
-         />
-        </div>
-        <div class="mb-3">
          <label for="firstName" class="form-label">First Name</label>
          <input
           type="text"
           class="form-control"
           id="firstName"
-          placeholder="Enter first name"
+          name="firstName"
           required
          />
         </div>
@@ -124,33 +145,39 @@
           type="text"
           class="form-control"
           id="lastName"
-          placeholder="Enter last name"
+          name="lastName"
           required
          />
         </div>
         <div class="mb-3">
-         <label for="contactNumber" class="form-label">Contact Number</label>
+         <label for="email" class="form-label">Email</label>
          <input
-          type="text"
+          type="email"
           class="form-control"
-          id="contactNumber"
-          placeholder="Enter contact number"
+          id="email"
+          name="email"
           required
          />
         </div>
-        <button type="submit" class="btn btn-primary">Add Inspector</button>
+        <div class="text-end">
+         <button type="submit" class="btn btn-primary">Add Inspector</button>
+        </div>
        </form>
       </div>
      </div>
     </div>
    </div>
 
+   <!-- Success Modal -->
+   <div id="successModal">
+    <p>Inspector added successfully!</p>
+   </div>
+
    <!-- List of Inspectors -->
-   <div id="message" class="mt-3"></div>
    <div class="card mt-4">
     <div class="card-body">
      <h4 class="card-title">List of Inspectors</h4>
-     <table class="table">
+     <table class="table table-striped">
       <thead>
        <tr>
         <th scope="col">No.</th>
@@ -161,9 +188,7 @@
         <th scope="col">No. of Inspections</th>
        </tr>
       </thead>
-      <tbody id="inspectorList">
-       <!-- Inspector rows will be dynamically added here -->
-      </tbody>
+      <tbody id="inspectorList"></tbody>
      </table>
     </div>
    </div>
@@ -176,6 +201,68 @@
 
    const apiUrl = CONFIG.API_BASE_URL;
 
+   // Add new inspector
+
+   const addInspector = async (event) => {
+    event.preventDefault();
+
+    // Get form inputs
+    const firstName = document.querySelector("#firstName").value.trim();
+    const lastName = document.querySelector("#lastName").value.trim();
+    const email = document.querySelector("#email").value.trim();
+
+    // Validate required fields
+    if (!firstName || !lastName || !email) {
+     alert("Please fill out all required fields.");
+     return;
+    }
+
+    try {
+     // Send POST request to create a new inspector
+     const response = await fetch(`${apiUrl}/admin/create-inspector`, {
+      method: "POST",
+      headers: {
+       Accept: "application/json",
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: JSON.stringify({
+       first_name: firstName,
+       last_name: lastName,
+       email: email,
+      }),
+     });
+
+     console.log(response);
+
+     const data = await response.json();
+     console.log("Inspector added successfully:", data);
+
+     // Show success modal
+     showSuccessModal();
+    } catch (err) {
+     console.error("Error adding inspector:", err.message);
+     alert("Failed to add inspector. Please try again.");
+    }
+   };
+
+   // Function to show success modal
+   const showSuccessModal = () => {
+    const modal = document.querySelector("#successModal");
+    modal.style.display = "block";
+
+    // Close modal after 3 seconds
+    setTimeout(() => {
+     modal.style.display = "none";
+    }, 3000);
+   };
+
+   // Event listener for form submission
+   document
+    .querySelector("#addInspectorForm")
+    .addEventListener("submit", addInspector);
+
+   // getting all inspectors
    const inspectorList = document.getElementById("inspectorList");
    const messageDiv = document.getElementById("message");
 
