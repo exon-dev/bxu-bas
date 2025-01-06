@@ -48,11 +48,20 @@
   </div>
 
   <script>
-   // Load the header
    fetch("components/header.html")
     .then((res) => res.text())
     .then((data) => {
-     document.getElementById("header").innerHTML = data;
+     const headerElement = document.getElementById("header");
+     headerElement.innerHTML = data;
+
+     // Execute scripts inside the dynamically loaded HTML
+     const scriptTags = headerElement.querySelectorAll("script");
+     scriptTags.forEach((script) => {
+      const newScript = document.createElement("script");
+      newScript.textContent = script.textContent;
+      document.body.appendChild(newScript); // Append to body to execute
+      document.body.removeChild(newScript); // Remove after execution
+     });
     });
 
    // Load the sidebar

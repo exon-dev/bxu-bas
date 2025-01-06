@@ -101,48 +101,60 @@
    adminLoginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Get the values from the form fields
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    try {
+     // Get the values from the form fields
+     const email = document.getElementById("email").value;
+     const password = document.getElementById("password").value;
+     const apiUrl = CONFIG.API_BASE_URL;
 
-    console.log(email, password);
+     // Send the login data to the backend
+     const response = await fetch(CONFIG.API_BASE_URL + "/admin-login", {
+      method: "POST",
+      headers: {
+       Accept: "applicaton/json",
+       "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+       email,
+       password,
+      }),
+     });
 
-    const apiUrl = CONFIG.API_BASE_URL;
-
-    console.log(apiUrl);
-
-    // Send the login data to the backend
-    const response = await fetch(CONFIG.API_BASE_URL + "/admin-login", {
-     method: "POST",
-     headers: {
-      Accept: "applicaton/json",
-      "Content-Type": "application/json",
-     },
-     body: JSON.stringify({
-      email,
-      password,
-     }),
-    });
-
-    const data = await response.json();
-
-    console.log("Data: ", data);
-    // Check if the login is successful
-    if (response.ok) {
+     const data = await response.json();
+     // Check if the login is successful
+     if (response.ok) {
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("role", "admin");
+      localStorage.setItem("email", data.user.email);
+      localStorage.setItem("firstName", data.user.first_name);
+      localStorage.setItem("lastName", data.user.last_name);
+      localStorage.setItem("admin_id", data.user.admin_id);
+      Toastify({
+       text: "Login Successful! Redirecting...",
+       duration: 3000,
+       gravity: "top", // Position of the toast
+       position: "center", // Center alignment
+       close: true, // Show close button
+      }).showToast();
+      setTimeout(() => {
+       window.location.href = "../admin/admin.html";
+      }, 3000);
+     } else {
+      // Show a Toastify notification for invalid login
+      Toastify({
+       text: data.message,
+       duration: 3000,
+       gravity: "top", // Position of the toast
+       position: "center", // Center alignment
+       close: true, // Show close button
+       style: {
+        background: "red", // Red background for error
+       },
+      }).showToast();
+     }
+    } catch (err) {
      Toastify({
-      text: "Login Successful! Redirecting...",
-      duration: 3000,
-      gravity: "top", // Position of the toast
-      position: "center", // Center alignment
-      close: true, // Show close button
-     }).showToast();
-     setTimeout(() => {
-      window.location.href = "../admin/admin.html";
-     }, 3000);
-    } else {
-     // Show a Toastify notification for invalid login
-     Toastify({
-      text: data.message,
+      text: "Internal server error, please try again later",
       duration: 3000,
       gravity: "top", // Position of the toast
       position: "center", // Center alignment

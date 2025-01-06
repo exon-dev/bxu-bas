@@ -53,7 +53,7 @@
   <div class="header m-3">
    <div class="profile">
     <img src="/assets/admin_prof.png" alt="Profile Picture" />
-    <span class="name">John Doe</span>
+    <span class="name" id="profileName"></span>
    </div>
    <div class="datetime">
     <span class="date" id="currentDate"></span>
@@ -72,6 +72,11 @@
    }
    setInterval(updateDateTime, 1000);
    updateDateTime();
+
+   const firstName = localStorage.getItem("firstName") || "";
+   const lastName = localStorage.getItem("lastName") || "";
+   const fullName = firstName + " " + lastName;
+   document.getElementById("profileName").textContent = fullName.trim();
   </script>
  </body>
 </html>
