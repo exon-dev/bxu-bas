@@ -14,6 +14,12 @@
    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
    rel="stylesheet"
   />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link
+   rel="stylesheet"
+   href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+  />
   <style>
    body {
     font-family: "Poppins", Arial, sans-serif !important;
@@ -58,6 +64,10 @@
    }
    .filters {
     margin-bottom: 20px;
+   }
+   .table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s ease;
    }
   </style>
  </head>
@@ -133,71 +143,128 @@
    </section>
   </div>
 
+  <div
+   class="modal fade"
+   id="inspectionDetailModal"
+   data-bs-backdrop="static"
+   data-bs-keyboard="false"
+   tabindex="-1"
+   aria-labelledby="inspectionDetailModalLabel"
+   aria-hidden="true"
+  >
+   <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="inspectionDetailModalLabel">
+       Inspection Details
+      </h5>
+      <button
+       type="button"
+       class="btn-close"
+       data-bs-dismiss="modal"
+       aria-label="Close"
+      ></button>
+     </div>
+     <!-- ... rest of your modal content ... -->
+    </div>
+   </div>
+  </div>
+
   <script type="module">
    import CONFIG from "/scripts/config.js";
    const apiUrl = CONFIG.API_BASE_URL;
-   const recordsPerPage = 10; // Number of records per page
-
-   let currentPage = 1; // Start with page 1
-   let totalPages = 1; // Default value for total pages
+   let recordsPerPage = 20; // Default value
+   let currentPage = 1;
+   let totalPages = 1;
    let inspectionsData = [];
    let inspectors = [];
+   let timeoutId = null;
 
    const renderTable = () => {
     const inspectionsTbody = document.getElementById("inspections-tbody");
-    inspectionsTbody.innerHTML = ""; // Clear existing rows
+    inspectionsTbody.innerHTML = "";
+
+    if (!inspectionsData || inspectionsData.length === 0) {
+     const noDataRow = document.createElement("tr");
+     noDataRow.innerHTML = `
+            <td colspan="7" class="text-center">No inspections found</td>
+        `;
+     inspectionsTbody.appendChild(noDataRow);
+     return;
+    }
 
     inspectionsData.forEach((inspection, index) => {
      const row = document.createElement("tr");
-     row.innerHTML = ` 
-                <td>${index + 1}</td>
-                <td>${inspection.business.business_name || "N/A"}</td>
-                <td>${inspection.business.status || "N/A"}</td>
-                <td>${inspection.inspector_full_name || "N/A"}</td>
-                <td>${inspection.inspection_date || "N/A"}</td>
-                <td>${inspection.type_of_inspection || "N/A"}</td>
-                <td>${inspection.with_violations ? "Yes" : "No"}</td>
-            `;
+     row.style.cursor = "pointer";
+     const actualIndex = (currentPage - 1) * recordsPerPage + index + 1;
+
+     row.innerHTML = `
+            <td>${actualIndex}</td>
+            <td>${inspection.business?.business_name || "N/A"}</td>
+            <td>${inspection.business?.status || "N/A"}</td>
+            <td>${inspection.inspector_full_name || "N/A"}</td>
+            <td>${formatDate(inspection.inspection_date)}</td>
+            <td>${inspection.type_of_inspection || "N/A"}</td>
+            <td><span class="badge ${
+             inspection.with_violations ? "bg-danger" : "bg-success"
+            }">${inspection.with_violations ? "Yes" : "No"}</span></td>
+        `;
+
+     row.addEventListener("click", () => showInspectionDetails(inspection));
      inspectionsTbody.appendChild(row);
     });
 
     renderPagination();
    };
 
+   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
+   };
+
    const renderPagination = () => {
     const paginationControls = document.getElementById("pagination-controls");
-    paginationControls.innerHTML = ""; // Clear existing controls
+    paginationControls.innerHTML = "";
+
+    if (totalPages <= 1) return;
 
     const prevPageButton = document.createElement("li");
     prevPageButton.classList.add("page-item");
     prevPageButton.innerHTML = `
-            <a class="page-link" href="#" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        `;
-    prevPageButton.addEventListener("click", () => changePage(currentPage - 1));
+        <a class="page-link" href="#" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+        </a>
+    `;
+    prevPageButton.addEventListener("click", (e) => {
+     e.preventDefault();
+     if (currentPage > 1) changePage(currentPage - 1);
+    });
     if (currentPage === 1) prevPageButton.classList.add("disabled");
     paginationControls.appendChild(prevPageButton);
 
     for (let i = 1; i <= totalPages; i++) {
      const pageButton = document.createElement("li");
      pageButton.classList.add("page-item");
-     pageButton.innerHTML = `
-                <a class="page-link" href="#">${i}</a>
-            `;
-     pageButton.addEventListener("click", () => changePage(i));
      if (i === currentPage) pageButton.classList.add("active");
+     pageButton.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+     pageButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      changePage(i);
+     });
      paginationControls.appendChild(pageButton);
     }
 
     const nextPageButton = document.createElement("li");
     nextPageButton.classList.add("page-item");
     nextPageButton.innerHTML = `
-            <a class="page-link" href="#" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        `;
-    nextPageButton.addEventListener("click", () => changePage(currentPage + 1));
+        <a class="page-link" href="#" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+        </a>
+    `;
+    nextPageButton.addEventListener("click", (e) => {
+     e.preventDefault();
+     if (currentPage < totalPages) changePage(currentPage + 1);
+    });
     if (currentPage === totalPages) nextPageButton.classList.add("disabled");
     paginationControls.appendChild(nextPageButton);
    };
@@ -211,13 +278,22 @@
 
    const fetchInspections = async (page = 1) => {
     try {
-     // Get filter values directly from elements
+     const inspectionsTbody = document.getElementById("inspections-tbody");
+     inspectionsTbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+
      const inspectionDate = document.getElementById("inspection-date").value;
      const violation = document.getElementById("violation").value;
      const inspector = document.getElementById("inspector").value;
      const searchName = document.getElementById("search-name").value;
 
-     // Build query parameters
      const params = new URLSearchParams({
       page: page,
       ...(inspectionDate && { inspection_date: inspectionDate }),
@@ -243,11 +319,23 @@
      }
 
      const data = await response.json();
+
      inspectionsData = data.inspections.data || [];
      totalPages = data.inspections.last_page || 1;
+     currentPage = data.inspections.current_page || 1;
+     recordsPerPage = data.inspections.per_page || 20;
+
      renderTable();
     } catch (error) {
      console.error("Error fetching inspections:", error);
+     const inspectionsTbody = document.getElementById("inspections-tbody");
+     inspectionsTbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-danger">
+                    Error loading inspections. Please try again.
+                </td>
+            </tr>
+        `;
     }
    };
 
@@ -268,10 +356,8 @@
      const data = await response.json();
      const inspectorSelect = document.getElementById("inspector");
 
-     // Clear existing options except the first one
      inspectorSelect.innerHTML = '<option value="">Select Inspector</option>';
 
-     // Add inspectors to select
      data.inspectors.forEach((inspector) => {
       const option = document.createElement("option");
       option.value = inspector.inspector_id;
@@ -283,19 +369,220 @@
     }
    };
 
-   // Update event listener to use debounce for better performance
-   let timeoutId;
-   document.getElementById("filters-form").addEventListener("input", () => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-     currentPage = 1; // Reset to first page when filtering
-     fetchInspections(currentPage);
-    }, 300); // Wait 300ms after user stops typing
-   });
+   const setupFilterListeners = () => {
+    const filterElements = [
+     "inspection-date",
+     "violation",
+     "inspector",
+     "search-name",
+    ];
 
-   // Initialize the page
+    filterElements.forEach((elementId) => {
+     const element = document.getElementById(elementId);
+     element.addEventListener("change", () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+       currentPage = 1;
+       fetchInspections(currentPage);
+      }, 300);
+     });
+
+     if (element.type === "text" || element.type === "date") {
+      element.addEventListener("input", () => {
+       clearTimeout(timeoutId);
+       timeoutId = setTimeout(() => {
+        currentPage = 1;
+        fetchInspections(currentPage);
+       }, 300);
+      });
+     }
+    });
+   };
+
+   const showInspectionDetails = (inspection) => {
+    try {
+     console.log("Inspection data:", inspection); // Debug log
+
+     // Create or get modal
+     let modalElement = document.getElementById("inspectionDetailModal");
+     if (modalElement) {
+      modalElement.remove(); // Remove existing modal if present
+     }
+
+     // Create new modal with the data
+     const modalContent = `
+            <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="inspectionDetailModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header border-bottom-0 bg-light">
+                            <h5 class="modal-title fw-bold" id="inspectionDetailModalLabel">
+                                <i class="bi bi-clipboard2-check me-2"></i>Inspection Details
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="row g-4">
+                                <!-- Business Information Card -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-building me-2"></i>Business Information
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Business Name</label>
+                                                <p class="fw-semibold mb-2">${
+                                                 inspection.business
+                                                  ?.business_name || "N/A"
+                                                }</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Business Permit</label>
+                                                <p class="fw-semibold mb-2">${
+                                                 inspection.business
+                                                  ?.business_permit || "N/A"
+                                                }</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Status</label>
+                                                <p class="mb-0"><span class="badge bg-success">${
+                                                 inspection.business?.status ||
+                                                 "N/A"
+                                                }</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Owner Information Card -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-person me-2"></i>Owner Information
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Owner Name</label>
+                                                <p class="fw-semibold mb-2">${
+                                                 inspection.business?.owner
+                                                  ? `${inspection.business.owner.first_name} ${inspection.business.owner.last_name}`
+                                                  : "N/A"
+                                                }</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Email</label>
+                                                <p class="fw-semibold mb-2">${
+                                                 inspection.business?.owner
+                                                  ?.email || "N/A"
+                                                }</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Phone</label>
+                                                <p class="fw-semibold mb-0">${
+                                                 inspection.business?.owner
+                                                  ?.phone_number || "N/A"
+                                                }</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Inspection Details Card -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-clipboard-data me-2"></i>Inspection Details
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Inspection Date</label>
+                                                <p class="fw-semibold mb-2">${formatDate(
+                                                 inspection.inspection_date
+                                                )}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Type</label>
+                                                <p class="fw-semibold mb-2">${
+                                                 inspection.type_of_inspection
+                                                }</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Violations</label>
+                                                <p class="mb-0">
+                                                    <span class="badge ${
+                                                     inspection.with_violations
+                                                      ? "bg-danger"
+                                                      : "bg-success"
+                                                    }">
+                                                        ${
+                                                         inspection.with_violations
+                                                          ? "Yes"
+                                                          : "No"
+                                                        }
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Inspector & Image Card -->
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-person-badge me-2"></i>Inspector & Image
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Inspector Name</label>
+                                                <p class="fw-semibold mb-3">${
+                                                 inspection.inspector_full_name
+                                                }</p>
+                                            </div>
+                                            <div>
+                                                <label class="text-muted small">Business Image</label>
+                                                ${
+                                                 inspection.business?.image_url
+                                                  ? `<img src="${inspection.business.image_url}" alt="Business Image" 
+                                                        class="img-fluid rounded shadow-sm mt-2" style="max-height: 150px; object-fit: cover;">`
+                                                  : '<p class="text-muted mt-2">No image available</p>'
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+     // Add modal to document
+     document.body.insertAdjacentHTML("beforeend", modalContent);
+
+     // Show the modal
+     const modal = new bootstrap.Modal(
+      document.getElementById("inspectionDetailModal")
+     );
+     modal.show();
+    } catch (error) {
+     console.error("Error showing inspection details:", error);
+    }
+   };
+
    fetchInspectors();
+   setupFilterListeners();
    fetchInspections(currentPage);
+
+   // Add this at the end of your script to ensure Bootstrap is loaded
+   document.addEventListener("DOMContentLoaded", () => {
+    // Initialize all modals
+    const modals = document.querySelectorAll(".modal");
+    modals.forEach((modalElement) => {
+     new bootstrap.Modal(modalElement);
+    });
+   });
   </script>
  </body>
 </html>
