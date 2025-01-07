@@ -211,20 +211,23 @@
 
    const fetchInspections = async (page = 1) => {
     try {
-     // Collect filter values from the form
-     const formData = new FormData(document.getElementById("filters-form"));
-     const filters = {
-      inspectionDate: formData.get("inspection-date"),
-      violation: formData.get("violation"),
-      inspector: formData.get("inspector"),
-      searchName: formData.get("search-name"),
-     };
+     // Get filter values directly from elements
+     const inspectionDate = document.getElementById("inspection-date").value;
+     const violation = document.getElementById("violation").value;
+     const inspector = document.getElementById("inspector").value;
+     const searchName = document.getElementById("search-name").value;
 
-     // Construct query string for the filters
-     const queryParams = new URLSearchParams(filters).toString();
+     // Build query parameters
+     const params = new URLSearchParams({
+      page: page,
+      ...(inspectionDate && { inspection_date: inspectionDate }),
+      ...(violation && { with_violations: violation }),
+      ...(inspector && { inspector_id: inspector }),
+      ...(searchName && { business_name: searchName }),
+     });
 
      const response = await fetch(
-      `${apiUrl}/inspection/inspections?page=${page}&${queryParams}`,
+      `${apiUrl}/inspection/inspections?${params.toString()}`,
       {
        method: "GET",
        headers: {
@@ -250,17 +253,29 @@
 
    const fetchInspectors = async () => {
     try {
-     const response = await fetch(`${apiUrl}/inspection/inspectors`);
+     const response = await fetch(`${apiUrl}/admin/inspectors`, {
+      headers: {
+       Accept: "application/json",
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+
      if (!response.ok) {
       throw new Error("Failed to fetch inspectors");
      }
 
-     inspectors = await response.json();
+     const data = await response.json();
      const inspectorSelect = document.getElementById("inspector");
-     inspectors.forEach((inspector) => {
+
+     // Clear existing options except the first one
+     inspectorSelect.innerHTML = '<option value="">Select Inspector</option>';
+
+     // Add inspectors to select
+     data.inspectors.forEach((inspector) => {
       const option = document.createElement("option");
-      option.value = inspector.id;
-      option.textContent = inspector.name;
+      option.value = inspector.inspector_id;
+      option.textContent = `${inspector.first_name} ${inspector.last_name}`;
       inspectorSelect.appendChild(option);
      });
     } catch (error) {
@@ -268,9 +283,14 @@
     }
    };
 
-   // Trigger fetchInspections when filters change
+   // Update event listener to use debounce for better performance
+   let timeoutId;
    document.getElementById("filters-form").addEventListener("input", () => {
-    fetchInspections(currentPage);
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+     currentPage = 1; // Reset to first page when filtering
+     fetchInspections(currentPage);
+    }, 300); // Wait 300ms after user stops typing
    });
 
    // Initialize the page

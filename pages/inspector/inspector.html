@@ -18,19 +18,23 @@
    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
    rel="stylesheet"
   />
-  />
-  <link rel="stylesheet" href="css/main.css" />
-  <style>
-   body {
-    font-family: "Poppins", sans-serif;
-    background-color: #eff3fc;
-   }
-   .main-content {
-    margin-left: 250px;
-    padding: 20px;
-   }
-  </style>
- </head>
+<style>
+  body {
+   font-family: "Poppins", Arial, sans-serif !important;
+   background-color: #f4f4f9;
+   margin: 0;
+   padding: 0;
+  }
+  .card {
+   border-radius: 10px;
+   -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+   box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+   border: none;
+   margin-bottom: 30px;
+   -webkit-transition: all 0.3s ease-in-out;
+   transition: all 0.3s ease-in-out;
+  }
+ </style>
  <body>
   <div class="dashboard">
    <!-- Include Header -->
@@ -41,7 +45,7 @@
 
    <!-- Main Content -->
    <main class="main-content">
-    <div id="content" style="padding: 20px">
+    <div id="content">
      <!-- Content will be loaded here -->
     </div>
    </main>
@@ -53,7 +57,9 @@
     .then((res) => res.text())
     .then((data) => {
      document.getElementById("header").innerHTML = data;
-    });
+     executeScriptsInElement(document.getElementById("header"));
+    })
+    .catch((error) => console.error("Error loading header:", error));
 
    // Load the sidebar
    fetch("components/sidebar.html")
@@ -80,7 +86,8 @@
 
      // Call loadContent with a mock event object for initial load
      loadContent(page, activeLink, { preventDefault: () => {} }); // Mock event
-    });
+    })
+    .catch((error) => console.error("Error loading sidebar:", error));
 
    // Function to load content
    function loadContent(page, element, event) {
@@ -106,6 +113,9 @@
       if (contentDiv) {
        contentDiv.innerHTML = data;
 
+       // Execute any scripts from the loaded content
+       executeScriptsInElement(contentDiv);
+
        // Remove 'active' class from all links
        const links = document.querySelectorAll(".nav-links a");
        links.forEach((link) => link.classList.remove("active"));
@@ -124,6 +134,22 @@
         "<h2>Error loading the page. Please try again.</h2>";
       }
      });
+   }
+
+   function executeScriptsInElement(element) {
+    const scriptTags = element.querySelectorAll("script");
+    scriptTags.forEach((script) => {
+     const newScript = document.createElement("script");
+
+     // If the script uses ES6 imports, set type="module"
+     if (script.type === "module" || script.src.includes(".js")) {
+      newScript.type = "module";
+     }
+
+     newScript.textContent = script.textContent;
+     document.body.appendChild(newScript);
+     document.body.removeChild(newScript); // Remove after execution
+    });
    }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

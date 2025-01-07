@@ -50,7 +50,7 @@
    aria-labelledby="violatorModalLabel"
    aria-hidden="true"
   >
-   <div class="modal-dialog modal-lg modal-dialog-centered"> 
+   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
      <div class="modal-header">
       <h5 class="modal-title" id="violatorModalLabel">Business Inspection</h5>
@@ -63,17 +63,143 @@
      </div>
      <div class="modal-body">
       <form id="violatorForm">
+       <!-- Owner's Information -->
        <div class="row mb-3">
         <div class="col-md-6">
-         <label for="name" class="form-label">Name:</label>
+         <label for="ownerFirstName" class="form-label"
+          >Owner's First Name:</label
+         >
          <input
           type="text"
           class="form-control"
-          id="name"
-          name="name"
+          id="ownerFirstName"
+          name="ownerFirstName"
+          value="Jane"
           required
          />
         </div>
+        <div class="col-md-6">
+         <label for="ownerLastName" class="form-label"
+          >Owner's Last Name:</label
+         >
+         <input
+          type="text"
+          class="form-control"
+          id="ownerLastName"
+          name="ownerLastName"
+          value="Smith"
+          required
+         />
+        </div>
+       </div>
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="ownerEmail" class="form-label">Owner's Email:</label>
+         <input
+          type="email"
+          class="form-control"
+          id="ownerEmail"
+          name="ownerEmail"
+          value="janesmith@example.com"
+          required
+         />
+        </div>
+        <div class="col-md-6">
+         <label for="ownerPhoneNumber" class="form-label"
+          >Owner's Phone Number:</label
+         >
+         <input
+          type="text"
+          class="form-control"
+          id="ownerPhoneNumber"
+          name="ownerPhoneNumber"
+          value="9876543210"
+          required
+         />
+        </div>
+       </div>
+
+       <!-- Business Information -->
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="businessName" class="form-label">Business Name:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="businessName"
+          name="businessName"
+          value="Smith's Deli"
+          required
+         />
+        </div>
+        <div class="col-md-6">
+         <label for="businessPermit" class="form-label">Business Permit:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="businessPermit"
+          name="businessPermit"
+          value="BP987654321"
+          required
+         />
+        </div>
+       </div>
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="businessStatus" class="form-label">Business Status:</label>
+         <select
+          class="form-select"
+          id="businessStatus"
+          name="businessStatus"
+          required
+         >
+          <option value="Active" selected>Active</option>
+          <option value="Inactive">Inactive</option>
+         </select>
+        </div>
+       </div>
+
+       <!-- Address Information -->
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="street" class="form-label">Street:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="street"
+          name="street"
+          value="456 Elm St"
+          required
+         />
+        </div>
+        <div class="col-md-6">
+         <label for="city" class="form-label">City:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="city"
+          name="city"
+          value="Metropolis"
+          required
+         />
+        </div>
+       </div>
+       <div class="row mb-3">
+        <div class="col-md-6">
+         <label for="zip" class="form-label">ZIP Code:</label>
+         <input
+          type="text"
+          class="form-control"
+          id="zip"
+          name="zip"
+          value="67890"
+          required
+         />
+        </div>
+       </div>
+
+       <!-- Inspection Details -->
+       <div class="row mb-3">
         <div class="col-md-6">
          <label for="typeOfInspection" class="form-label"
           >Type of Inspection:</label
@@ -84,289 +210,57 @@
           name="typeOfInspection"
           required
          >
-          <option value="regular">Regular</option>
-          <option value="night">Night</option>
-          <option value="special_change_address">
-           Special (Change Address)
-          </option>
-          <option value="special_verification">Special (Verification)</option>
-          <option value="special_complaint">Special (Complaint)</option>
-          <option value="special_retirement">Special (Retirement)</option>
-          <option value="joint">Joint</option>
-         </select>
-        </div>
-       </div>
-
-       <div class="row mb-3">
-        <div class="col-md-6">
-         <label for="status" class="form-label">Status:</label>
-         <select class="form-select" id="status" name="status" required>
-          <option value="low_income">Low Income</option>
-          <option value="with_permit">With Permit</option>
-          <option value="without_permit">Without Permit</option>
-          <option value="already_closed">Already Closed</option>
-          <option value="already_closed_new_business">
-           Already Closed but New Business Operating
-          </option>
-          <option value="still_operating">Still Operating</option>
+          <option value="Routine">Routine</option>
+          <option value="Follow-up" selected>Follow-up</option>
          </select>
         </div>
         <div class="col-md-6">
-         <label for="violationStatus" class="form-label"
-          >Violation Status:</label
-         >
+         <label for="withViolations" class="form-label">With Violations:</label>
          <select
           class="form-select"
-          id="violationStatus"
-          name="violationStatus"
+          id="withViolations"
+          name="withViolations"
           required
          >
-          <option value="with_violation">With Violation</option>
-          <option value="without_violation">Without Violation</option>
+          <option value="true" selected>Yes</option>
+          <option value="false">No</option>
          </select>
-        </div>
-       </div>
-
-       <div class="row mb-3" id="natureOfViolationContainer">
-        <div class="col-md-12">
-         <label class="form-label" for="natureOfViolationAccordion"
-          >Nature of Violation:</label
-         >
-         <div class="accordion" id="natureOfViolationAccordion">
-          <div class="accordion-item">
-           <h2 class="accordion-header" id="headingOne">
-            <button
-             class="accordion-button"
-             type="button"
-             data-bs-toggle="collapse"
-             data-bs-target="#collapseOne"
-             aria-expanded="true"
-             aria-controls="collapseOne"
-            >
-             Select Violations
-            </button>
-           </h2>
-           <div
-            id="collapseOne"
-            class="accordion-collapse collapse show"
-            aria-labelledby="headingOne"
-            data-bs-parent="#natureOfViolationAccordion"
-           >
-            <div class="accordion-body">
-             <div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="no_mayors_permit"
-                name="natureOfViolation"
-                value="no_mayors_permit"
-               />
-               <label class="form-check-label" for="no_mayors_permit"
-                >NO MAYOR'S PERMIT</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="non_display_of_mayors_permit"
-                name="natureOfViolation"
-                value="non_display_of_mayors_permit"
-               />
-               <label
-                class="form-check-label"
-                for="non_display_of_mayors_permit"
-                >NON-DISPLAY OF MAYOR'S PERMIT</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="displaying_dilapidated_mayors_permit"
-                name="natureOfViolation"
-                value="displaying_dilapidated_mayors_permit"
-               />
-               <label
-                class="form-check-label"
-                for="displaying_dilapidated_mayors_permit"
-                >DISPLAYING DILAPIDATED MAYOR'S PERMIT</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="displaying_counterfeit_mayors_permit"
-                name="natureOfViolation"
-                value="displaying_counterfeit_mayors_permit"
-               />
-               <label
-                class="form-check-label"
-                for="displaying_counterfeit_mayors_permit"
-                >DISPLAYING A COUNTERFEIT MAYOR'S PERMIT</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="understatement_of_gross_sales"
-                name="natureOfViolation"
-                value="understatement_of_gross_sales"
-               />
-               <label
-                class="form-check-label"
-                for="understatement_of_gross_sales"
-                >UNDERSTATEMENT AND/OR INCORRECT DECLARATION OF GROSS SALES OR
-                RECEIPTS</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="falsification_of_business_permit"
-                name="natureOfViolation"
-                value="falsification_of_business_permit"
-               />
-               <label
-                class="form-check-label"
-                for="falsification_of_business_permit"
-                >FALSIFICATION AND/OR ALTERATION OF BUSINESS PERMIT</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="sidewalk_obstruction"
-                name="natureOfViolation"
-                value="sidewalk_obstruction"
-               />
-               <label class="form-check-label" for="sidewalk_obstruction"
-                >SIDEWALK/STREET/SIDESTREET OBSTRUCTION</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="non_posting_of_notice"
-                name="natureOfViolation"
-                value="non_posting_of_notice"
-               />
-               <label class="form-check-label" for="non_posting_of_notice"
-                >NON-POSTING OF NOTICE</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="non_declaration_of_business"
-                name="natureOfViolation"
-                value="non_declaration_of_business"
-               />
-               <label class="form-check-label" for="non_declaration_of_business"
-                >NON-DECLARATION OF TYPE OR NATURE OF BUSINESS</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="drinking_in_public_places"
-                name="natureOfViolation"
-                value="drinking_in_public_places"
-               />
-               <label class="form-check-label" for="drinking_in_public_places"
-                >DRINKING IN PUBLIC PLACES</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="unauthorized_serving_of_liquor"
-                name="natureOfViolation"
-                value="unauthorized_serving_of_liquor"
-               />
-               <label
-                class="form-check-label"
-                for="unauthorized_serving_of_liquor"
-                >UNAUTHORIZED SERVING OF LIQUOR</label
-               >
-              </div>
-              <div class="form-check">
-               <input
-                class="form-check-input"
-                type="checkbox"
-                id="unauthorized_selling_of_liquor"
-                name="natureOfViolation"
-                value="unauthorized_selling_of_liquor"
-               />
-               <label
-                class="form-check-label"
-                for="unauthorized_selling_of_liquor"
-                >UNAUTHORIZED SELLING OF LIQUOR</label
-               >
-              </div>
-             </div>
-            </div>
-           </div>
-          </div>
-         </div>
         </div>
        </div>
 
        <div
         class="row mb-3"
-        id="inspectionReportContainer"
+        id="natureOfViolationContainer"
         style="display: none"
        >
         <div class="col-md-12">
-         <label for="inspectionReportFormNo" class="form-label"
-          >Inspection Report Form No.:</label
+         <label for="natureOfViolation" class="form-label"
+          >Nature of Violation:</label
          >
          <input
           type="text"
           class="form-control"
-          id="inspectionReportFormNo"
-          name="inspectionReportFormNo"
+          id="natureOfViolation"
+          name="natureOfViolation"
+          value="Expired food items and unsanitary conditions."
          />
         </div>
        </div>
 
        <div class="row mb-3">
         <div class="col-md-6">
-         <label for="violationReceiptNo" class="form-label"
+         <label for="violationReceipt" class="form-label"
           >Violation Receipt No.:</label
          >
          <input
           type="text"
           class="form-control"
-          id="violationReceiptNo"
-          name="violationReceiptNo"
+          id="violationReceipt"
+          name="violationReceipt"
+          value="VR456789123"
           required
          />
         </div>
-        <div class="col-md-6">
-         <label for="dateOfViolation" class="form-label"
-          >Date of Violation:</label
-         >
-         <input
-          type="date"
-          class="form-control"
-          id="dateOfViolation"
-          name="dateOfViolation"
-          required
-         />
-        </div>
-       </div>
-
-       <div class="row mb-3">
         <div class="col-md-6">
          <label for="dueDate" class="form-label">Due Date:</label>
          <input
@@ -374,89 +268,40 @@
           class="form-control"
           id="dueDate"
           name="dueDate"
-          required
-         />
-        </div>
-        <div class="col-md-6">
-         <label for="phoneNumber" class="form-label">Phone Number:</label>
-         <input
-          type="text"
-          class="form-control"
-          id="phoneNumber"
-          name="phoneNumber"
+          value="2025-01-15"
           required
          />
         </div>
        </div>
 
+       <!-- Submit Button -->
        <div class="row mb-3">
         <div class="col-md-12">
-         <label for="email" class="form-label">Email:</label>
-         <input
-          type="email"
-          class="form-control"
-          id="email"
-          name="email"
-          required
-         />
+         <button type="submit" class="btn btn-primary">Submit</button>
         </div>
        </div>
-
-       <button type="submit" class="btn btn-primary">Add Inspection</button>
       </form>
      </div>
     </div>
    </div>
   </div>
 
-  <div class="mt-3"></div>
-   <section class="card">
-    <div class="card-body">
-     <h4>List of Violators</h4>
-     <table class="table">
-      <thead>
-       <tr>
-        <th scope="col" style="background-color: #f4f4f9">Name</th>
-        <th scope="col" style="background-color: #f4f4f9">Business</th>
-        <th scope="col" style="background-color: #f4f4f9">Business ID</th>
-        <th scope="col" style="background-color: #f4f4f9">Business Status</th>
-        <th scope="col" style="background-color: #f4f4f9">Type of Violation</th>
-        <th scope="col" style="background-color: #f4f4f9">Date Issued</th>
-        <th scope="col" style="background-color: #f4f4f9">Due Date</th>
-       </tr>
-      </thead>
-      <tbody>
-       <tr>
-        <td>John Doe</td>
-        <td>Doe Enterprises</td>
-        <td>12345</td>
-        <td>low Income</td>
-        <td>Late Payment</td>
-        <td>2023-01-15</td>
-        <td>2023-02-15</td>
-       </tr>
-       <tr>
-        <td>Jane Smith</td>
-        <td>Smith & Co.</td>
-        <td>67890</td>
-        <td>Still operating</td>
-        <td>Unlicensed Operation</td>
-        <td>2023-02-01</td>
-        <td>2023-03-01</td>
-       </tr>
-       <tr>
-        <td>Bob Johnson</td>
-        <td>Johnson Services</td>
-        <td>11223</td>
-        <td>With Permit</td>
-        <td>Health Code Violation</td>
-        <td>2023-03-10</td>
-        <td>2023-04-10</td>
-       </tr>
-      </tbody>
-     </table>
+  <!-- Add Success Modal -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title">Success</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+     </div>
+     <div class="modal-body">
+      <p>Inspection has been successfully saved!</p>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+     </div>
     </div>
-   </section>
+   </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -464,17 +309,43 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/js/bootstrap.min.js"></script>
   <script>
    document.addEventListener("DOMContentLoaded", function () {
-    const violationStatus = document.getElementById("violationStatus");
+    const violationStatus = document.getElementById("withViolations");
     const natureOfViolationContainer = document.getElementById(
      "natureOfViolationContainer"
     );
 
     violationStatus.addEventListener("change", function () {
-     if (violationStatus.value === "with_violation") {
-      natureOfViolationContainer.style.display = "block";
-     } else {
-      natureOfViolationContainer.style.display = "none";
-     }
+     natureOfViolationContainer.style.display = 
+       violationStatus.value === "true" ? "block" : "none";
+    });
+
+    // Form submission handling
+    const violatorForm = document.getElementById("violatorForm");
+    violatorForm.addEventListener("submit", function (e) {
+     e.preventDefault();
+     // Add your form submission logic here
+     
+     // Hide the form modal
+     const violatorModal = bootstrap.Modal.getInstance(document.getElementById('violatorModal'));
+     violatorModal.hide();
+     
+     // Show success modal
+     const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+     successModal.show();
+    });
+
+    // Delete functionality
+    document.querySelectorAll('.delete-btn').forEach(button => {
+     button.addEventListener('click', function() {
+      if (confirm('Are you sure you want to delete this inspection?')) {
+       const row = this.closest('tr');
+       const inspectionId = this.dataset.id;
+       // Add your delete logic here
+       
+       // Remove row from table
+       row.remove();
+      }
+     });
     });
    });
   </script>
@@ -482,40 +353,50 @@
 </html>
 <section class="card mt-3">
  <div class="card-body">
- <h4>Inspected Businesses</h4>
- <table class="table">
-  <thead>
-  <tr>
-   <th scope="col" style="background-color: #f4f4f9">Business ID</th>
-   <th scope="col" style="background-color: #f4f4f9">Inspector ID</th>
-   <th scope="col" style="background-color: #f4f4f9">Inspection Date</th>
-   <th scope="col" style="background-color: #f4f4f9">Type of Inspection</th>
-   <th scope="col" style="background-color: #f4f4f9">With Violations</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-   <td>12345</td>
-   <td>1</td>
-   <td>2023-01-10</td>
-   <td>Regular</td>
-   <td>Yes</td>
-  </tr>
-  <tr>
-   <td>67890</td>
-   <td>2</td>
-   <td>2023-02-05</td>
-   <td>Night</td>
-   <td>No</td>
-  </tr>
-  <tr>
-   <td>11223</td>
-   <td>3</td>
-   <td>2023-03-15</td>
-   <td>Special (Verification)</td>
-   <td>Yes</td>
-  </tr>
-  </tbody>
- </table>
+  <h4>Inspected Businesses</h4>
+  <table class="table">
+   <thead>
+    <tr>
+     <th scope="col" style="background-color: #f4f4f9">Business ID</th>
+     <th scope="col" style="background-color: #f4f4f9">Inspector ID</th>
+     <th scope="col" style="background-color: #f4f4f9">Inspection Date</th>
+     <th scope="col" style="background-color: #f4f4f9">Type of Inspection</th>
+     <th scope="col" style="background-color: #f4f4f9">With Violations</th>
+     <th scope="col" style="background-color: #f4f4f9">Actions</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr>
+     <td>12345</td>
+     <td>1</td>
+     <td>2023-01-10</td>
+     <td>Regular</td>
+     <td>Yes</td>
+     <td>
+      <button class="btn btn-danger btn-sm delete-btn" data-id="12345">Delete</button>
+     </td>
+    </tr>
+    <tr>
+     <td>67890</td>
+     <td>2</td>
+     <td>2023-02-05</td>
+     <td>Night</td>
+     <td>No</td>
+     <td>
+      <button class="btn btn-danger btn-sm delete-btn" data-id="67890">Delete</button>
+     </td>
+    </tr>
+    <tr>
+     <td>11223</td>
+     <td>3</td>
+     <td>2023-03-15</td>
+     <td>Special (Verification)</td>
+     <td>Yes</td>
+     <td>
+      <button class="btn btn-danger btn-sm delete-btn" data-id="11223">Delete</button>
+     </td>
+    </tr>
+   </tbody>
+  </table>
  </div>
 </section>
