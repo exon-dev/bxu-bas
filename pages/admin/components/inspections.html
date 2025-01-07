@@ -117,8 +117,8 @@
        <tr>
         <th>No.</th>
         <th>Business Name</th>
-        <th>Business ID</th>
-        <th>Inspector ID</th>
+        <th>Business Status</th>
+        <th>Inspector</th>
         <th>Inspection Date</th>
         <th>Type of Inspection</th>
         <th>With Violations</th>
@@ -152,8 +152,8 @@
      row.innerHTML = ` 
                 <td>${index + 1}</td>
                 <td>${inspection.business.business_name || "N/A"}</td>
-                <td>${inspection.business_id || "N/A"}</td>
-                <td>${inspection.inspector_id || "N/A"}</td>
+                <td>${inspection.business.status || "N/A"}</td>
+                <td>${inspection.inspector_full_name || "N/A"}</td>
                 <td>${inspection.inspection_date || "N/A"}</td>
                 <td>${inspection.type_of_inspection || "N/A"}</td>
                 <td>${inspection.with_violations ? "Yes" : "No"}</td>
