@@ -15,7 +15,7 @@
   <style>
    body {
     font-family: "Poppins", sans-serif;
-    background-color: #f9fbff;
+    background-color: #eff3fc;
    }
    .container {
     max-width: 800px;
@@ -186,6 +186,7 @@
         <th scope="col">Date Created</th>
         <th scope="col">Date Updated</th>
         <th scope="col">No. of Inspections</th>
+        <th scope="col">Actions</th>
        </tr>
       </thead>
       <tbody id="inspectorList"></tbody>
@@ -202,7 +203,6 @@
    const apiUrl = CONFIG.API_BASE_URL;
 
    // Add new inspector
-
    const addInspector = async (event) => {
     event.preventDefault();
 
@@ -236,13 +236,50 @@
      console.log(response);
 
      const data = await response.json();
-     console.log("Inspector added successfully:", data);
+     if (res.ok) {
+      console.log("Inspector added successfully:", data);
 
-     // Show success modal
-     showSuccessModal();
+      // Show success modal
+      showSuccessModal();
+      setTimeout(() => {
+       window.location.reload();
+      }, 3000);
+     }
     } catch (err) {
      console.error("Error adding inspector:", err.message);
      alert("Failed to add inspector. Please try again.");
+    }
+   };
+
+   // delete inspectors
+   window.deleteInspector = async (inspector_id) => {
+    if (!confirm("Are you sure you want to delete this inspector?")) {
+     return;
+    }
+
+    try {
+     const response = await fetch(
+      `${apiUrl}/admin/delete-inspector/${inspector_id}`,
+      {
+       method: "DELETE",
+       headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     console.log(response);
+
+     if (!response.ok) {
+      throw new Error("Failed to delete inspector");
+     }
+
+     alert("Inspector deleted successfully.");
+     fetchInspectors(); // Refresh the inspector list
+    } catch (error) {
+     alert(`Error deleting inspector: ${error.message}`);
     }
    };
 
@@ -287,22 +324,47 @@
      inspectorList.innerHTML = "";
      inspectors.inspectors.forEach((inspector, index) => {
       const row = document.createElement("tr");
+
+      // Escape any special characters to prevent issues in innerHTML
+      const escapeHtml = (str) => {
+       return str.replace(/[&<>"']/g, (char) => {
+        const map = {
+         "&": "&amp;",
+         "<": "&lt;",
+         ">": "&gt;",
+         '"': "&quot;",
+         "'": "&#39;",
+        };
+        return map[char] || char;
+       });
+      };
+
       row.innerHTML = `
-            <th scope="row">${index + 1}</th>
-            <td>${inspector.email}</td>
-            <td>${inspector.first_name} ${inspector.last_name}</td>
-            <td>${new Date(inspector.created_at).toLocaleDateString()}</td>
-            <td>${new Date(inspector.updated_at).toLocaleDateString()}</td>
-            <td>${0}</td> <!-- Placeholder for number of inspections -->
-          `;
+           <th scope="row">${index + 1}</th>
+           <td>${escapeHtml(inspector.email)}</td>
+           <td>${escapeHtml(inspector.first_name)} ${escapeHtml(
+       inspector.last_name
+      )}</td>
+           <td>${new Date(inspector.created_at).toLocaleDateString()}</td>
+           <td>${new Date(inspector.updated_at).toLocaleDateString()}</td>
+           <td>${inspector.inspections_count}</td>
+           <td>
+               <button
+                   class="btn btn-danger btn-sm"
+                   onclick="deleteInspector(${inspector.inspector_id})"
+               >
+                   Delete
+               </button>
+           </td>
+       `;
       inspectorList.appendChild(row);
      });
     } catch (error) {
      messageDiv.innerHTML = `
-          <div class="alert alert-danger" role="alert">
-            Error fetching inspectors: ${error.message}
-          </div>
-        `;
+             <div class="alert alert-danger" role="alert">
+               Error fetching inspectors: ${error.message}
+             </div>
+           `;
     }
    };
 

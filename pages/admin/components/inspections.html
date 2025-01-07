@@ -56,6 +56,9 @@
     margin-bottom: 30px;
     transition: all 0.3s ease-in-out;
    }
+   .filters {
+    margin-bottom: 20px;
+   }
   </style>
  </head>
  <body id="violations">
@@ -70,15 +73,49 @@
   <div class="mt-3">
    <section class="card">
     <div class="card-body">
+     <h4>Filter & Search</h4>
+     <div class="filters">
+      <form id="filters-form">
+       <div class="row">
+        <div class="col-md-3">
+         <label for="inspection-date" class="form-label"
+          >Filter by Inspection Date</label
+         >
+         <input type="date" id="inspection-date" class="form-control" />
+        </div>
+        <div class="col-md-3">
+         <label for="violation" class="form-label">Filter by Violation</label>
+         <select id="violation" class="form-select">
+          <option value="">Select Violation</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+         </select>
+        </div>
+        <div class="col-md-3">
+         <label for="inspector" class="form-label">Filter by Inspector</label>
+         <select id="inspector" class="form-select">
+          <!-- Inspector options will be dynamically added here -->
+         </select>
+        </div>
+        <div class="col-md-3">
+         <label for="search-name" class="form-label"
+          >Search by Business Name</label
+         >
+         <input
+          type="text"
+          id="search-name"
+          class="form-control"
+          placeholder="Search by name"
+         />
+        </div>
+       </div>
+      </form>
+     </div>
      <h4>Inspected Businesses</h4>
-     <!-- <div class="spinner" id="loading-inspections">
-      <div class="spinner-border text-primary" role="status">
-       <span class="visually-hidden">Loading...</span>
-      </div>
-     </div> -->
      <table class="table">
       <thead>
        <tr>
+        <th>No.</th>
         <th>Business Name</th>
         <th>Business ID</th>
         <th>Inspector ID</th>
@@ -87,117 +124,158 @@
         <th>With Violations</th>
        </tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="inspections-tbody"></tbody>
      </table>
+     <nav>
+      <ul class="pagination" id="pagination-controls"></ul>
+     </nav>
     </div>
    </section>
   </div>
-  <!-- <div class="mt-3">
-   <section class="card">
-    <div class="card-body">
-     <h4>List of Violators</h4>
-     <div class="spinner" id="loading-violators">
-      <div class="spinner-border text-primary" role="status">
-       <span class="visually-hidden">Loading...</span>
-      </div>
-     </div>
-     <table class="table">
-      <thead>
-       <tr>
-        <th>Owner Name</th>
-        <th>Business Name</th>
-        <th>Business ID</th>
-        <th>Status</th>
-        <th>Violation Details</th>
-        <th>Inspection Date</th>
-        <th>Due Date</th>
-       </tr>
-      </thead>
-      <tbody></tbody>
-     </table>
-    </div>
-   </section>
-  </div> -->
+
   <script type="module">
    import CONFIG from "/scripts/config.js";
    const apiUrl = CONFIG.API_BASE_URL;
+   const recordsPerPage = 10; // Number of records per page
 
-   const fetchInspections = async () => {
+   let currentPage = 1; // Start with page 1
+   let totalPages = 1; // Default value for total pages
+   let inspectionsData = [];
+   let inspectors = [];
+
+   const renderTable = () => {
+    const inspectionsTbody = document.getElementById("inspections-tbody");
+    inspectionsTbody.innerHTML = ""; // Clear existing rows
+
+    inspectionsData.forEach((inspection, index) => {
+     const row = document.createElement("tr");
+     row.innerHTML = ` 
+                <td>${index + 1}</td>
+                <td>${inspection.business.business_name || "N/A"}</td>
+                <td>${inspection.business_id || "N/A"}</td>
+                <td>${inspection.inspector_id || "N/A"}</td>
+                <td>${inspection.inspection_date || "N/A"}</td>
+                <td>${inspection.type_of_inspection || "N/A"}</td>
+                <td>${inspection.with_violations ? "Yes" : "No"}</td>
+            `;
+     inspectionsTbody.appendChild(row);
+    });
+
+    renderPagination();
+   };
+
+   const renderPagination = () => {
+    const paginationControls = document.getElementById("pagination-controls");
+    paginationControls.innerHTML = ""; // Clear existing controls
+
+    const prevPageButton = document.createElement("li");
+    prevPageButton.classList.add("page-item");
+    prevPageButton.innerHTML = `
+            <a class="page-link" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        `;
+    prevPageButton.addEventListener("click", () => changePage(currentPage - 1));
+    if (currentPage === 1) prevPageButton.classList.add("disabled");
+    paginationControls.appendChild(prevPageButton);
+
+    for (let i = 1; i <= totalPages; i++) {
+     const pageButton = document.createElement("li");
+     pageButton.classList.add("page-item");
+     pageButton.innerHTML = `
+                <a class="page-link" href="#">${i}</a>
+            `;
+     pageButton.addEventListener("click", () => changePage(i));
+     if (i === currentPage) pageButton.classList.add("active");
+     paginationControls.appendChild(pageButton);
+    }
+
+    const nextPageButton = document.createElement("li");
+    nextPageButton.classList.add("page-item");
+    nextPageButton.innerHTML = `
+            <a class="page-link" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        `;
+    nextPageButton.addEventListener("click", () => changePage(currentPage + 1));
+    if (currentPage === totalPages) nextPageButton.classList.add("disabled");
+    paginationControls.appendChild(nextPageButton);
+   };
+
+   const changePage = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+     currentPage = newPage;
+     fetchInspections(currentPage);
+    }
+   };
+
+   const fetchInspections = async (page = 1) => {
     try {
-     const response = await fetch(`${apiUrl}/admin/inspections`, {
-      method: "GET",
-      headers: {
-       Accept: "application/json",
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-     });
+     // Collect filter values from the form
+     const formData = new FormData(document.getElementById("filters-form"));
+     const filters = {
+      inspectionDate: formData.get("inspection-date"),
+      violation: formData.get("violation"),
+      inspector: formData.get("inspector"),
+      searchName: formData.get("search-name"),
+     };
+
+     // Construct query string for the filters
+     const queryParams = new URLSearchParams(filters).toString();
+
+     const response = await fetch(
+      `${apiUrl}/inspection/inspections?page=${page}&${queryParams}`,
+      {
+       method: "GET",
+       headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
 
      if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
      }
 
      const data = await response.json();
-     console.log("Fetched Data:", data); // Debugging API response
-
-     // Validate and process inspections
-     const inspections = data.inspections || [];
-     if (!Array.isArray(inspections)) {
-      throw new Error("Invalid API response: `inspections` is not an array");
-     }
-
-     // Update the inspected businesses table
-     const inspectedBusinessesTableBody =
-      document.querySelector("table.table tbody");
-     inspectedBusinessesTableBody.innerHTML = ""; // Clear existing rows
-
-     inspections.forEach((inspection) => {
-      const row = document.createElement("tr");
-
-      row.innerHTML = `
-        <td>${inspection.business.business_name || "N/A"}</td>
-        <td>${inspection.business_id || "N/A"}</td>
-        <td>${inspection.inspector_id || "N/A"}</td>
-        <td>${inspection.inspection_date || "N/A"}</td>
-        <td>${inspection.type_of_inspection || "N/A"}</td>
-        <td>${inspection.with_violations ? "Yes" : "No"}</td>
-      `;
-
-      inspectedBusinessesTableBody.appendChild(row);
-     });
-
-     // Update the violators table
-     const violatorsTableBody = document
-      .querySelectorAll("table.table")[1]
-      .querySelector("tbody");
-     violatorsTableBody.innerHTML = ""; // Clear existing rows
-
-     inspections
-      .filter((inspection) => inspection.with_violations) // Filter inspections with violations
-      .forEach((inspection) => {
-       const business = inspection.business || {};
-       const owner = business.owner || {};
-
-       const row = document.createElement("tr");
-
-       row.innerHTML = `
-          <td>${owner.first_name || "N/A"} ${owner.last_name || ""}</td>
-          <td>${business.business_name || "N/A"}</td>
-          <td>${inspection.business_id || "N/A"}</td>
-          <td>${business.status || "N/A"}</td>
-          <td>Violation Details</td>
-          <td>${inspection.inspection_date || "N/A"}</td>
-          <td>Due Date</td>
-        `;
-
-       violatorsTableBody.appendChild(row);
-      });
-    } catch (err) {
-     console.error("Error fetching inspections:", err.message);
+     inspectionsData = data.inspections.data || [];
+     totalPages = data.inspections.last_page || 1;
+     renderTable();
+    } catch (error) {
+     console.error("Error fetching inspections:", error);
     }
    };
 
-   fetchInspections();
+   const fetchInspectors = async () => {
+    try {
+     const response = await fetch(`${apiUrl}/inspection/inspectors`);
+     if (!response.ok) {
+      throw new Error("Failed to fetch inspectors");
+     }
+
+     inspectors = await response.json();
+     const inspectorSelect = document.getElementById("inspector");
+     inspectors.forEach((inspector) => {
+      const option = document.createElement("option");
+      option.value = inspector.id;
+      option.textContent = inspector.name;
+      inspectorSelect.appendChild(option);
+     });
+    } catch (error) {
+     console.error("Error fetching inspectors:", error);
+    }
+   };
+
+   // Trigger fetchInspections when filters change
+   document.getElementById("filters-form").addEventListener("input", () => {
+    fetchInspections(currentPage);
+   });
+
+   // Initialize the page
+   fetchInspectors();
+   fetchInspections(currentPage);
   </script>
  </body>
 </html>
