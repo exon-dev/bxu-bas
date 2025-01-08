@@ -16,6 +16,11 @@
    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
    rel="stylesheet"
   />
+  <!-- Add Toastify CSS -->
+  <link
+   rel="stylesheet"
+   href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  />
   <style>
    body {
     font-family: "Poppins", sans-serif;
@@ -51,8 +56,8 @@
 
        <form id="inspectorLoginForm">
         <div class="mb-3">
-         <label for="username" class="form-label small">Username</label>
-         <input type="text" class="form-control small" id="username" required />
+         <label for="email" class="form-label small">Email</label>
+         <input type="email" class="form-control small" id="email" required />
         </div>
 
         <div class="mb-3">
@@ -75,7 +80,11 @@
         <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
 
         <div class="text-center">
-         <a href="#" class="text-decoration-none small">Forgot Password?</a>
+         <a
+          href="forgotPassword.html?role=inspector"
+          class="text-decoration-none small"
+          >Forgot Password?</a
+         >
         </div>
        </form>
       </div>
@@ -83,20 +92,85 @@
     </div>
    </div>
   </div>
+
+  <!-- Add Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+  <!-- Add Toastify JS -->
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <!-- API script -->
+  <script type="module">
+   import CONFIG from "/scripts/config.js";
+   const apiUrl = CONFIG.API_BASE_URL;
    const inspectorLoginForm = document.getElementById("inspectorLoginForm");
 
-   inspectorLoginForm.addEventListener("submit", (e) => {
+   inspectorLoginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    try {
+     // Get the values from the form fields
+     const email = document.getElementById("email").value;
+     const password = document.getElementById("password").value;
 
-    if (username === "inspector" && password === "inspector") {
-     window.location.href = "dashboard.html";
-    } else {
-     alert("Invalid username or password");
+     // Send the login data to the backend
+     const response = await fetch(apiUrl + "/inspector-login", {
+      method: "POST",
+      headers: {
+       Accept: "application/json",
+       "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+       email,
+       password,
+      }),
+     });
+
+     const data = await response.json();
+
+     // Check if the login is successful
+     if (response.ok) {
+      const token = data.token.split("|")[1]; // Get everything after the pipe
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("role", "inspector");
+      localStorage.setItem("email", data.user.email);
+      localStorage.setItem("firstName", data.user.first_name);
+      localStorage.setItem("lastName", data.user.last_name);
+      localStorage.setItem("inspector_id", data.user.inspector_id);
+
+      Toastify({
+       text: "Login Successful! Redirecting...",
+       duration: 3000,
+       gravity: "top",
+       position: "center",
+       close: true,
+      }).showToast();
+
+      setTimeout(() => {
+       window.location.href = "../inspector/inspector.html";
+      }, 3000);
+     } else {
+      // Show error notification
+      Toastify({
+       text: data.message || "Invalid credentials",
+       duration: 3000,
+       gravity: "top",
+       position: "center",
+       close: true,
+       style: {
+        background: "red",
+       },
+      }).showToast();
+     }
+    } catch (err) {
+     Toastify({
+      text: "Internal server error, please try again later",
+      duration: 3000,
+      gravity: "top",
+      position: "center",
+      close: true,
+      style: {
+       background: "red",
+      },
+     }).showToast();
     }
    });
   </script>
