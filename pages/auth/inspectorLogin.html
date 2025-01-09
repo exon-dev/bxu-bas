@@ -124,17 +124,21 @@
       }),
      });
 
+     console.log("Response: ", response);
+
      const data = await response.json();
+
+     console.log(data);
 
      // Check if the login is successful
      if (response.ok) {
       const token = data.token.split("|")[1]; // Get everything after the pipe
       localStorage.setItem("authToken", token);
       localStorage.setItem("role", "inspector");
-      localStorage.setItem("email", data.user.email);
-      localStorage.setItem("firstName", data.user.first_name);
-      localStorage.setItem("lastName", data.user.last_name);
-      localStorage.setItem("inspector_id", data.user.inspector_id);
+      localStorage.setItem("email", data.inspector.email);
+      localStorage.setItem("firstName", data.inspector.first_name);
+      localStorage.setItem("lastName", data.inspector.last_name);
+      localStorage.setItem("inspector_id", data.inspector.inspector_id);
 
       Toastify({
        text: "Login Successful! Redirecting...",
