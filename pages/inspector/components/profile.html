@@ -15,7 +15,7 @@
     font-family: "Poppins", sans-serif !important;
     background-color: #eff3fc;
     margin: 0;
-    padding: 20px;
+    /* padding: 20px; */
    }
    .card {
     border-radius: 10px;
@@ -30,7 +30,7 @@
    }
    .card-body {
     flex: 1;
-    padding: 20px;
+    padding: 28px;
    }
    .circular-image {
     width: 100px;
@@ -102,13 +102,18 @@
    >
     <div class="card-body" style="text-align: center">
      <div class="w-full align-items-center d-flex flex-column gap-3">
-      <img src="" alt="" class="circular-image bg-secondary" />
+      <img
+       src=""
+       alt="Profile Image"
+       class="circular-image bg-secondary"
+       id="profileImage"
+      />
      </div>
-     <div>
-      <p class="m-0">bxubasadmin@gmail.com</p>
-      <p class="m-0">Inspector</p>
+     <div class="mt-3">
+      <p class="m-0" id="profileEmail"></p>
+      <p class="m-0" id="profileRole"></p>
      </div>
-     <div>
+     <div class="mt-3">
       <button class="btn btn-success" onclick="changePassword()">
        Change Password
       </button>
@@ -120,11 +125,11 @@
      <h5>Personal Information</h5>
      <div class="personal-info mt-3">
       <p class="label">Email:</p>
-      <div class="value">bxubasinspector@gmail.com</div>
+      <div class="value" id="personalEmail"></div>
       <p class="label">Firstname:</p>
-      <div class="value">John</div>
+      <div class="value" id="personalFirstName"></div>
       <p class="label">Lastname:</p>
-      <div class="value">Doe</div>
+      <div class="value" id="personalLastName"></div>
      </div>
     </div>
    </div>
@@ -135,5 +140,20 @@
    // Implement change password functionality here
    alert("Change password functionality not implemented yet.");
   }
+
+  // Fetch data from local storage
+  const email = localStorage.getItem("email");
+  const first_name = localStorage.getItem("firstName");
+  const last_name = localStorage.getItem("lastName");
+  const profileImageUrl = localStorage.getItem("profile_image"); // Assuming you store the profile image URL
+
+  // Populate the fields
+  document.getElementById("profileEmail").textContent = email || "N/A";
+  document.getElementById("personalEmail").textContent = email || "N/A";
+  document.getElementById("personalFirstName").textContent =
+   first_name || "N/A";
+  document.getElementById("personalLastName").textContent = last_name || "N/A";
+  document.getElementById("profileRole").textContent = "Inspector"; // Assuming the role is static
+  document.getElementById("profileImage").src = profileImageUrl || ""; // Set the profile image source
  </script>
 </html>
