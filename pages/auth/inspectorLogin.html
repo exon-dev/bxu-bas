@@ -77,7 +77,19 @@
          >
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+        <button
+         type="submit"
+         class="btn btn-primary w-100 mb-3"
+         id="loginButton"
+        >
+         Login
+         <span
+          class="spinner-border spinner-border-sm ms-2"
+          role="status"
+          aria-hidden="true"
+          style="display: none"
+         ></span>
+        </button>
 
         <div class="text-center">
          <a
@@ -105,6 +117,12 @@
 
    inspectorLoginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    // Disable the login button and show the spinner
+    const loginButton = document.getElementById("loginButton");
+    const spinner = loginButton.querySelector(".spinner-border");
+    loginButton.disabled = true; // Disable the button
+    spinner.style.display = "inline-block"; // Show the spinner
 
     try {
      // Get the values from the form fields
@@ -175,6 +193,10 @@
        background: "red",
       },
      }).showToast();
+    } finally {
+     // Re-enable the button and hide the spinner after the process
+     loginButton.disabled = false; // Re-enable the button
+     spinner.style.display = "none"; // Hide the spinner
     }
    });
   </script>
