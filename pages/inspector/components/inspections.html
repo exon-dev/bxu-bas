@@ -44,14 +44,14 @@
 
   <!-- Modal Structure -->
   <div
-   class="modal fade"
+   class="modal fade overflow-scroll"
    id="violatorModal"
    tabindex="-1"
    aria-labelledby="violatorModalLabel"
    aria-hidden="true"
   >
-   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
+   <div class="modal-dialog modal-lg modal-dialog-centered overflow-scroll max">
+    <div class="modal-content overflow-scroll">
      <div class="modal-header">
       <h5 class="modal-title" id="violatorModalLabel">Business Inspection</h5>
       <button
@@ -61,7 +61,7 @@
        aria-label="Close"
       ></button>
      </div>
-     <div class="modal-body">
+     <div class="modal-body" style="max-height: 500px; overflow-y: auto">
       <form id="violatorForm">
        <!-- Owner's Information -->
        <div class="row mb-3">
@@ -147,8 +147,14 @@
           name="businessStatus"
           required
          >
-          <option value="Active" selected>Active</option>
-          <option value="Inactive">Inactive</option>
+          <option value="low_income">Low Income</option>
+          <option value="with_permit">With Permit</option>
+          <option value="without_permit">Without Permit</option>
+          <option value="already_closed">Already Closed</option>
+          <option value="already_closed_new_business">
+           Already Closed but New Business Operating
+          </option>
+          <option value="still_operating">Still Operating</option>
          </select>
         </div>
        </div>
@@ -195,8 +201,15 @@
           name="typeOfInspection"
           required
          >
-          <option value="Routine">Routine</option>
-          <option value="Follow-up" selected>Follow-up</option>
+          <option value="regular">Regular</option>
+          <option value="night">Night</option>
+          <option value="special_change_address">
+           Special (Change Address)
+          </option>
+          <option value="special_verification">Special (Verification)</option>
+          <option value="special_complaint">Special (Complaint)</option>
+          <option value="special_retirement">Special (Retirement)</option>
+          <option value="joint">Joint</option>
          </select>
         </div>
         <div class="col-md-6">
@@ -207,8 +220,8 @@
           name="withViolations"
           required
          >
-          <option value="true" selected>Yes</option>
-          <option value="false">No</option>
+          <option value="true">Yes</option>
+          <option value="false" selected>No</option>
          </select>
         </div>
        </div>
@@ -218,7 +231,7 @@
         id="natureOfViolationContainer"
         style="display: none"
        >
-        <div class="col-md-12">
+        <div class="col-md-12 mb-3">
          <label for="natureOfViolation" class="form-label"
           >Nature of Violation:</label
          >
@@ -287,14 +300,12 @@
          </div>
         </div>
        </div>
-
-       <!-- Submit Button -->
-       <div class="row mb-3">
-        <div class="col-md-12">
-         <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-       </div>
       </form>
+     </div>
+     <div class="modal-footer">
+      <button type="submit" class="btn btn-primary" form="violatorForm">
+       Submit
+      </button>
      </div>
     </div>
    </div>
@@ -329,48 +340,47 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/js/bootstrap.min.js"></script>
   <script>
-   document.addEventListener("DOMContentLoaded", function () {
-    const violationStatus = document.getElementById("withViolations");
-    const natureOfViolationContainer = document.getElementById(
-     "natureOfViolationContainer"
+   const violationStatus = document.getElementById("withViolations");
+   const natureOfViolationContainer = document.getElementById(
+    "natureOfViolationContainer"
+   );
+
+   violationStatus.addEventListener("change", function () {
+    console.log("Change");
+    natureOfViolationContainer.style.display =
+     violationStatus.value === "true" ? "block" : "none";
+   });
+
+   // Form submission handling
+   const violatorForm = document.getElementById("violatorForm");
+   violatorForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    // Add your form submission logic here
+
+    // Hide the form modal
+    const violatorModal = bootstrap.Modal.getInstance(
+     document.getElementById("violatorModal")
     );
+    violatorModal.hide();
 
-    violationStatus.addEventListener("change", function () {
-     natureOfViolationContainer.style.display =
-      violationStatus.value === "true" ? "block" : "none";
-    });
+    // Show success modal
+    const successModal = new bootstrap.Modal(
+     document.getElementById("successModal")
+    );
+    successModal.show();
+   });
 
-    // Form submission handling
-    const violatorForm = document.getElementById("violatorForm");
-    violatorForm.addEventListener("submit", function (e) {
-     e.preventDefault();
-     // Add your form submission logic here
+   // Delete functionality
+   document.querySelectorAll(".delete-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+     if (confirm("Are you sure you want to delete this inspection?")) {
+      const row = this.closest("tr");
+      const inspectionId = this.dataset.id;
+      // Add your delete logic here
 
-     // Hide the form modal
-     const violatorModal = bootstrap.Modal.getInstance(
-      document.getElementById("violatorModal")
-     );
-     violatorModal.hide();
-
-     // Show success modal
-     const successModal = new bootstrap.Modal(
-      document.getElementById("successModal")
-     );
-     successModal.show();
-    });
-
-    // Delete functionality
-    document.querySelectorAll(".delete-btn").forEach((button) => {
-     button.addEventListener("click", function () {
-      if (confirm("Are you sure you want to delete this inspection?")) {
-       const row = this.closest("tr");
-       const inspectionId = this.dataset.id;
-       // Add your delete logic here
-
-       // Remove row from table
-       row.remove();
-      }
-     });
+      // Remove row from table
+      row.remove();
+     }
     });
    });
   </script>
