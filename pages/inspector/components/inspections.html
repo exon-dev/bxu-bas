@@ -62,7 +62,7 @@
       ></button>
      </div>
      <div class="modal-body" style="max-height: 500px; overflow-y: auto">
-      <form id="violatorForm">
+      <form id="inspectionForm">
        <!-- Owner's Information -->
        <div class="row mb-2">
         <div class="col-md-6">
@@ -134,7 +134,6 @@
           class="form-control form-control-sm"
           id="businessPermit"
           name="businessPermit"
-          required
          />
         </div>
        </div>
@@ -323,7 +322,7 @@
       </form>
      </div>
      <div class="modal-footer border-0 shadow-lg">
-      <button type="submit" class="btn btn-primary h6" form="violatorForm">
+      <button type="submit" class="btn btn-primary h6" form="inspectionForm">
        Submit
       </button>
      </div>
@@ -446,22 +445,131 @@
    });
 
    // Form submission handling
-   const violatorForm = document.getElementById("violatorForm");
-   violatorForm.addEventListener("submit", function (e) {
+   const inspectionForm = document.getElementById("inspectionForm");
+   inspectionForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-    // Add your form submission logic here
 
-    // Hide the form modal
-    const violatorModal = bootstrap.Modal.getInstance(
-     document.getElementById("violatorModal")
-    );
-    violatorModal.hide();
+    // Clear previous error messages
+    const errorMessages = document.querySelectorAll(".error-message");
+    errorMessages.forEach((msg) => msg.remove());
 
-    // Show success modal
-    const successModal = new bootstrap.Modal(
-     document.getElementById("successModal")
-    );
-    successModal.show();
+    // Get form values
+    const ownerFirstName = document
+     .getElementById("ownerFirstName")
+     .value.trim();
+    const ownerLastName = document.getElementById("ownerLastName").value.trim();
+    const ownerEmail = document.getElementById("ownerEmail").value.trim();
+    const ownerPhoneNumber = document
+     .getElementById("ownerPhoneNumber")
+     .value.trim();
+    const businessName = document.getElementById("businessName").value.trim();
+    const businessPermit = document
+     .getElementById("businessPermit")
+     .value.trim(); // Nullable
+    const businessStatus = document.getElementById("businessStatus").value;
+    const street = document.getElementById("street").value.trim();
+    const city = document.getElementById("city").value.trim();
+    const zip = document.getElementById("zip").value.trim();
+    const typeOfInspection = document.getElementById("typeOfInspection").value;
+    const withViolations =
+     document.getElementById("withViolations").value === "true"; // Convert to boolean
+    const violationReceipt = document
+     .getElementById("violationReceipt")
+     .value.trim();
+    const dueDate = document.getElementById("dueDate").value;
+    const businessImage = document.getElementById("businessImage").files[0];
+
+    // Initialize an array to hold error messages
+    let errors = [];
+
+    // Check required fields
+    if (!ownerFirstName) errors.push("Owner's First Name is required.");
+    if (!ownerLastName) errors.push("Owner's Last Name is required.");
+    if (!ownerEmail) errors.push("Owner's Email is required.");
+    if (!ownerPhoneNumber) errors.push("Owner's Phone Number is required.");
+    if (!businessName) errors.push("Business Name is required.");
+    if (!businessStatus) errors.push("Business Status is required.");
+    if (!street) errors.push("Street is required.");
+    if (!city) errors.push("City is required.");
+    if (!zip) errors.push("ZIP Code is required.");
+    if (!typeOfInspection) errors.push("Type of Inspection is required.");
+    if (withViolations && !violationReceipt)
+     errors.push(
+      "Violation Receipt No. is required when there are violations."
+     );
+    if (withViolations && !dueDate)
+     errors.push("Due Date is required when there are violations.");
+
+    // Automatically set withViolations to true if businessPermit is blank
+    if (!businessPermit) {
+     document.getElementById("withViolations").value = "true";
+    }
+
+    // If there are errors, display them and prevent form submission
+    if (errors.length > 0) {
+     errors.forEach((error) => {
+      const errorMsg = document.createElement("div");
+      errorMsg.className = "error-message text-danger";
+      errorMsg.textContent = error;
+      inspectionForm.prepend(errorMsg); // Display error messages at the top of the form
+     });
+     return; // Stop form submission
+    }
+
+    // Prepare the data to be sent to the backend
+    const formData = {
+     owner_first_name: ownerFirstName,
+     owner_last_name: ownerLastName,
+     owner_email: ownerEmail,
+     owner_phone_number: ownerPhoneNumber,
+     business_name: businessName,
+     business_permit: businessPermit || null, // Set to null if empty
+     business_status: businessStatus,
+     street: street,
+     city: city,
+     zip: zip,
+     type_of_inspection: typeOfInspection,
+     with_violations: withViolations,
+     nature_of_violation: "Expired food items and unsanitary conditions.", // Example value, adjust as needed
+     violation_receipt: violationReceipt,
+     due_date: dueDate,
+     image_url: businessImage ? URL.createObjectURL(businessImage) : null, // Handle image upload if needed
+    };
+
+    try {
+     console.log(formData);
+     // Send a POST request to the backend
+     const response = await fetch(apiUrl + "/inspector/add-inspection", {
+      method: "POST",
+      headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`, // Include token if needed
+      },
+      body: JSON.stringify(formData),
+     });
+
+     if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+     }
+
+     const result = await response.json();
+     console.log("Inspection added successfully:", result);
+
+     // Hide the form modal
+     const violatorModal = bootstrap.Modal.getInstance(
+      document.getElementById("violatorModal")
+     );
+     violatorModal.hide();
+
+     // Show success modal
+     const successModal = new bootstrap.Modal(
+      document.getElementById("successModal")
+     );
+     successModal.show();
+    } catch (error) {
+     console.error("Error adding inspection:", error);
+     // Handle error (e.g., show an error message to the user)
+    }
    });
 
    // Delete functionality
@@ -489,8 +597,8 @@
     if (!inspectionsData || inspectionsData.length === 0) {
      const noDataRow = document.createElement("tr");
      noDataRow.innerHTML = `
-            <td colspan="6" class="text-center">No inspections found</td>
-        `;
+             <td colspan="6" class="text-center">No inspections found</td>
+         `;
      inspectionsTbody.appendChild(noDataRow);
      return;
     }
@@ -505,16 +613,16 @@
      const actualIndex = startingIndex + index; // Calculate the actual index
 
      row.innerHTML = `
-            <td>${actualIndex}</td>
-            <td>${inspection.business?.business_name || "N/A"}</td>
-            <td>${inspection.business?.status || "N/A"}</td>
-            <td>${formatDate(inspection.inspection_date)}</td>
-            <td>${inspection.type_of_inspection || "N/A"}</td>
-            <td>${inspection.inspector_full_name || "N/A"}</td>
-            <td><span class="badge ${
-             inspection.with_violations ? "bg-danger" : "bg-success"
-            }">${inspection.with_violations ? "Yes" : "No"}</span></td>
-        `;
+             <td>${actualIndex}</td>
+             <td>${inspection.business?.business_name || "N/A"}</td>
+             <td>${inspection.business?.status || "N/A"}</td>
+             <td>${formatDate(inspection.inspection_date)}</td>
+             <td>${inspection.type_of_inspection || "N/A"}</td>
+             <td>${inspection.inspector_full_name || "N/A"}</td>
+             <td><span class="badge ${
+              inspection.with_violations ? "bg-danger" : "bg-success"
+             }">${inspection.with_violations ? "Yes" : "No"}</span></td>
+         `;
 
      row.addEventListener("click", () => showInspectionDetails(inspection));
      inspectionsTbody.appendChild(row);
@@ -527,14 +635,14 @@
     try {
      const inspectionsTbody = document.getElementById("inspections-tbody");
      inspectionsTbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </td>
-            </tr>
-        `;
+             <tr>
+                 <td colspan="7" class="text-center">
+                     <div class="spinner-border text-primary" role="status">
+                         <span class="visually-hidden">Loading...</span>
+                     </div>
+                 </td>
+             </tr>
+         `;
 
      // Get filter values
      const inspectionDate = document.getElementById("inspection-date").value;
@@ -577,12 +685,12 @@
      console.error("Error fetching inspections:", error);
      const inspectionsTbody = document.getElementById("inspections-tbody");
      inspectionsTbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center text-danger">
-                    Error loading inspections. Please try again.
-                </td>
-            </tr>
-        `;
+             <tr>
+                 <td colspan="7" class="text-center text-danger">
+                     Error loading inspections. Please try again.
+                 </td>
+             </tr>
+         `;
     }
    };
 
@@ -620,10 +728,10 @@
     const prevPageButton = document.createElement("li");
     prevPageButton.classList.add("page-item");
     prevPageButton.innerHTML = `
-        <a class="page-link" href="#" aria-label="Previous">
-            <span aria-hidden="true">&laquo;</span>
-        </a>
-    `;
+         <a class="page-link" href="#" aria-label="Previous">
+             <span aria-hidden="true">&laquo;</span>
+         </a>
+     `;
     prevPageButton.addEventListener("click", (e) => {
      e.preventDefault();
      if (currentPage > 1) changePage(currentPage - 1);
@@ -646,10 +754,10 @@
     const nextPageButton = document.createElement("li");
     nextPageButton.classList.add("page-item");
     nextPageButton.innerHTML = `
-        <a class="page-link" href="#" aria-label="Next">
-            <span aria-hidden="true">&raquo;</span>
-        </a>
-    `;
+         <a class="page-link" href="#" aria-label="Next">
+             <span aria-hidden="true">&raquo;</span>
+         </a>
+     `;
     nextPageButton.addEventListener("click", (e) => {
      e.preventDefault();
      if (currentPage < totalPages) changePage(currentPage + 1);
