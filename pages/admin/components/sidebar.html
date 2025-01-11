@@ -17,6 +17,10 @@
    rel="stylesheet"
   />
   <link rel="stylesheet" href="/css/admin/sidebar.css" />
+  <link
+   rel="stylesheet"
+   href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  />
  </head>
  <body>
   <div class="sidebar">
@@ -36,7 +40,7 @@
     <a href="#profile"><i class="bi bi-person"></i> Profile</a>
    </div>
    <div class="logout">
-    <button onclick="logout()">
+    <button id="logoutButton">
      <i class="bi bi-box-arrow-right"></i> Logout
     </button>
    </div>
@@ -47,7 +51,8 @@
    style="margin-left: 250px; padding: 100px 20px 20px 20px"
   ></div>
 
-  <script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script type="module">
    function loadContent(page, element, event) {
     if (event) {
      event.preventDefault();
@@ -84,6 +89,39 @@
      });
    }
 
+   import CONFIG from "/scripts/config.js";
+
+   const apiUrl = CONFIG.API_URL;
+
+   console.log(apiUrl);
+
+   const handleLogout = async () => {
+    console.log("Logout button clicked"); // Debugging log
+    const response = await fetch(`${apiUrl}/admin/admin-logout`, {
+     method: "POST",
+     headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+     },
+    });
+    const data = await response.json();
+    if (response.ok) {
+     localStorage.removeItem("authToken");
+     localStorage.clear();
+     window.location.href = "../auth/index.html";
+     Toastify({
+      text: "Logout successful",
+      duration: 3000,
+      close: true,
+      gravity: "top",
+      position: "right",
+      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+     }).showToast();
+    } else {
+     alert(data.message);
+    }
+   };
+
    // Dynamically load the page-specific script
    function loadPageScript(page) {
     const scriptPath = `components/${page.replace(".html", ".js")}`;
@@ -102,21 +140,26 @@
     document.body.appendChild(scriptElement);
    }
 
-   window.logout = function () {
-    alert("Logging out...");
-   };
-
    window.onload = function () {
     const currentPage = localStorage.getItem("currentPage") || "dashboard.html";
     loadContent(currentPage);
 
-    // Fix: Add the event listeners here to ensure that the "working" log prints when clicked
+    // Add event listeners for navigation links
     document.querySelectorAll(".nav-links a").forEach((link) => {
      link.addEventListener("click", function (event) {
       const page = this.getAttribute("href").substring(1) + ".html";
       loadContent(page, this, event);
      });
     });
+
+    // Add event listener for the logout button
+    const logoutButton = document.getElementById("logoutButton");
+    if (logoutButton) {
+     console.log("Logout button found"); // Debugging log
+     logoutButton.addEventListener("click", handleLogout);
+    } else {
+     console.error("Logout button not found");
+    }
    };
   </script>
  </body>

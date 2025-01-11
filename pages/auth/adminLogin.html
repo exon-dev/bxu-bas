@@ -77,7 +77,20 @@
          >
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+        <button
+         type="submit"
+         class="btn btn-primary w-100 mb-3"
+         id="loginButton"
+        >
+         <span id="buttonText">Login</span>
+         <div
+          class="spinner-border spinner-border-sm text-light d-none"
+          id="loadingSpinner"
+          role="status"
+         >
+          <span class="visually-hidden">Loading...</span>
+         </div>
+        </button>
 
         <div class="text-center">
          <a
@@ -101,9 +114,16 @@
    import CONFIG from "/scripts/config.js";
 
    const adminLoginForm = document.getElementById("adminLoginForm");
+   const loginButton = document.getElementById("loginButton");
+   const loadingSpinner = document.getElementById("loadingSpinner");
 
    adminLoginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    // Disable the login button and show the spinner
+    loginButton.disabled = true;
+    document.getElementById("buttonText").textContent = "Loading...";
+    loadingSpinner.classList.remove("d-none");
 
     try {
      // Get the values from the form fields
@@ -169,6 +189,10 @@
        background: "red", // Red background for error
       },
      }).showToast();
+    } finally {
+     // Enable the login button and hide the spinner
+     loginButton.disabled = false;
+     loadingSpinner.classList.add("d-none");
     }
    });
   </script>

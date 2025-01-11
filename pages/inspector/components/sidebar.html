@@ -16,26 +16,31 @@
    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
    rel="stylesheet"
   />
+  <link rel="stylesheet" href="/css/admin/sidebar.css" />
+  <link
+   rel="stylesheet"
+   href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  />
   <style>
    body {
     font-family: "Poppins", sans-serif;
    }
 
-  .sidebar {
-   height: 100vh;
-   position: fixed;
-   top: 0;
-   left: 0;
-   width: 250px;
-   background-color: white;
-   color: #222d31;
-   padding-top: 20px;
-   display: flex;
-   flex-direction: column;
-   justify-content: space-between;
-   z-index: 1000;
-   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Add right shadow */
-  }
+   .sidebar {
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    background-color: white;
+    color: #222d31;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05); /* Add right shadow */
+   }
 
    .sidebar a {
     color: #222d31;
@@ -122,9 +127,9 @@
      ><i class="bi bi-speedometer2"></i> Dashboard</a
     >
     <a href="#inspections"
-     ><i class="bi bi-exclamation-triangle"></i> Inspection</a
+     ><i class="bi bi-exclamation-triangle"></i> Inspections</a
     >
-    <a href="#notifications"><i class="bi bi-bell"></i> Notifications</a>
+    <a href="#reports"><i class="bi bi-file-earmark-text"></i> Reports</a>
     <a href="#profile"><i class="bi bi-person"></i> Profile</a>
    </div>
    <div class="logout">
@@ -139,9 +144,9 @@
    style="margin-left: 250px; padding: 100px 20px 20px 20px"
   ></div>
 
-  <script>
-   // Function to load content and highlight the active link
-   function loadContent(page, element) {
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script type="module">
+   function loadContent(page, element, event) {
     // Prevent default link behavior
     if (event) {
      event.preventDefault();
@@ -177,36 +182,40 @@
      });
    }
 
-   // Define the logout function
-   function logout() {
+   import CONFIG from "/scripts/config.js";
+
+   const apiUrl = CONFIG.API_URL;
+
+   const handleLogout = async () => {
     // Redirect to the authentication page
-    window.location.href = "auth/index.html"; // Navigate to auth/index.html
+    window.location.href = "../auth/index.html";
+    Toastify({
+     text: "Logout successful",
+    }).showToast();
+   };
+
+   function loadPageScript(page) {
+    // Implementation of loadPageScript
    }
 
-   // Attach the logout function to the button click event
-   document.getElementById("logoutButton").onclick = logout;
-
-   // Load the default content on page load
    window.onload = function () {
-    const hash = window.location.hash || "#dashboard"; // Default to dashboard if no hash
-    const page = hash.substring(1) + ".html"; // Get the page name from the hash
-    loadContent(page); // Load the initial content based on the hash
+    const currentPage = localStorage.getItem("currentPage") || "dashboard.html";
+    loadContent(currentPage);
    };
+
+   // Attach the logout function to the button click event
+   document.getElementById("logoutButton").onclick = handleLogout;
 
    // Add event listeners to the links
    document.querySelectorAll(".nav-links a").forEach((link) => {
     link.addEventListener("click", function (event) {
      const page = this.getAttribute("href").substring(1) + ".html"; // Get the page name from the href
-     loadContent(page, this); // Pass the actual event object
+     loadContent(page, this, event); // Pass the actual event object
     });
    });
 
    // Store the current page in local storage
-   localStorage.setItem("currentPage", page);
-
-   // On page load, check local storage
-   const currentPage = localStorage.getItem("currentPage") || "dashboard.html";
-   loadContent(currentPage);
+   localStorage.setItem("currentPage", currentPage);
   </script>
  </body>
 </html>

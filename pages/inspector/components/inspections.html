@@ -446,6 +446,8 @@
 
    // Form submission handling
    const inspectionForm = document.getElementById("inspectionForm");
+   const loadingSpinner = document.getElementById("loadingSpinner");
+
    inspectionForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -536,6 +538,12 @@
      image_url: businessImage ? URL.createObjectURL(businessImage) : null, // Handle image upload if needed
     };
 
+    // Show the loading spinner and disable the form
+    loadingSpinner.style.display = "block";
+    inspectionForm
+     .querySelectorAll("input, select, button")
+     .forEach((el) => (el.disabled = true));
+
     try {
      console.log(formData);
      // Send a POST request to the backend
@@ -569,6 +577,12 @@
     } catch (error) {
      console.error("Error adding inspection:", error);
      // Handle error (e.g., show an error message to the user)
+    } finally {
+     // Hide the loading spinner and re-enable the form
+     loadingSpinner.style.display = "none";
+     inspectionForm
+      .querySelectorAll("input, select, button")
+      .forEach((el) => (el.disabled = false));
     }
    });
 
@@ -597,8 +611,8 @@
     if (!inspectionsData || inspectionsData.length === 0) {
      const noDataRow = document.createElement("tr");
      noDataRow.innerHTML = `
-             <td colspan="6" class="text-center">No inspections found</td>
-         `;
+              <td colspan="6" class="text-center">No inspections found</td>
+          `;
      inspectionsTbody.appendChild(noDataRow);
      return;
     }
@@ -613,16 +627,16 @@
      const actualIndex = startingIndex + index; // Calculate the actual index
 
      row.innerHTML = `
-             <td>${actualIndex}</td>
-             <td>${inspection.business?.business_name || "N/A"}</td>
-             <td>${inspection.business?.status || "N/A"}</td>
-             <td>${formatDate(inspection.inspection_date)}</td>
-             <td>${inspection.type_of_inspection || "N/A"}</td>
-             <td>${inspection.inspector_full_name || "N/A"}</td>
-             <td><span class="badge ${
-              inspection.with_violations ? "bg-danger" : "bg-success"
-             }">${inspection.with_violations ? "Yes" : "No"}</span></td>
-         `;
+              <td>${actualIndex}</td>
+              <td>${inspection.business?.business_name || "N/A"}</td>
+              <td>${inspection.business?.status || "N/A"}</td>
+              <td>${formatDate(inspection.inspection_date)}</td>
+              <td>${inspection.type_of_inspection || "N/A"}</td>
+              <td>${inspection.inspector_full_name || "N/A"}</td>
+              <td><span class="badge ${
+               inspection.with_violations ? "bg-danger" : "bg-success"
+              }">${inspection.with_violations ? "Yes" : "No"}</span></td>
+          `;
 
      row.addEventListener("click", () => showInspectionDetails(inspection));
      inspectionsTbody.appendChild(row);
@@ -648,14 +662,16 @@
      const inspectionDate = document.getElementById("inspection-date").value;
      const violation = document.getElementById("violation").value;
      const searchName = document.getElementById("search-name").value;
-     const inspectorId = localStorage.getItem("inspectorId"); // Assuming you store inspector ID in localStorage
+     const inspectorId = localStorage.getItem("inspectorId");
+     const sortOrder = document.getElementById("sort-order").value; // Get the selected sort order
 
      const params = new URLSearchParams({
       page: page,
       ...(inspectionDate && { inspection_date: inspectionDate }),
-      ...(violation && { with_violations: violation }), // Send 'yes' or 'no'
+      ...(violation && { with_violations: violation }),
       ...(searchName && { business_name: searchName }),
-      ...(inspectorId && { inspector_id: inspectorId }), // Include inspector ID if available
+      ...(inspectorId && { inspector_id: inspectorId }),
+      ...(sortOrder && { sort_order: sortOrder }), // Include sort order
      });
 
      const response = await fetch(
@@ -675,10 +691,10 @@
      }
 
      const data = await response.json();
-     inspectionsData = data.inspections.data || []; // Adjust based on the response structure
+     inspectionsData = data.inspections.data || [];
      totalPages = data.inspections.last_page || 1;
-     currentPage = data.inspections.current_page || 1; // Update currentPage from response
-     recordsPerPage = data.inspections.per_page || 15; // Adjust based on backend pagination
+     currentPage = data.inspections.current_page || 1;
+     recordsPerPage = data.inspections.per_page || 15;
 
      renderTable(); // Call to render the table with the fetched data
     } catch (error) {
@@ -695,7 +711,12 @@
    };
 
    const setupFilterListeners = () => {
-    const filterElements = ["inspection-date", "violation", "search-name"];
+    const filterElements = [
+     "inspection-date",
+     "violation",
+     "search-name",
+     "sort-order",
+    ];
 
     filterElements.forEach((elementId) => {
      const element = document.getElementById(elementId);
@@ -728,10 +749,10 @@
     const prevPageButton = document.createElement("li");
     prevPageButton.classList.add("page-item");
     prevPageButton.innerHTML = `
-         <a class="page-link" href="#" aria-label="Previous">
-             <span aria-hidden="true">&laquo;</span>
-         </a>
-     `;
+          <a class="page-link" href="#" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+          </a>
+      `;
     prevPageButton.addEventListener("click", (e) => {
      e.preventDefault();
      if (currentPage > 1) changePage(currentPage - 1);
@@ -754,10 +775,10 @@
     const nextPageButton = document.createElement("li");
     nextPageButton.classList.add("page-item");
     nextPageButton.innerHTML = `
-         <a class="page-link" href="#" aria-label="Next">
-             <span aria-hidden="true">&raquo;</span>
-         </a>
-     `;
+          <a class="page-link" href="#" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+          </a>
+      `;
     nextPageButton.addEventListener("click", (e) => {
      e.preventDefault();
      if (currentPage < totalPages) changePage(currentPage + 1);
@@ -841,6 +862,13 @@
          class="form-control"
          placeholder="Search by name"
         />
+       </div>
+       <div class="col-md-3">
+        <label for="sort-order" class="form-label">Sort by Date</label>
+        <select id="sort-order" class="form-select">
+         <option value="latest">Latest to Oldest</option>
+         <option value="oldest">Oldest to Latest</option>
+        </select>
        </div>
       </div>
      </form>
