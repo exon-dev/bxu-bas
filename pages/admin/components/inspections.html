@@ -411,24 +411,55 @@
 
      // Create new modal with the data
      const modalContent = `
-            <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="inspectionDetailModalLabel" aria-hidden="true">
+            <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content border-0 shadow">
-                        <div class="modal-header border-bottom-0 bg-light">
+                    <div class="modal-content border-0 shadow-lg">
+                        <!-- Header -->
+                        <div class="modal-header border-bottom-0 bg-primary bg-gradient text-white">
                             <h5 class="modal-title fw-bold" id="inspectionDetailModalLabel">
                                 <i class="bi bi-clipboard2-check me-2"></i>Inspection Details
                             </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+                        
                         <div class="modal-body p-4">
+                            <!-- Business Image Section -->
+                            <div class="text-center mb-4">
+                                ${
+                                 inspection.business?.image_url
+                                  ? `
+                                        <div class="position-relative d-inline-block">
+                                            <img src="${
+                                             inspection.business.image_url
+                                            }" 
+                                                 alt="Business Image" 
+                                                 class="rounded-3 shadow-sm" 
+                                                 style="max-height: 200px; width: auto; object-fit: cover;">
+                                            <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
+                                                <small>${
+                                                 inspection.business
+                                                  .business_name ||
+                                                 "Business Image"
+                                                }</small>
+                                            </div>
+                                        </div>`
+                                  : `
+                                        <div class="text-center p-4 bg-light rounded-3">
+                                            <i class="bi bi-building-x display-1 text-muted"></i>
+                                            <p class="text-muted mt-2">No business image available</p>
+                                        </div>`
+                                }
+                            </div>
+
                             <div class="row g-4">
-                                <!-- Business Information Card -->
+                                <!-- Business Information -->
                                 <div class="col-md-6">
-                                    <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card h-100 border-0 shadow-sm hover-shadow">
                                         <div class="card-body">
-                                            <h6 class="card-title fw-bold mb-3">
-                                                <i class="bi bi-building me-2"></i>Business Information
-                                            </h6>
+                                            <div class="d-flex align-items-center mb-3">
+                                                <i class="bi bi-building fs-4 text-primary me-2"></i>
+                                                <h6 class="card-title fw-bold mb-0">Business Information</h6>
+                                            </div>
                                             <div class="mb-3">
                                                 <label class="text-muted small">Business Name</label>
                                                 <p class="fw-semibold mb-2">${
@@ -443,41 +474,57 @@
                                                   ?.business_permit || "N/A"
                                                 }</p>
                                             </div>
-                                            <div class="mb-3">
+                                            <div>
                                                 <label class="text-muted small">Status</label>
-                                                <p class="mb-0"><span class="badge bg-success">${
-                                                 inspection.business?.status ||
-                                                 "N/A"
-                                                }</span></p>
+                                                <p class="mb-0">
+                                                    <span class="badge bg-${
+                                                     inspection.business
+                                                      ?.status === "Active"
+                                                      ? "success"
+                                                      : "warning"
+                                                    } rounded-pill">
+                                                        ${
+                                                         inspection.business
+                                                          ?.status || "N/A"
+                                                        }
+                                                    </span>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Owner Information Card -->
+                                <!-- Owner Information -->
                                 <div class="col-md-6">
-                                    <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card h-100 border-0 shadow-sm hover-shadow">
                                         <div class="card-body">
-                                            <h6 class="card-title fw-bold mb-3">
-                                                <i class="bi bi-person me-2"></i>Owner Information
-                                            </h6>
-                                            <div class="mb-3">
-                                                <label class="text-muted small">Owner Name</label>
-                                                <p class="fw-semibold mb-2">${
-                                                 inspection.business?.owner
-                                                  ? `${inspection.business.owner.first_name} ${inspection.business.owner.last_name}`
-                                                  : "N/A"
-                                                }</p>
+                                            <div class="d-flex align-items-center mb-3">
+                                                <i class="bi bi-person fs-4 text-primary me-2"></i>
+                                                <h6 class="card-title fw-bold mb-0">Owner Information</h6>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="text-muted small">Email</label>
+                                                <label class="text-muted small">Owner Name</label>
+                                                <p class="fw-semibold mb-2">
+                                                    ${
+                                                     inspection.business?.owner
+                                                      ? `${inspection.business.owner.first_name} ${inspection.business.owner.last_name}`
+                                                      : "N/A"
+                                                    }
+                                                </p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">
+                                                    <i class="bi bi-envelope-fill me-1"></i>Email
+                                                </label>
                                                 <p class="fw-semibold mb-2">${
                                                  inspection.business?.owner
                                                   ?.email || "N/A"
                                                 }</p>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="text-muted small">Phone</label>
+                                            <div>
+                                                <label class="text-muted small">
+                                                    <i class="bi bi-telephone-fill me-1"></i>Phone
+                                                </label>
                                                 <p class="fw-semibold mb-0">${
                                                  inspection.business?.owner
                                                   ?.phone_number || "N/A"
@@ -487,66 +534,43 @@
                                     </div>
                                 </div>
 
-                                <!-- Inspection Details Card -->
-                                <div class="col-md-6">
-                                    <div class="card h-100 border-0 shadow-sm">
+                                <!-- Inspection Details -->
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm hover-shadow">
                                         <div class="card-body">
-                                            <h6 class="card-title fw-bold mb-3">
-                                                <i class="bi bi-clipboard-data me-2"></i>Inspection Details
-                                            </h6>
-                                            <div class="mb-3">
-                                                <label class="text-muted small">Inspection Date</label>
-                                                <p class="fw-semibold mb-2">${formatDate(
-                                                 inspection.inspection_date
-                                                )}</p>
+                                            <div class="d-flex align-items-center mb-3">
+                                                <i class="bi bi-clipboard-data fs-4 text-primary me-2"></i>
+                                                <h6 class="card-title fw-bold mb-0">Inspection Details</h6>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="text-muted small">Type</label>
-                                                <p class="fw-semibold mb-2">${
-                                                 inspection.type_of_inspection
-                                                }</p>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="text-muted small">Violations</label>
-                                                <p class="mb-0">
-                                                    <span class="badge ${
-                                                     inspection.with_violations
-                                                      ? "bg-danger"
-                                                      : "bg-success"
-                                                    }">
-                                                        ${
+                                            <div class="row">
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="text-muted small">Inspection Date</label>
+                                                    <p class="fw-semibold mb-0">${formatDate(
+                                                     inspection.inspection_date
+                                                    )}</p>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="text-muted small">Inspector</label>
+                                                    <p class="fw-semibold mb-0">${
+                                                     inspection.inspector_full_name
+                                                    }</p>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="text-muted small">Violations</label>
+                                                    <p class="mb-0">
+                                                        <span class="badge ${
                                                          inspection.with_violations
-                                                          ? "Yes"
-                                                          : "No"
-                                                        }
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Inspector & Image Card -->
-                                <div class="col-md-6">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-body">
-                                            <h6 class="card-title fw-bold mb-3">
-                                                <i class="bi bi-person-badge me-2"></i>Inspector & Image
-                                            </h6>
-                                            <div class="mb-3">
-                                                <label class="text-muted small">Inspector Name</label>
-                                                <p class="fw-semibold mb-3">${
-                                                 inspection.inspector_full_name
-                                                }</p>
-                                            </div>
-                                            <div>
-                                                <label class="text-muted small">Business Image</label>
-                                                ${
-                                                 inspection.business?.image_url
-                                                  ? `<img src="${inspection.business.image_url}" alt="Business Image" 
-                                                        class="img-fluid rounded shadow-sm mt-2" style="max-height: 150px; object-fit: cover;">`
-                                                  : '<p class="text-muted mt-2">No image available</p>'
-                                                }
+                                                          ? "bg-danger"
+                                                          : "bg-success"
+                                                        } rounded-pill">
+                                                            ${
+                                                             inspection.with_violations
+                                                              ? "Yes"
+                                                              : "No"
+                                                            }
+                                                        </span>
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

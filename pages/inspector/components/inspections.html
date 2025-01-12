@@ -25,6 +25,32 @@
    -webkit-transition: all 0.3s ease-in-out;
    transition: all 0.3s ease-in-out;
   }
+
+  .hover-shadow {
+   transition: all 0.3s ease;
+  }
+
+  .hover-shadow:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .inspection-row {
+   cursor: pointer;
+   transition: background-color 0.2s ease;
+  }
+
+  .inspection-row:hover {
+   background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .modal-content {
+   border-radius: 0.5rem;
+  }
+
+  .modal-header {
+   border-radius: 0.5rem 0.5rem 0 0;
+  }
  </style>
  <body>
   <div class="card">
@@ -602,47 +628,45 @@
 
    const renderTable = () => {
     const inspectionsTbody = document.getElementById("inspections-tbody");
-    inspectionsTbody.innerHTML = ""; // Clear existing rows
+    inspectionsTbody.innerHTML = "";
 
-    // Log the inspectionsData to see what is being rendered
-    console.log("Rendering Inspections Data: ", inspectionsData);
-
-    // Check if inspectionsData is empty
     if (!inspectionsData || inspectionsData.length === 0) {
      const noDataRow = document.createElement("tr");
      noDataRow.innerHTML = `
-              <td colspan="6" class="text-center">No inspections found</td>
-          `;
+            <td colspan="6" class="text-center">No inspections found</td>
+        `;
      inspectionsTbody.appendChild(noDataRow);
      return;
     }
 
-    // Calculate the starting index for the current page
-    const startingIndex = (currentPage - 1) * recordsPerPage + 1;
-
-    // Iterate over inspectionsData to create table rows
     inspectionsData.forEach((inspection, index) => {
      const row = document.createElement("tr");
+     row.className = "inspection-row";
      row.style.cursor = "pointer";
-     const actualIndex = startingIndex + index; // Calculate the actual index
+     const actualIndex = (currentPage - 1) * recordsPerPage + index + 1;
 
      row.innerHTML = `
-              <td>${actualIndex}</td>
-              <td>${inspection.business?.business_name || "N/A"}</td>
-              <td>${inspection.business?.status || "N/A"}</td>
-              <td>${formatDate(inspection.inspection_date)}</td>
-              <td>${inspection.type_of_inspection || "N/A"}</td>
-              <td>${inspection.inspector_full_name || "N/A"}</td>
-              <td><span class="badge ${
-               inspection.with_violations ? "bg-danger" : "bg-success"
-              }">${inspection.with_violations ? "Yes" : "No"}</span></td>
-          `;
+            <td>${actualIndex}</td>
+            <td>${inspection.business?.business_name || "N/A"}</td>
+            <td>${inspection.business?.status || "N/A"}</td>
+            <td>${formatDate(inspection.inspection_date)}</td>
+            <td>${inspection.type_of_inspection || "N/A"}</td>
+            <td>
+                <span class="badge ${
+                 inspection.with_violations ? "bg-danger" : "bg-success"
+                }">
+                    ${inspection.with_violations ? "Yes" : "No"}
+                </span>
+            </td>
+        `;
 
+     // Add click event listener to show inspection details
      row.addEventListener("click", () => showInspectionDetails(inspection));
+
      inspectionsTbody.appendChild(row);
     });
 
-    renderPagination(); // Call to render pagination if needed
+    renderPagination();
    };
 
    const fetchInspections = async (page = currentPage) => {
@@ -796,36 +820,210 @@
    setupFilterListeners();
    fetchInspections();
 
+   // Function to show inspection details in the modal
    const showInspectionDetails = (inspection) => {
-    try {
-     const modalBusinessName = document.getElementById("modalBusinessName");
-     const modalInspectionDate = document.getElementById("modalInspectionDate");
-     const modalInspectionType = document.getElementById("modalInspectionType");
-     const modalWithViolations = document.getElementById("modalWithViolations");
-     const modalBusinessImage = document.getElementById("modalBusinessImage");
-
-     if (modalBusinessName)
-      modalBusinessName.textContent =
-       inspection.business?.business_name || "N/A";
-     if (modalInspectionDate)
-      modalInspectionDate.textContent = formatDate(inspection.inspection_date);
-     if (modalInspectionType)
-      modalInspectionType.textContent = inspection.type_of_inspection || "N/A";
-     if (modalWithViolations)
-      modalWithViolations.textContent = inspection.with_violations
-       ? "Yes"
-       : "No";
-     if (modalBusinessImage)
-      modalBusinessImage.src = inspection.business?.image_url || "";
-
-     const modal = new bootstrap.Modal(
-      document.getElementById("inspectionDetailModal")
-     );
-     modal.show();
-    } catch (error) {
-     console.error("Error showing inspection details:", error);
+    // Remove existing modal if present
+    const existingModal = document.getElementById("inspectionDetailModal");
+    if (existingModal) {
+     existingModal.remove();
     }
+
+    // Create modal HTML
+    const modalContent = `
+        <div class="modal fade" id="inspectionDetailModal" tabindex="-1" aria-labelledby="inspectionDetailModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header border-bottom-0 bg-primary bg-gradient text-white">
+                        <h5 class="modal-title fw-bold" id="inspectionDetailModalLabel">
+                            <i class="bi bi-clipboard2-check me-2"></i>Inspection Details
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <!-- Business Image Section -->
+                        <div class="text-center mb-4">
+                            ${
+                             inspection.business?.image_url
+                              ? `
+                                    <div class="position-relative d-inline-block">
+                                        <img src="${
+                                         inspection.business.image_url
+                                        }" 
+                                             alt="Business Image" 
+                                             class="rounded-3 shadow-sm" 
+                                             style="max-height: 200px; width: auto; object-fit: cover;">
+                                        <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
+                                            <small>${
+                                             inspection.business
+                                              .business_name || "Business Image"
+                                            }</small>
+                                        </div>
+                                    </div>`
+                              : `
+                                    <div class="text-center p-4 bg-light rounded-3">
+                                        <i class="bi bi-building-x display-1 text-muted"></i>
+                                        <p class="text-muted mt-2">No business image available</p>
+                                    </div>`
+                            }
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Business Information -->
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-building fs-4 text-primary me-2"></i>
+                                            <h6 class="card-title fw-bold mb-0">Business Information</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Business Name</label>
+                                            <p class="fw-semibold mb-2">${
+                                             inspection.business
+                                              ?.business_name || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Business Permit</label>
+                                            <p class="fw-semibold mb-2">${
+                                             inspection.business
+                                              ?.business_permit || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-muted small">Status</label>
+                                            <p class="mb-0">
+                                                <span class="badge bg-${
+                                                 inspection.business?.status ===
+                                                 "Active"
+                                                  ? "success"
+                                                  : "warning"
+                                                } rounded-pill">
+                                                    ${
+                                                     inspection.business
+                                                      ?.status || "N/A"
+                                                    }
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Owner Information -->
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-person fs-4 text-primary me-2"></i>
+                                            <h6 class="card-title fw-bold mb-0">Owner Information</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Owner Name</label>
+                                            <p class="fw-semibold mb-2">
+                                                ${
+                                                 inspection.business?.owner
+                                                  ? `${inspection.business.owner.first_name} ${inspection.business.owner.last_name}`
+                                                  : "N/A"
+                                                }
+                                            </p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">
+                                                <i class="bi bi-envelope-fill me-1"></i>Email
+                                            </label>
+                                            <p class="fw-semibold mb-2">${
+                                             inspection.business?.owner
+                                              ?.email || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-muted small">
+                                                <i class="bi bi-telephone-fill me-1"></i>Phone
+                                            </label>
+                                            <p class="fw-semibold mb-0">${
+                                             inspection.business?.owner
+                                              ?.phone_number || "N/A"
+                                            }</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Inspection Details -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm hover-shadow">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-clipboard-data fs-4 text-primary me-2"></i>
+                                            <h6 class="card-title fw-bold mb-0">Inspection Details</h6>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="text-muted small">Inspection Date</label>
+                                                <p class="fw-semibold mb-0">${formatDate(
+                                                 inspection.inspection_date
+                                                )}</p>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="text-muted small">Inspector</label>
+                                                <p class="fw-semibold mb-0">${
+                                                 inspection.inspector_full_name
+                                                }</p>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="text-muted small">Violations</label>
+                                                <p class="mb-0">
+                                                    <span class="badge ${
+                                                     inspection.with_violations
+                                                      ? "bg-danger"
+                                                      : "bg-success"
+                                                    } rounded-pill">
+                                                        ${
+                                                         inspection.with_violations
+                                                          ? "Yes"
+                                                          : "No"
+                                                        }
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add modal to document
+    document.body.insertAdjacentHTML("beforeend", modalContent);
+
+    // Show the modal
+    const modalElement = document.getElementById("inspectionDetailModal");
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
    };
+
+   // Example: Add event listeners to inspection rows or buttons
+   document.querySelectorAll(".inspection-row").forEach((row) => {
+    row.addEventListener("click", () => {
+     const inspectionId = row.dataset.inspectionId;
+     // Fetch the inspection data using the ID
+     const inspection = getInspectionById(inspectionId); // Implement this function to fetch data
+     showInspectionDetails(inspection);
+    });
+   });
+
+   // Function to fetch inspection data by ID (example implementation)
+   function getInspectionById(id) {
+    // This is a placeholder function. Replace with actual data fetching logic.
+    return inspectionsData.find((inspection) => inspection.id === id);
+   }
+
+   // Other existing code...
   </script>
  </body>
 </html>
