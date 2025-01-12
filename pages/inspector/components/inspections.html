@@ -848,9 +848,9 @@
                                     <div class="position-relative d-inline-block">
                                         <img src="${
                                          inspection.business.image_url
-                                        }" 
-                                             alt="Business Image" 
-                                             class="rounded-3 shadow-sm" 
+                                        }"
+                                             alt="Business Image"
+                                             class="rounded-3 shadow-sm"
                                              style="max-height: 200px; width: auto; object-fit: cover;">
                                         <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
                                             <small>${
@@ -968,7 +968,10 @@
                                             <div class="col-md-4 mb-3">
                                                 <label class="text-muted small">Inspector</label>
                                                 <p class="fw-semibold mb-0">${
-                                                 inspection.inspector_full_name
+                                                 inspection.inspector
+                                                  .first_name +
+                                                 " " +
+                                                 inspection.inspector.last_name
                                                 }</p>
                                             </div>
                                             <div class="col-md-4 mb-3">

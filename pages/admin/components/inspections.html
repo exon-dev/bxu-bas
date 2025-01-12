@@ -202,7 +202,9 @@
             <td>${actualIndex}</td>
             <td>${inspection.business?.business_name || "N/A"}</td>
             <td>${inspection.business?.status || "N/A"}</td>
-            <td>${inspection.inspector_full_name || "N/A"}</td>
+            <td>${inspection.inspector?.first_name || "N/A"} ${
+      inspection.inspector?.last_name || "N/A"
+     }</td>
             <td>${formatDate(inspection.inspection_date)}</td>
             <td>${inspection.type_of_inspection || "N/A"}</td>
             <td><span class="badge ${
@@ -410,6 +412,22 @@
      }
 
      // Create new modal with the data
+     const violationsList = inspection.violations
+      .map(
+       (violation) => `
+        <li>
+            <strong>${violation.nature_of_violation}</strong> - Receipt No: ${
+        violation.violation_receipt_no
+       }, 
+            Date: ${formatDate(violation.violation_date)}, Due: ${formatDate(
+        violation.due_date
+       )}, 
+            Status: ${violation.status}
+        </li>
+    `
+      )
+      .join("");
+
      const modalContent = `
             <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -552,7 +570,11 @@
                                                 <div class="col-md-4 mb-3">
                                                     <label class="text-muted small">Inspector</label>
                                                     <p class="fw-semibold mb-0">${
-                                                     inspection.inspector_full_name
+                                                     inspection.inspector
+                                                      .first_name +
+                                                     " " +
+                                                     inspection.inspector
+                                                      .last_name
                                                     }</p>
                                                 </div>
                                                 <div class="col-md-4 mb-3">
@@ -574,6 +596,14 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6>Violations</h6>
+                                    <ul>${
+                                     violationsList ||
+                                     "<li>No violations found</li>"
+                                    }</ul>
                                 </div>
                             </div>
                         </div>
