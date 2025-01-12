@@ -108,15 +108,11 @@
          </select>
         </div>
         <div class="col-md-3">
-         <label for="search-name" class="form-label"
-          >Search by Business Name</label
-         >
-         <input
-          type="text"
-          id="search-name"
-          class="form-control"
-          placeholder="Search by name"
-         />
+         <label for="sort-order" class="form-label">Sort by Date</label>
+         <select id="sort-order" class="form-select">
+          <option value="latest">Latest to Oldest</option>
+          <option value="oldest">Oldest to Latest</option>
+         </select>
         </div>
        </div>
       </form>
@@ -294,14 +290,14 @@
      const inspectionDate = document.getElementById("inspection-date").value;
      const violation = document.getElementById("violation").value;
      const inspector = document.getElementById("inspector").value;
-     const searchName = document.getElementById("search-name").value;
+     const sortOrder = document.getElementById("sort-order").value;
 
      const params = new URLSearchParams({
       page: page,
       ...(inspectionDate && { inspection_date: inspectionDate }),
       ...(violation && { with_violations: violation }),
       ...(inspector && { inspector_id: inspector }),
-      ...(searchName && { business_name: searchName }),
+      ...(sortOrder && { sort_order: sortOrder }),
      });
 
      const response = await fetch(
@@ -376,27 +372,29 @@
      "inspection-date",
      "violation",
      "inspector",
-     "search-name",
+     "sort-order",
     ];
 
     filterElements.forEach((elementId) => {
      const element = document.getElementById(elementId);
-     element.addEventListener("change", () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-       currentPage = 1;
-       fetchInspections(currentPage);
-      }, 300);
-     });
-
-     if (element.type === "text" || element.type === "date") {
-      element.addEventListener("input", () => {
+     if (element) {
+      element.addEventListener("change", () => {
        clearTimeout(timeoutId);
        timeoutId = setTimeout(() => {
         currentPage = 1;
         fetchInspections(currentPage);
        }, 300);
       });
+
+      if (element.type === "text" || element.type === "date") {
+       element.addEventListener("input", () => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+         currentPage = 1;
+         fetchInspections(currentPage);
+        }, 300);
+       });
+      }
      }
     });
    };
