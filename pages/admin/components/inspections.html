@@ -86,30 +86,39 @@
      <h4>Filter & Search</h4>
      <div class="filters">
       <form id="filters-form">
-       <div class="row">
-        <div class="col-md-3">
-         <label for="inspection-date" class="form-label"
-          >Filter by Inspection Date</label
-         >
-         <input type="date" id="inspection-date" class="form-control" />
+       <div class="row g-2 align-items-end">
+        <div class="col-auto">
+         <label for="business-name" class="form-label h6">Business Name</label>
+         <input
+          type="text"
+          id="business-name"
+          class="form-control h6"
+          placeholder="Enter business name"
+         />
         </div>
-        <div class="col-md-3">
-         <label for="violation" class="form-label">Filter by Violation</label>
-         <select id="violation" class="form-select">
-          <option value="">Select Violation</option>
+        <div class="col-auto">
+         <label for="inspection-date" class="form-label h6"
+          >Inspection Date</label
+         >
+         <input type="date" id="inspection-date" class="form-control h6" />
+        </div>
+        <div class="col-auto">
+         <label for="violation" class="form-label h6">Violation</label>
+         <select id="violation" class="form-select h6">
+          <option value="">Select</option>
           <option value="yes">Yes</option>
           <option value="no">No</option>
          </select>
         </div>
-        <div class="col-md-3">
-         <label for="inspector" class="form-label">Filter by Inspector</label>
-         <select id="inspector" class="form-select">
-          <!-- Inspector options will be dynamically added here -->
+        <div class="col-auto">
+         <label for="inspector" class="form-label h6">Inspector</label>
+         <select id="inspector" class="form-select h6">
+          <!-- Inspector options dynamically added here -->
          </select>
         </div>
-        <div class="col-md-3">
-         <label for="sort-order" class="form-label">Sort by Date</label>
-         <select id="sort-order" class="form-select">
+        <div class="col-auto">
+         <label for="sort-order" class="form-label h6">Sort by Date</label>
+         <select id="sort-order" class="form-select h6">
           <option value="latest">Latest to Oldest</option>
           <option value="oldest">Oldest to Latest</option>
          </select>
@@ -287,6 +296,7 @@
             </tr>
         `;
 
+     const businessName = document.getElementById("business-name").value;
      const inspectionDate = document.getElementById("inspection-date").value;
      const violation = document.getElementById("violation").value;
      const inspector = document.getElementById("inspector").value;
@@ -294,10 +304,11 @@
 
      const params = new URLSearchParams({
       page: page,
+      ...(businessName && { business_name: businessName }),
       ...(inspectionDate && { inspection_date: inspectionDate }),
       ...(violation && { with_violations: violation }),
       ...(inspector && { inspector_id: inspector }),
-      ...(sortOrder && { sort_order: sortOrder }),
+      sort_order: sortOrder === "latest" ? "desc" : "asc",
      });
 
      const response = await fetch(
@@ -369,6 +380,7 @@
 
    const setupFilterListeners = () => {
     const filterElements = [
+     "business-name",
      "inspection-date",
      "violation",
      "inspector",
@@ -410,21 +422,81 @@
      }
 
      // Create new modal with the data
-     const violationsList = inspection.violations
+     const violationsList = [...new Set(inspection.violations)]
       .map(
        (violation) => `
-        <li>
-            <strong>${violation.nature_of_violation}</strong> - Receipt No: ${
-        violation.violation_receipt_no
-       }, 
-            Date: ${formatDate(violation.violation_date)}, Due: ${formatDate(
-        violation.due_date
-       )}, 
-            Status: ${violation.status}
-        </li>
+        <div class="violation-item mb-3 p-3 bg-light rounded-3 border-start border-4 border-danger shadow-sm">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="violation-main">
+                    <h6 class="fw-bold text-danger mb-2">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        ${violation.nature_of_violation}
+                    </h6>
+                    <div class="violation-details">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <small class="text-muted d-block">Receipt No.</small>
+                                    <span class="fw-semibold">${
+                                     violation.violation_receipt_no
+                                    }</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <small class="text-muted d-block">Violation Date</small>
+                                    <span class="fw-semibold">${formatDate(
+                                     violation.violation_date
+                                    )}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <small class="text-muted d-block">Due Date</small>
+                                    <span class="fw-semibold">${formatDate(
+                                     violation.due_date
+                                    )}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ms-3">
+                    <span class="badge ${
+                     violation.status.toLowerCase() === "pending"
+                      ? "bg-warning"
+                      : violation.status.toLowerCase() === "paid"
+                      ? "bg-success"
+                      : violation.status.toLowerCase() === "overdue"
+                      ? "bg-danger"
+                      : "bg-secondary"
+                    } rounded-pill px-3 py-2">
+                        ${violation.status}
+                    </span>
+                </div>
+            </div>
+        </div>
     `
       )
       .join("");
+
+     const violationsContainer = `
+        <div class="violations-section mt-4">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-clipboard-x fs-4 text-danger me-2"></i>
+                <h6 class="fw-bold mb-0">Violations Found</h6>
+            </div>
+            ${
+             violationsList ||
+             `
+                <div class="text-center p-4 bg-light rounded-3">
+                    <i class="bi bi-check-circle text-success display-4"></i>
+                    <p class="text-muted mt-2">No violations found</p>
+                </div>
+            `
+            }
+        </div>
+    `;
 
      const modalContent = `
             <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
@@ -596,13 +668,7 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <h6>Violations</h6>
-                                    <ul>${
-                                     violationsList ||
-                                     "<li>No violations found</li>"
-                                    }</ul>
-                                </div>
+                                ${violationsContainer}
                             </div>
                         </div>
                     </div>
