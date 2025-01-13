@@ -714,17 +714,17 @@
      );
      detailedModal.show();
 
-     // Add event listener for modal closing
-     document
-      .getElementById("inspectionDetailModal")
-      .addEventListener("hidden.bs.modal", function () {
-       this.remove();
-       const backdrops = document.getElementsByClassName("modal-backdrop");
-       while (backdrops.length > 0) {
-        backdrops[0].remove();
-       }
-       document.body.classList.remove("modal-open");
-      });
+     // Clean up modal and backdrop on close
+     detailedModal._element.addEventListener("hidden.bs.modal", function () {
+      this.remove();
+      const backdrops = document.getElementsByClassName("modal-backdrop");
+      while (backdrops.length > 0) {
+       backdrops[0].remove();
+      }
+      // Restore body overflow
+      document.body.style.overflow = ""; // Reset overflow style
+      document.body.classList.remove("modal-open"); // Ensure body overflow is restored
+     });
     } catch (error) {
      console.error("Error showing inspection details:", error);
      // Clean up any existing modals and backdrops before showing error

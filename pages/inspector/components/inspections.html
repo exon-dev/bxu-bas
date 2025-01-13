@@ -74,6 +74,11 @@
    font-weight: 500;
    letter-spacing: 0.5px;
   }
+
+  .modal-body {
+   max-height: 70vh;
+   overflow-y: auto;
+  }
  </style>
  <body>
   <div class="card">
@@ -110,7 +115,7 @@
        aria-label="Close"
       ></button>
      </div>
-     <div class="modal-body" style="max-height: 500px; overflow-y: auto">
+     <div class="modal-body" style="max-height: 500px">
       <form id="inspectionForm">
        <!-- Owner's Information -->
        <div class="row mb-2">
@@ -404,181 +409,101 @@
   <div
    class="modal fade"
    id="inspectionDetailModal"
-   data-bs-backdrop="static"
-   data-bs-keyboard="false"
    tabindex="-1"
    aria-labelledby="inspectionDetailModalLabel"
    aria-hidden="true"
   >
    <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg">
-     <div
-      class="modal-header border-bottom-0 bg-primary bg-gradient text-white"
-     >
-      <h5 class="modal-title fw-bold" id="inspectionDetailModalLabel">
-       <i class="bi bi-clipboard2-check me-2"></i>Inspection Details
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="inspectionDetailModalLabel">
+       Inspection Details
       </h5>
       <button
        type="button"
-       class="btn-close btn-close-white"
+       class="btn-close"
        data-bs-dismiss="modal"
        aria-label="Close"
       ></button>
      </div>
-     <div class="modal-body p-4">
-      <!-- Business Image Section -->
-      <div class="text-center mb-4">
-       <div class="position-relative d-inline-block">
-        <img
-         src="https://example.com/business-image.jpg"
-         alt="Business Image"
-         class="rounded-3 shadow-sm"
-         style="max-height: 200px; width: auto; object-fit: cover"
-        />
-        <div
-         class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100"
-        >
-         <small>Business Name</small>
-        </div>
-       </div>
-      </div>
-
-      <div class="row g-4">
-       <!-- Business Information -->
-       <div class="col-md-6">
-        <div class="card h-100 border-0 shadow-sm hover-shadow">
-         <div class="card-body">
-          <div class="d-flex align-items-center mb-3">
-           <i class="bi bi-building fs-4 text-primary me-2"></i>
-           <h6 class="card-title fw-bold mb-0">Business Information</h6>
-          </div>
-          <div class="mb-3">
-           <label class="text-muted small">Business Name</label>
-           <p class="fw-semibold mb-2">Business Name</p>
-          </div>
-          <div class="mb-3">
-           <label class="text-muted small">Business Permit</label>
-           <p class="fw-semibold mb-2">Business Permit</p>
-          </div>
-          <div>
-           <label class="text-muted small">Status</label>
-           <p class="mb-0">
-            <span class="badge bg-success rounded-pill">Active</span>
-           </p>
-          </div>
-         </div>
-        </div>
-       </div>
-
-       <!-- Owner Information -->
-       <div class="col-md-6">
-        <div class="card h-100 border-0 shadow-sm hover-shadow">
-         <div class="card-body">
-          <div class="d-flex align-items-center mb-3">
-           <i class="bi bi-person fs-4 text-primary me-2"></i>
-           <h6 class="card-title fw-bold mb-0">Owner Information</h6>
-          </div>
-          <div class="mb-3">
-           <label class="text-muted small">Owner Name</label>
-           <p class="fw-semibold mb-2">Owner Name</p>
-          </div>
-          <div class="mb-3">
-           <label class="text-muted small">
-            <i class="bi bi-envelope-fill me-1"></i>Email
-           </label>
-           <p class="fw-semibold mb-2">owner@example.com</p>
-          </div>
-          <div>
-           <label class="text-muted small">
-            <i class="bi bi-telephone-fill me-1"></i>Phone
-           </label>
-           <p class="fw-semibold mb-0">123-456-7890</p>
-          </div>
-         </div>
-        </div>
-       </div>
-
-       <!-- Inspection Details -->
-       <div class="col-12">
-        <div class="card border-0 shadow-sm hover-shadow">
-         <div class="card-body">
-          <div class="d-flex align-items-center mb-3">
-           <i class="bi bi-clipboard-data fs-4 text-primary me-2"></i>
-           <h6 class="card-title fw-bold mb-0">Inspection Details</h6>
-          </div>
-          <div class="row">
-           <div class="col-md-4 mb-3">
-            <label class="text-muted small">Inspection Date</label>
-            <p class="fw-semibold mb-0">2023-01-01</p>
-           </div>
-           <div class="col-md-4 mb-3">
-            <label class="text-muted small">Type of Inspection</label>
-            <p class="fw-semibold mb-0">Regular</p>
-           </div>
-           <div class="col-md-4 mb-3">
-            <label class="text-muted small">Violations</label>
-            <p class="mb-0">
-             <span class="badge bg-danger rounded-pill">Yes</span>
-            </p>
-           </div>
-          </div>
-         </div>
-        </div>
-       </div>
-
-       <!-- Violations Section -->
-       <div class="col-12">
-        <div class="violations-section mt-4">
-         <div class="d-flex align-items-center mb-3">
-          <i class="bi bi-clipboard-x fs-4 text-danger me-2"></i>
-          <h6 class="fw-bold mb-0">Violations Found</h6>
-         </div>
-         <div
-          class="violation-item mb-3 p-3 bg-light rounded-3 border-start border-4 border-danger shadow-sm"
-         >
-          <div class="d-flex justify-content-between align-items-start">
-           <div class="violation-main">
-            <h6 class="fw-bold text-danger mb-2">
-             <i class="bi bi-exclamation-triangle-fill me-2"></i>
-             NO MAYOR'S PERMIT
-            </h6>
-            <div class="violation-details">
-             <div class="row g-3">
-              <div class="col-md-4">
-               <div class="detail-item">
-                <small class="text-muted d-block">Receipt No.</small>
-                <span class="fw-semibold">123456</span>
-               </div>
-              </div>
-              <div class="col-md-4">
-               <div class="detail-item">
-                <small class="text-muted d-block">Violation Date</small>
-                <span class="fw-semibold">2023-01-01</span>
-               </div>
-              </div>
-              <div class="col-md-4">
-               <div class="detail-item">
-                <small class="text-muted d-block">Due Date</small>
-                <span class="fw-semibold">2023-01-15</span>
-               </div>
-              </div>
-             </div>
-            </div>
-           </div>
-           <div class="ms-3">
-            <span class="badge bg-warning rounded-pill px-3 py-2">
-             Pending
-            </span>
-           </div>
-          </div>
-         </div>
-        </div>
-       </div>
-      </div>
+     <div class="modal-body" style="max-height: 70vh; overflow-y: auto">
+      <!-- Your modal content goes here -->
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+       Close
+      </button>
      </div>
     </div>
    </div>
   </div>
+  <section class="card mt-3">
+   <div class="card-body">
+    <h4>Inspected Businesses</h4>
+    <section class="card mt-3">
+     <div class="card-body">
+      <h4>Filter & Search</h4>
+      <div class="filters">
+       <form id="filters-form">
+        <div class="row">
+         <div class="col-md-3">
+          <label for="search-name" class="form-label"
+           >Search Business Name</label
+          >
+          <input
+           type="text"
+           id="search-name"
+           class="form-control"
+           placeholder="Enter business name..."
+          />
+         </div>
+         <div class="col-md-3">
+          <label for="inspection-date" class="form-label"
+           >Filter by Inspection Date</label
+          >
+          <input type="date" id="inspection-date" class="form-control" />
+         </div>
+         <div class="col-md-3">
+          <label for="violation" class="form-label">Filter by Violation</label>
+          <select id="violation" class="form-select">
+           <option value="">Select Violation</option>
+           <option value="yes">Yes</option>
+           <option value="no">No</option>
+          </select>
+         </div>
+         <div class="col-md-3">
+          <label for="sort-order" class="form-label">Sort by Date</label>
+          <select id="sort-order" class="form-select">
+           <option value="latest">Latest to Oldest</option>
+           <option value="oldest">Oldest to Latest</option>
+          </select>
+         </div>
+        </div>
+       </form>
+      </div>
+     </div>
+    </section>
+    <table class="table">
+     <thead>
+      <tr>
+       <th>No.</th>
+       <th>Business Name</th>
+       <th>Business Status</th>
+       <th>Inspection Date</th>
+       <th>Type of Inspection</th>
+       <th>With Violations</th>
+      </tr>
+     </thead>
+     <tbody id="inspections-tbody">
+      <!-- Rendered rows will be inserted here -->
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <nav>
+   <ul class="pagination" id="pagination-controls"></ul>
+  </nav>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -1162,14 +1087,12 @@
      const detailedModalContent = `
             <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header border-bottom-0 bg-primary bg-gradient text-white">
-                            <h5 class="modal-title fw-bold">
-                                <i class="bi bi-clipboard2-check me-2"></i>Inspection Details
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="inspectionDetailModalLabel">Inspection Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+                        <div class="modal-body" style="max-height: 70vh">
                             <div class="text-center mb-4">
                                 ${
                                  inspectionDetails.business?.image_url
@@ -1279,7 +1202,9 @@
       while (backdrops.length > 0) {
        backdrops[0].remove();
       }
-      document.body.classList.remove("modal-open");
+      // Restore body overflow
+      document.body.style.overflow = ""; // Reset overflow style
+      document.body.classList.remove("modal-open"); // Ensure body overflow is restored
      });
     } catch (error) {
      console.error("Error showing inspection details:", error);
@@ -1321,72 +1246,18 @@
     return inspectionsData.find((inspection) => inspection.id === id);
    }
 
-   // Other existing code...
+   // Ensure that the modal is initialized correctly
+   document
+    .getElementById("inspectionDetailModal")
+    .addEventListener("show.bs.modal", function () {
+     // Bootstrap handles the body overflow automatically
+    });
+
+   document
+    .getElementById("inspectionDetailModal")
+    .addEventListener("hidden.bs.modal", function () {
+     // Bootstrap handles the body overflow automatically
+    });
   </script>
  </body>
 </html>
-<section class="card mt-3">
- <div class="card-body">
-  <h4>Inspected Businesses</h4>
-  <section class="card mt-3">
-   <div class="card-body">
-    <h4>Filter & Search</h4>
-    <div class="filters">
-     <form id="filters-form">
-      <div class="row">
-       <div class="col-md-3">
-        <label for="search-name" class="form-label">Search Business Name</label>
-        <input
-         type="text"
-         id="search-name"
-         class="form-control"
-         placeholder="Enter business name..."
-        />
-       </div>
-       <div class="col-md-3">
-        <label for="inspection-date" class="form-label"
-         >Filter by Inspection Date</label
-        >
-        <input type="date" id="inspection-date" class="form-control" />
-       </div>
-       <div class="col-md-3">
-        <label for="violation" class="form-label">Filter by Violation</label>
-        <select id="violation" class="form-select">
-         <option value="">Select Violation</option>
-         <option value="yes">Yes</option>
-         <option value="no">No</option>
-        </select>
-       </div>
-       <div class="col-md-3">
-        <label for="sort-order" class="form-label">Sort by Date</label>
-        <select id="sort-order" class="form-select">
-         <option value="latest">Latest to Oldest</option>
-         <option value="oldest">Oldest to Latest</option>
-        </select>
-       </div>
-      </div>
-     </form>
-    </div>
-   </div>
-  </section>
-  <table class="table">
-   <thead>
-    <tr>
-     <th>No.</th>
-     <th>Business Name</th>
-     <th>Business Status</th>
-     <th>Inspection Date</th>
-     <th>Type of Inspection</th>
-     <th>With Violations</th>
-    </tr>
-   </thead>
-   <tbody id="inspections-tbody">
-    <!-- Rendered rows will be inserted here -->
-   </tbody>
-  </table>
- </div>
-</section>
-
-<nav>
- <ul class="pagination" id="pagination-controls"></ul>
-</nav>
