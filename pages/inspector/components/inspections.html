@@ -339,7 +339,6 @@
            class="form-control form-control-sm"
            id="violationReceipt"
            name="violationReceipt"
-           required
           />
          </div>
          <div class="col-md-6">
@@ -349,7 +348,6 @@
            class="form-control form-control-sm"
            id="dueDate"
            name="dueDate"
-           required
           />
          </div>
         </div>
@@ -364,7 +362,6 @@
           id="businessImage"
           name="businessImage"
           accept="image/*"
-          required
          />
         </div>
        </div>
@@ -616,124 +613,196 @@
      violationStatus.value === "true" ? "block" : "none";
    });
 
+   // Function to toggle required attributes based on the "With Violations" selection
+   const toggleViolationFields = () => {
+    const withViolationsSelect = document.getElementById("withViolations");
+    const natureOfViolationInput = document.getElementById("natureOfViolation");
+    const violationReceiptInput = document.getElementById("violationReceipt");
+    const dueDateInput = document.getElementById("dueDate");
+
+    const hasViolations = withViolationsSelect.value === "true";
+
+    // Set required attribute based on the selection
+    natureOfViolationInput.required = hasViolations;
+    violationReceiptInput.required = hasViolations;
+    dueDateInput.required = hasViolations;
+   };
+
+   // Add event listener to the "With Violations" select element
+   document
+    .getElementById("withViolations")
+    .addEventListener("change", toggleViolationFields);
+
+   // Initial call to set the required attributes correctly on page load
+   toggleViolationFields();
+
    // Form submission handling
    const inspectionForm = document.getElementById("inspectionForm");
-   const loadingSpinner = document.getElementById("loadingSpinner");
 
    inspectionForm.addEventListener("submit", async function (e) {
     e.preventDefault();
+    console.log("Form submission started");
 
     // Clear previous error messages
     const errorMessages = document.querySelectorAll(".error-message");
     errorMessages.forEach((msg) => msg.remove());
 
     // Get form values
-    const ownerFirstName = document
-     .getElementById("ownerFirstName")
-     .value.trim();
-    const ownerLastName = document.getElementById("ownerLastName").value.trim();
-    const ownerEmail = document.getElementById("ownerEmail").value.trim();
-    const ownerPhoneNumber = document
-     .getElementById("ownerPhoneNumber")
-     .value.trim();
-    const businessName = document.getElementById("businessName").value.trim();
-    const businessPermit = document
-     .getElementById("businessPermit")
-     .value.trim(); // Nullable
-    const businessStatus = document.getElementById("businessStatus").value;
-    const street = document.getElementById("street").value.trim();
-    const city = document.getElementById("city").value.trim();
-    const zip = document.getElementById("zip").value.trim();
-    const typeOfInspection = document.getElementById("typeOfInspection").value;
-    const withViolations =
-     document.getElementById("withViolations").value === "true"; // Convert to boolean
-    const violationReceipt = document
-     .getElementById("violationReceipt")
-     .value.trim();
-    const dueDate = document.getElementById("dueDate").value;
-    const businessImage = document.getElementById("businessImage").files[0];
+    const formData = {
+     owner_first_name: document.getElementById("ownerFirstName").value.trim(),
+     owner_last_name: document.getElementById("ownerLastName").value.trim(),
+     owner_email: document.getElementById("ownerEmail").value.trim(),
+     owner_phone_number: document
+      .getElementById("ownerPhoneNumber")
+      .value.trim(),
+     business_name: document.getElementById("businessName").value.trim(),
+     business_permit:
+      document.getElementById("businessPermit").value.trim() || null,
+     business_status: document.getElementById("businessStatus").value,
+     street: document.getElementById("street").value.trim(),
+     city: document.getElementById("city").value.trim(),
+     zip: document.getElementById("zip").value.trim(),
+     type_of_inspection: document.getElementById("typeOfInspection").value,
+     with_violations:
+      document.getElementById("withViolations").value === "true",
+     // Initialize these as empty strings for non-violation cases
+     nature_of_violation: "",
+     violation_receipt: "",
+     due_date: "",
+    };
 
-    // Initialize an array to hold error messages
+    // Only update violation-related fields if violations exist
+    if (formData.with_violations) {
+     formData.nature_of_violation =
+      document.getElementById("natureOfViolation").value;
+     formData.violation_receipt = document
+      .getElementById("violationReceipt")
+      .value.trim();
+     formData.due_date = document.getElementById("dueDate").value;
+    }
+
+    console.log("Form data collected:", formData);
+
+    // Validation checks
     let errors = [];
+    if (!formData.owner_first_name)
+     errors.push({
+      field: "ownerFirstName",
+      message: "Owner's First Name is required.",
+     });
+    if (!formData.owner_last_name)
+     errors.push({
+      field: "ownerLastName",
+      message: "Owner's Last Name is required.",
+     });
+    if (!formData.owner_email)
+     errors.push({
+      field: "ownerEmail",
+      message: "Owner's Email is required.",
+     });
+    if (!formData.owner_phone_number)
+     errors.push({
+      field: "ownerPhoneNumber",
+      message: "Owner's Phone Number is required.",
+     });
+    if (!formData.business_name)
+     errors.push({
+      field: "businessName",
+      message: "Business Name is required.",
+     });
+    if (!formData.business_status)
+     errors.push({
+      field: "businessStatus",
+      message: "Business Status is required.",
+     });
+    if (!formData.street)
+     errors.push({ field: "street", message: "Street is required." });
+    if (!formData.city)
+     errors.push({ field: "city", message: "City is required." });
+    if (!formData.zip)
+     errors.push({ field: "zip", message: "ZIP Code is required." });
+    if (!formData.type_of_inspection)
+     errors.push({
+      field: "typeOfInspection",
+      message: "Type of Inspection is required.",
+     });
 
-    // Check required fields
-    if (!ownerFirstName) errors.push("Owner's First Name is required.");
-    if (!ownerLastName) errors.push("Owner's Last Name is required.");
-    if (!ownerEmail) errors.push("Owner's Email is required.");
-    if (!ownerPhoneNumber) errors.push("Owner's Phone Number is required.");
-    if (!businessName) errors.push("Business Name is required.");
-    if (!businessStatus) errors.push("Business Status is required.");
-    if (!street) errors.push("Street is required.");
-    if (!city) errors.push("City is required.");
-    if (!zip) errors.push("ZIP Code is required.");
-    if (!typeOfInspection) errors.push("Type of Inspection is required.");
-    if (withViolations && !violationReceipt)
-     errors.push(
-      "Violation Receipt No. is required when there are violations."
-     );
-    if (withViolations && !dueDate)
-     errors.push("Due Date is required when there are violations.");
-
-    // Automatically set withViolations to true if businessPermit is blank
-    if (!businessPermit) {
-     document.getElementById("withViolations").value = "true";
+    // Only check violation fields if there are violations
+    if (formData.with_violations) {
+     if (!formData.nature_of_violation)
+      errors.push({
+       field: "natureOfViolation",
+       message: "Nature of Violation is required when there are violations.",
+      });
+     if (!formData.violation_receipt)
+      errors.push({
+       field: "violationReceipt",
+       message: "Violation Receipt No. is required when there are violations.",
+      });
+     if (!formData.due_date)
+      errors.push({
+       field: "dueDate",
+       message: "Due Date is required when there are violations.",
+      });
     }
 
     // If there are errors, display them and prevent form submission
     if (errors.length > 0) {
-     errors.forEach((error) => {
+     errors.forEach(({ field, message }) => {
+      const inputField = document.getElementById(field);
       const errorMsg = document.createElement("div");
       errorMsg.className = "error-message text-danger";
-      errorMsg.textContent = error;
-      inspectionForm.prepend(errorMsg); // Display error messages at the top of the form
+      errorMsg.textContent = message;
+      inputField.parentNode.insertBefore(errorMsg, inputField.nextSibling); // Insert error message after the input field
      });
-     return; // Stop form submission
+     return;
     }
 
-    // Prepare the data to be sent to the backend
-    const formData = {
-     owner_first_name: ownerFirstName,
-     owner_last_name: ownerLastName,
-     owner_email: ownerEmail,
-     owner_phone_number: ownerPhoneNumber,
-     business_name: businessName,
-     business_permit: businessPermit || null, // Set to null if empty
-     business_status: businessStatus,
-     street: street,
-     city: city,
-     zip: zip,
-     type_of_inspection: typeOfInspection,
-     with_violations: withViolations,
-     nature_of_violation: "Expired food items and unsanitary conditions.", // Example value, adjust as needed
-     violation_receipt: violationReceipt,
-     due_date: dueDate,
-     image_url: businessImage ? URL.createObjectURL(businessImage) : null, // Handle image upload if needed
-    };
+    // Handle file upload
+    const businessImage = document.getElementById("businessImage").files[0];
+    if (businessImage) {
+     const reader = new FileReader();
+     reader.onload = async function (e) {
+      formData.image_url = e.target.result;
+      await submitForm(formData);
+     };
+     reader.readAsDataURL(businessImage);
+    } else {
+     // If no image, still submit the form
+     formData.image_url = null; // or some default image URL
+     await submitForm(formData);
+    }
+   });
 
-    // Show the loading spinner and disable the form
-    loadingSpinner.style.display = "block";
-    inspectionForm
-     .querySelectorAll("input, select, button")
-     .forEach((el) => (el.disabled = true));
+   // Separate function to handle the actual form submission
+   async function submitForm(formData) {
+    console.log("Submitting to API:", formData); // Debug log
+
+    // Disable form inputs during submission
+    const formElements = inspectionForm.querySelectorAll(
+     "input, select, button"
+    );
+    formElements.forEach((el) => (el.disabled = true));
 
     try {
-     console.log(formData);
-     // Send a POST request to the backend
-     const response = await fetch(apiUrl + "/inspector/add-inspection", {
+     const response = await fetch(`${apiUrl}/inspector/add-inspection`, {
       method: "POST",
       headers: {
        "Content-Type": "application/json",
-       Authorization: `Bearer ${localStorage.getItem("authToken")}`, // Include token if needed
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
       body: JSON.stringify(formData),
      });
 
+     console.log("API Response status:", response.status); // Debug log
+
      if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Error: ${response.statusText}`);
      }
 
      const result = await response.json();
-     console.log("Inspection added successfully:", result);
+     console.log("API Response data:", result); // Debug log
 
      // Hide the form modal
      const violatorModal = bootstrap.Modal.getInstance(
@@ -746,17 +815,21 @@
       document.getElementById("successModal")
      );
      successModal.show();
+
+     // Refresh the inspections list
+     fetchInspections(currentPage);
     } catch (error) {
-     console.error("Error adding inspection:", error);
-     // Handle error (e.g., show an error message to the user)
+     console.error("Submission error:", error); // Debug log
+     const errorMsg = document.createElement("div");
+     errorMsg.className = "error-message text-danger";
+     errorMsg.textContent =
+      error.message || "Failed to submit inspection. Please try again.";
+     inspectionForm.prepend(errorMsg);
     } finally {
-     // Hide the loading spinner and re-enable the form
-     loadingSpinner.style.display = "none";
-     inspectionForm
-      .querySelectorAll("input, select, button")
-      .forEach((el) => (el.disabled = false));
+     // Re-enable form inputs
+     formElements.forEach((el) => (el.disabled = false));
     }
-   });
+   }
 
    // Delete functionality
    document.querySelectorAll(".delete-btn").forEach((button) => {
