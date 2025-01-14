@@ -484,7 +484,7 @@
                         <div class="violation-main">
                             <h6 class="fw-bold text-danger mb-2">
                                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                ${violation.nature_of_violation}
+                                ${violation.nature_of_violation.join(", ")}
                             </h6>
                             <div class="violation-details">
                                 <div class="row g-3">
@@ -551,18 +551,18 @@
                                 ${
                                  inspectionDetails.business?.image_url
                                   ? `<div class="position-relative d-inline-block">
-                                        <img src="${inspectionDetails.business.image_url}" 
-                                            alt="Business Image" 
-                                            class="rounded-3 shadow-sm" 
-                                            style="max-height: 200px; width: auto; object-fit: cover">
-                                        <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
-                                            <small>${inspectionDetails.business.business_name}</small>
-                                        </div>
-                                    </div>`
+                                            <img src="${inspectionDetails.business.image_url}" 
+                                                alt="Business Image" 
+                                                class="rounded-3 shadow-sm" 
+                                                style="max-height: 200px; width: auto; object-fit: cover">
+                                            <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
+                                                <small>${inspectionDetails.business.business_name}</small>
+                                            </div>
+                                        </div>`
                                   : `<div class="text-center p-4 bg-light rounded-3">
-                                        <i class="bi bi-building-x display-1 text-muted"></i>
-                                        <p class="text-muted mt-2">No business image available</p>
-                                    </div>`
+                                            <i class="bi bi-building-x display-1 text-muted"></i>
+                                            <p class="text-muted mt-2">No business image available</p>
+                                        </div>`
                                 }
                             </div>
 
