@@ -291,48 +291,157 @@
         style="display: none"
        >
         <div class="col-md-12 mb-3">
-         <label for="natureOfViolation" class="form-label"
-          >Nature of Violation:</label
+         <label class="form-label">Nature of Violation:</label>
+         <div
+          class="violation-checkboxes border rounded p-3"
+          style="max-height: 200px; overflow-y: auto"
          >
-         <select
-          id="natureOfViolation"
-          name="natureOfViolation"
-          class="form-select"
-         >
-          <option value="no_mayors_permit">NO MAYOR'S PERMIT</option>
-          <option value="non_display_of_mayors_permit">
-           NON-DISPLAY OF MAYOR'S PERMIT
-          </option>
-          <option value="displaying_dilapidated_mayors_permit">
-           DISPLAYING DILAPIDATED MAYOR'S PERMIT
-          </option>
-          <option value="displaying_counterfeit_mayors_permit">
-           DISPLAYING A COUNTERFEIT MAYOR'S PERMIT
-          </option>
-          <option value="understatement_of_gross_sales">
-           UNDERSTATEMENT AND/OR INCORRECT DECLARATION OF GROSS SALES OR
-           RECEIPTS
-          </option>
-          <option value="falsification_of_business_permit">
-           FALSIFICATION AND/OR ALTERATION OF BUSINESS PERMIT
-          </option>
-          <option value="sidewalk_obstruction">
-           SIDEWALK/STREET/SIDESTREET OBSTRUCTION
-          </option>
-          <option value="non_posting_of_notice">NON-POSTING OF NOTICE</option>
-          <option value="non_declaration_of_business">
-           NON-DECLARATION OF TYPE OR NATURE OF BUSINESS
-          </option>
-          <option value="drinking_in_public_places">
-           DRINKING IN PUBLIC PLACES
-          </option>
-          <option value="unauthorized_serving_of_liquor">
-           UNAUTHORIZED SERVING OF LIQUOR
-          </option>
-          <option value="unauthorized_selling_of_liquor">
-           UNAUTHORIZED SELLING OF LIQUOR
-          </option>
-         </select>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="no mayors permit"
+            name="natureOfViolation[]"
+            id="violation1"
+           />
+           <label class="form-check-label" for="violation1">
+            NO MAYOR'S PERMIT
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="non display of mayors permit"
+            name="natureOfViolation[]"
+            id="violation2"
+           />
+           <label class="form-check-label" for="violation2">
+            NON-DISPLAY OF MAYOR'S PERMIT
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="displaying dilapidated mayors permit"
+            name="natureOfViolation[]"
+            id="violation3"
+           />
+           <label class="form-check-label" for="violation3">
+            DISPLAYING DILAPIDATED MAYOR'S PERMIT
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="displaying counterfeit mayors permit"
+            name="natureOfViolation[]"
+            id="violation4"
+           />
+           <label class="form-check-label" for="violation4">
+            DISPLAYING A COUNTERFEIT MAYOR'S PERMIT
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="understatement of gross sales"
+            name="natureOfViolation[]"
+            id="violation5"
+           />
+           <label class="form-check-label" for="violation5">
+            UNDERSTATEMENT AND/OR INCORRECT DECLARATION OF GROSS SALES OR
+            RECEIPTS
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="falsification of business permit"
+            name="natureOfViolation[]"
+            id="violation6"
+           />
+           <label class="form-check-label" for="violation6">
+            FALSIFICATION AND/OR ALTERATION OF BUSINESS PERMIT
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="sidewalk obstruction"
+            name="natureOfViolation[]"
+            id="violation7"
+           />
+           <label class="form-check-label" for="violation7">
+            SIDEWALK/STREET/SIDESTREET OBSTRUCTION
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="non posting of notice"
+            name="natureOfViolation[]"
+            id="violation8"
+           />
+           <label class="form-check-label" for="violation8">
+            NON-POSTING OF NOTICE
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="non declaration of business"
+            name="natureOfViolation[]"
+            id="violation9"
+           />
+           <label class="form-check-label" for="violation9">
+            NON-DECLARATION OF TYPE OR NATURE OF BUSINESS
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="drinking in public places"
+            name="natureOfViolation[]"
+            id="violation10"
+           />
+           <label class="form-check-label" for="violation10">
+            DRINKING IN PUBLIC PLACES
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="unauthorized serving of liquor"
+            name="natureOfViolation[]"
+            id="violation11"
+           />
+           <label class="form-check-label" for="violation11">
+            UNAUTHORIZED SERVING OF LIQUOR
+           </label>
+          </div>
+          <div class="form-check">
+           <input
+            class="form-check-input"
+            type="checkbox"
+            value="unauthorized selling of liquor"
+            name="natureOfViolation[]"
+            id="violation12"
+           />
+           <label class="form-check-label" for="violation12">
+            UNAUTHORIZED SELLING OF LIQUOR
+           </label>
+          </div>
+         </div>
         </div>
         <div class="row mb-3">
          <div class="col-md-6">
@@ -541,16 +650,36 @@
    // Function to toggle required attributes based on the "With Violations" selection
    const toggleViolationFields = () => {
     const withViolationsSelect = document.getElementById("withViolations");
-    const natureOfViolationInput = document.getElementById("natureOfViolation");
     const violationReceiptInput = document.getElementById("violationReceipt");
     const dueDateInput = document.getElementById("dueDate");
+    const violationCheckboxes = document.querySelectorAll(
+     'input[name="natureOfViolation[]"]'
+    );
+    const violationContainer = document.querySelector(".violation-checkboxes");
 
     const hasViolations = withViolationsSelect.value === "true";
 
-    // Set required attribute based on the selection
-    natureOfViolationInput.required = hasViolations;
+    // Remove required from individual checkboxes but add custom validation
+    violationCheckboxes.forEach((checkbox) => (checkbox.required = false));
     violationReceiptInput.required = hasViolations;
     dueDateInput.required = hasViolations;
+
+    // Add custom validation on form submit
+    const form = withViolationsSelect.closest("form");
+    form.onsubmit = (e) => {
+     if (hasViolations) {
+      const checkedViolations = document.querySelectorAll(
+       'input[name="natureOfViolation[]"]:checked'
+      );
+      if (checkedViolations.length === 0) {
+       e.preventDefault();
+       alert("Please select at least one violation");
+       violationContainer.scrollIntoView({ behavior: "smooth" });
+       return false;
+      }
+     }
+     return true;
+    };
    };
 
    // Add event listener to the "With Violations" select element
@@ -568,134 +697,157 @@
     e.preventDefault();
     console.log("Form submission started");
 
-    // Clear previous error messages
-    const errorMessages = document.querySelectorAll(".error-message");
-    errorMessages.forEach((msg) => msg.remove());
+    try {
+     const formData = new FormData();
 
-    // Get form values
-    const formData = {
-     owner_first_name: document.getElementById("ownerFirstName").value.trim(),
-     owner_last_name: document.getElementById("ownerLastName").value.trim(),
-     owner_email: document.getElementById("ownerEmail").value.trim(),
-     owner_phone_number: document
-      .getElementById("ownerPhoneNumber")
-      .value.trim(),
-     business_name: document.getElementById("businessName").value.trim(),
-     business_permit:
-      document.getElementById("businessPermit").value.trim() || null,
-     business_status: document.getElementById("businessStatus").value,
-     street: document.getElementById("street").value.trim(),
-     city: document.getElementById("city").value.trim(),
-     zip: document.getElementById("zip").value.trim(),
-     type_of_inspection: document.getElementById("typeOfInspection").value,
-     with_violations:
-      document.getElementById("withViolations").value === "true",
-     // Initialize these as empty strings for non-violation cases
-     nature_of_violation: "",
-     violation_receipt: "",
-     due_date: "",
-    };
+     // Basic fields
+     formData.append(
+      "owner_first_name",
+      document.getElementById("ownerFirstName").value.trim()
+     );
+     formData.append(
+      "owner_last_name",
+      document.getElementById("ownerLastName").value.trim()
+     );
+     formData.append(
+      "owner_email",
+      document.getElementById("ownerEmail").value.trim()
+     );
+     formData.append(
+      "owner_phone_number",
+      document.getElementById("ownerPhoneNumber").value.trim()
+     );
+     formData.append(
+      "business_name",
+      document.getElementById("businessName").value.trim()
+     );
+     formData.append(
+      "business_permit",
+      document.getElementById("businessPermit").value.trim()
+     );
+     formData.append(
+      "business_status",
+      document.getElementById("businessStatus").value
+     );
 
-    // Only update violation-related fields if violations exist
-    if (formData.with_violations) {
-     formData.nature_of_violation =
-      document.getElementById("natureOfViolation").value;
-     formData.violation_receipt = document
-      .getElementById("violationReceipt")
-      .value.trim();
-     formData.due_date = document.getElementById("dueDate").value;
-    }
+     // Address fields
+     formData.append("street", document.getElementById("street").value.trim());
+     formData.append("city", document.getElementById("city").value.trim());
+     formData.append("zip", document.getElementById("zip").value.trim());
 
-    console.log("Form data collected:", formData);
+     // Inspection fields
+     formData.append(
+      "type_of_inspection",
+      document.getElementById("typeOfInspection").value
+     );
+     formData.append(
+      "with_violations",
+      document.getElementById("withViolations").value === "true"
+     );
 
-    // Validation checks
-    let errors = [];
-    if (!formData.owner_first_name)
-     errors.push({
-      field: "ownerFirstName",
-      message: "Owner's First Name is required.",
-     });
-    if (!formData.owner_last_name)
-     errors.push({
-      field: "ownerLastName",
-      message: "Owner's Last Name is required.",
-     });
-    if (!formData.owner_email)
-     errors.push({
-      field: "ownerEmail",
-      message: "Owner's Email is required.",
-     });
-    if (!formData.owner_phone_number)
-     errors.push({
-      field: "ownerPhoneNumber",
-      message: "Owner's Phone Number is required.",
-     });
-    if (!formData.business_name)
-     errors.push({
-      field: "businessName",
-      message: "Business Name is required.",
-     });
-    if (!formData.business_status)
-     errors.push({
-      field: "businessStatus",
-      message: "Business Status is required.",
-     });
-    if (!formData.street)
-     errors.push({ field: "street", message: "Street is required." });
-    if (!formData.city)
-     errors.push({ field: "city", message: "City is required." });
-    if (!formData.zip)
-     errors.push({ field: "zip", message: "ZIP Code is required." });
-    if (!formData.type_of_inspection)
-     errors.push({
-      field: "typeOfInspection",
-      message: "Type of Inspection is required.",
-     });
+     // Handle violations if present
+     if (document.getElementById("withViolations").value === "true") {
+      const violations = Array.from(
+       document.querySelectorAll('input[name="natureOfViolation[]"]:checked')
+      ).map((checkbox) => checkbox.value);
 
-    // Only check violation fields if there are violations
-    if (formData.with_violations) {
-     if (!formData.nature_of_violation)
-      errors.push({
-       field: "natureOfViolation",
-       message: "Nature of Violation is required when there are violations.",
+      // Changed from 'nature_of_violations' to match backend expectation
+      violations.forEach((violation, index) => {
+       formData.append(`nature_of_violations[${index}]`, violation);
       });
-     if (!formData.violation_receipt)
-      errors.push({
-       field: "violationReceipt",
-       message: "Violation Receipt No. is required when there are violations.",
-      });
-     if (!formData.due_date)
-      errors.push({
-       field: "dueDate",
-       message: "Due Date is required when there are violations.",
-      });
-    }
 
-    // If there are errors, display them and prevent form submission
-    if (errors.length > 0) {
-     errors.forEach(({ field, message }) => {
-      const inputField = document.getElementById(field);
-      const errorMsg = document.createElement("div");
-      errorMsg.className = "error-message text-danger";
-      errorMsg.textContent = message;
-      inputField.parentNode.insertBefore(errorMsg, inputField.nextSibling); // Insert error message after the input field
+      formData.append(
+       "violation_receipt",
+       document.getElementById("violationReceipt").value.trim()
+      );
+      formData.append("due_date", document.getElementById("dueDate").value);
+     }
+
+     // Handle image file - renamed from 'image' to match backend
+     const imageFile = document.getElementById("businessImage").files[0];
+     if (imageFile) {
+      formData.append("image", imageFile);
+     }
+
+     // Log FormData contents for debugging
+     for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+     }
+
+     const response = await fetch(`${apiUrl}/inspector/add-inspection`, {
+      method: "POST",
+      headers: {
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       // Remove Content-Type header to let browser set it with boundary for FormData
+      },
+      body: formData,
      });
-     return;
-    }
 
-    // Handle file upload
-    const businessImage = document.getElementById("businessImage").files[0];
-    if (businessImage) {
-     const reader = new FileReader();
-     reader.onload = async function (e) {
-      formData.image_url = e.target.result;
-      await submitForm(formData);
-     };
-     reader.readAsDataURL(businessImage);
-    } else {
-     // If no image, still submit the form
-     formData.image_url = null; // or some default image URL
-     await submitForm(formData);
+     // Log the raw response for debugging
+     const responseText = await response.text();
+     console.log("Raw response:", responseText);
+
+     let result;
+     try {
+      // Try to parse the response as JSON
+      result = JSON.parse(responseText);
+     } catch (parseError) {
+      console.error("Failed to parse response as JSON:", parseError);
+      console.log("Response content:", responseText);
+      throw new Error(
+       "Server returned invalid JSON. Please check the console for details."
+      );
+     }
+
+     if (!response.ok) {
+      throw new Error(
+       result.message || `HTTP error! status: ${response.status}`
+      );
+     }
+
+     console.log("Success:", result);
+
+     // Hide the form modal
+     const violatorModal = bootstrap.Modal.getInstance(
+      document.getElementById("violatorModal")
+     );
+     violatorModal.hide();
+
+     // Show success modal
+     const successModal = new bootstrap.Modal(
+      document.getElementById("successModal")
+     );
+     successModal.show();
+
+     // Reset form
+     inspectionForm.reset();
+
+     // Refresh the inspections list
+     fetchInspections(currentPage);
+    } catch (error) {
+     console.error("Error:", error);
+
+     // Create a more detailed error message
+     let errorMessage = "Failed to submit inspection. ";
+     if (error.message) {
+      errorMessage += error.message;
+     }
+
+     // Show error in a more user-friendly way
+     const errorAlert = document.createElement("div");
+     errorAlert.className = "alert alert-danger alert-dismissible fade show";
+     errorAlert.innerHTML = `
+            <strong>Error!</strong> ${errorMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+     // Insert the alert at the top of the form
+     inspectionForm.insertBefore(errorAlert, inspectionForm.firstChild);
+
+     // Remove the alert after 5 seconds
+     setTimeout(() => {
+      errorAlert.remove();
+     }, 5000);
     }
    });
 
@@ -967,23 +1119,34 @@
    fetchInspections();
 
    // Function to show inspection details in the modal
+   const getImageUrl = (imageUrl) => {
+    console.log("Image URL: ", imageUrl);
+    if (!imageUrl) return null;
+    return `${CONFIG.APP_URL}/storage/${imageUrl}`;
+   };
+
    const showInspectionDetails = async (inspection) => {
     try {
-     // Clean up any existing modals and backdrops
+     // Clean up any existing modals, backdrops, and styles
      let modalElement = document.getElementById("inspectionDetailModal");
      if (modalElement) {
       const modalInstance = bootstrap.Modal.getInstance(modalElement);
       if (modalInstance) {
-       modalInstance.dispose(); // Dispose of the modal instance
+       modalInstance.dispose();
       }
-      modalElement.remove(); // Remove the modal element
+      modalElement.remove();
      }
 
-     // Remove any lingering backdrops
+     // Remove any lingering backdrops and cleanup styles
      const backdrops = document.getElementsByClassName("modal-backdrop");
      while (backdrops.length > 0) {
       backdrops[0].remove();
      }
+
+     // Reset any padding-right that might have been added to the body
+     document.body.style.paddingRight = "";
+     document.body.style.overflow = "";
+     document.body.classList.remove("modal-open");
 
      // Show loading state
      const loadingModal = `
@@ -1024,8 +1187,8 @@
      const data = await response.json();
      const inspectionDetails = data.inspection;
 
-     // Create violations list
-     const violationsList = inspectionDetails.violations
+     // Create violations list - Modified to handle the new violations structure
+     const violationsList = Object.values(inspectionDetails.violations)
       .map(
        (violation) => `
                 <div class="violation-item mb-3 p-3 bg-light rounded-3 border-start border-4 border-danger shadow-sm">
@@ -1084,7 +1247,6 @@
       .join("");
 
      // Create the detailed modal content
-     // Create the detailed modal content
      const detailedModalContent = `
     <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -1099,20 +1261,26 @@
                     <!-- Business Image Section -->
                     <div class="text-center mb-4">
                         ${
-                         inspectionDetails.business?.image_url
+                         inspectionDetails.image_url
                           ? `<div class="position-relative d-inline-block">
-                                        <img src="${inspectionDetails.business.image_url}" 
-                                            alt="Business Image" 
-                                            class="rounded-3 shadow-sm" 
-                                            style="max-height: 200px; width: auto; object-fit: cover">
-                                        <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
-                                            <small>${inspectionDetails.business.business_name}</small>
-                                        </div>
-                                    </div>`
+                                <img src="${getImageUrl(
+                                 inspectionDetails.image_url
+                                )}" 
+                                    alt="Business Image" 
+                                    class="rounded-3 shadow-sm" 
+                                    style="max-height: 200px; width: auto; object-fit: cover"
+                                    onerror="this.onerror=null; this.src='/assets/images/no-image.png';"
+                                >
+                                <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
+                                    <small>${
+                                     inspectionDetails.business.business_name
+                                    }</small>
+                                </div>
+                            </div>`
                           : `<div class="text-center p-4 bg-light rounded-3">
-                                        <i class="bi bi-building-x display-1 text-muted"></i>
-                                        <p class="text-muted mt-2">No business image available</p>
-                                    </div>`
+                                <i class="bi bi-building-x display-1 text-muted"></i>
+                                <p class="text-muted mt-2">No business image available</p>
+                            </div>`
                         }
                     </div>
 
@@ -1231,13 +1399,101 @@
                                 </h6>
                                 ${
                                  inspectionDetails.violations.length > 0
-                                  ? violationsList
-                                  : `
-                                            <div class="text-center p-4 bg-light rounded-3">
-                                                <i class="bi bi-check-circle text-success display-4"></i>
-                                                <p class="text-muted mt-2">No violations found</p>
+                                  ? `<div class="list-group">
+                                        ${inspectionDetails.violations
+                                         .map(
+                                          (violation, index) => `
+                                            <div class="list-group-item list-group-item-action border-0 mb-2 rounded-3 shadow-sm hover-shadow">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="violation-main flex-grow-1">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <span class="badge bg-danger rounded-pill me-2">#${
+                                                             index + 1
+                                                            }</span>
+                                                            <div class="violations-list">
+                                                                <h6 class="fw-bold text-danger mb-2">Nature of Violations:</h6>
+                                                                <ul class="list-unstyled mb-0">
+                                                                    ${violation.nature_of_violation[0]
+                                                                     .replace(
+                                                                      "[",
+                                                                      ""
+                                                                     )
+                                                                     .replace(
+                                                                      "]",
+                                                                      ""
+                                                                     )
+                                                                     .split(",")
+                                                                     .map(
+                                                                      (
+                                                                       nature
+                                                                      ) => `
+                                                                            <li class="mb-1">
+                                                                                <i class="bi bi-dot text-danger"></i>
+                                                                                ${nature
+                                                                                 .trim()
+                                                                                 .toUpperCase()}
+                                                                            </li>
+                                                                        `
+                                                                     )
+                                                                     .join("")}
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div class="violation-details mt-3">
+                                                            <div class="row g-3">
+                                                                <div class="col-md-4">
+                                                                    <div class="detail-item">
+                                                                        <small class="text-muted d-block">Receipt No.</small>
+                                                                        <span class="fw-semibold">${
+                                                                         violation.violation_receipt_no
+                                                                        }</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="detail-item">
+                                                                        <small class="text-muted d-block">Violation Date</small>
+                                                                        <span class="fw-semibold">${formatDate(
+                                                                         violation.violation_date
+                                                                        )}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="detail-item">
+                                                                        <small class="text-muted d-block">Due Date</small>
+                                                                        <span class="fw-semibold">${formatDate(
+                                                                         violation.due_date
+                                                                        )}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <span class="badge ${
+                                                         violation.status.toLowerCase() ===
+                                                         "pending"
+                                                          ? "bg-warning"
+                                                          : violation.status.toLowerCase() ===
+                                                            "paid"
+                                                          ? "bg-success"
+                                                          : violation.status.toLowerCase() ===
+                                                            "overdue"
+                                                          ? "bg-danger"
+                                                          : "bg-secondary"
+                                                        } rounded-pill px-3 py-2">
+                                                            ${violation.status.toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         `
+                                         )
+                                         .join("")}
+                                    </div>`
+                                  : `<div class="text-center p-4 bg-light rounded-3">
+                                        <i class="bi bi-check-circle text-success display-4"></i>
+                                        <p class="text-muted mt-2">No violations found</p>
+                                    </div>`
                                 }
                             </div>
                         </div>
@@ -1260,16 +1516,19 @@
      );
      detailedModal.show();
 
-     // Clean up modal and backdrop on close
+     // Add cleanup on modal hide
      detailedModal._element.addEventListener("hidden.bs.modal", function () {
+      // Clean up modal and styles
       this.remove();
+      document.body.style.paddingRight = "";
+      document.body.style.overflow = "";
+      document.body.classList.remove("modal-open");
+
+      // Remove any remaining backdrops
       const backdrops = document.getElementsByClassName("modal-backdrop");
       while (backdrops.length > 0) {
        backdrops[0].remove();
       }
-      // Restore body overflow
-      document.body.style.overflow = ""; // Reset overflow style
-      document.body.classList.remove("modal-open"); // Ensure body overflow is restored
      });
     } catch (error) {
      console.error("Error showing inspection details:", error);
