@@ -61,7 +61,6 @@
 
    // Define the handleLogout function
    const handleLogout = async () => {
-    console.log("Logout button clicked"); // Debugging log
     const response = await fetch(`${apiUrl}/inspector/inspector-logout`, {
      method: "POST",
      headers: {
@@ -107,7 +106,6 @@
      .then((res) => res.text())
      .then((data) => {
       document.getElementById("sidebar").innerHTML = data;
-      console.log("Sidebar loaded successfully"); // Debugging log
 
       // Add event listeners to sidebar links
       const links = document.querySelectorAll(".nav-links a");
@@ -122,7 +120,6 @@
       // Add event listener for the logout button
       const logoutButton = document.getElementById("logoutButton");
       if (logoutButton) {
-       console.log("Logout button found"); // Debugging log
        logoutButton.addEventListener("click", handleLogout);
       } else {
        console.error("Logout button not found");

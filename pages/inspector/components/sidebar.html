@@ -129,7 +129,6 @@
     <a href="#inspections"
      ><i class="bi bi-exclamation-triangle"></i> Inspections</a
     >
-    <a href="#reports"><i class="bi bi-file-earmark-text"></i> Reports</a>
     <a href="#profile"><i class="bi bi-person"></i> Profile</a>
    </div>
    <div class="logout">
@@ -175,7 +174,6 @@
       }
      })
      .catch((error) => {
-      console.error("Error loading content:", error);
       const contentDiv = document.getElementById("content");
       contentDiv.innerHTML =
        "<h2>Error loading the page. Please try again.</h2>";

@@ -65,17 +65,6 @@
   </div>
   <div class="row">
    <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-pink order-card">
-     <div class="card-body">
-      <h6 class="mb-2">Total Inspectors</h6>
-      <div class="d-flex align-items-center gap-2">
-       <i class="fa fa-user-tie text-white" aria-label="Inspectors Icon"></i>
-       <h2 id="total_inspectors">0</h2>
-      </div>
-     </div>
-    </div>
-   </div>
-   <div class="col-md-4 col-xl-3">
     <div class="card bg-c-blue order-card">
      <div class="card-body">
       <h6 class="mb-2">Total Inspections</h6>
@@ -133,15 +122,11 @@
       },
      });
 
-     console.log(res);
-
      if (!res.ok) {
       throw new Error(`Error: ${res.status} - ${res.statusText}`);
      }
 
      const data = await res.json();
-     document.getElementById("total_inspectors").textContent =
-      data.total_inspectors || 0;
      document.getElementById("total_inspections").textContent =
       data.total_inspections || 0;
      document.getElementById("total_violations").textContent =

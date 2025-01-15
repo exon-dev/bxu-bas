@@ -152,7 +152,6 @@
           class="form-control form-control-sm"
           id="ownerEmail"
           name="ownerEmail"
-          required
          />
         </div>
         <div class="col-md-6">
@@ -622,6 +621,8 @@
 
    const apiUrl = CONFIG.API_BASE_URL;
 
+   // Add this debug log to verify the URL
+
    let recordsPerPage = 20; // Default value
    let currentPage = 1; // Initialize currentPage to 1
    let totalPages = 1;
@@ -642,7 +643,6 @@
    );
 
    violationStatus.addEventListener("change", function () {
-    console.log("Change");
     natureOfViolationContainer.style.display =
      violationStatus.value === "true" ? "block" : "none";
    });
@@ -695,7 +695,6 @@
 
    inspectionForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-    console.log("Form submission started");
 
     try {
      const formData = new FormData();
@@ -740,72 +739,76 @@
       "type_of_inspection",
       document.getElementById("typeOfInspection").value
      );
-     formData.append(
-      "with_violations",
-      document.getElementById("withViolations").value === "true"
-     );
 
-     // Handle violations if present
-     if (document.getElementById("withViolations").value === "true") {
+     // Convert with_violations select value to boolean
+     const withViolationsSelect = document.getElementById("withViolations");
+     const hasViolations = withViolationsSelect.value === "true";
+     formData.append("with_violations", hasViolations ? "1" : "0");
+
+     // Only append violation-related fields if hasViolations is true
+     if (hasViolations) {
       const violations = Array.from(
        document.querySelectorAll('input[name="natureOfViolation[]"]:checked')
       ).map((checkbox) => checkbox.value);
 
-      // Changed from 'nature_of_violations' to match backend expectation
-      violations.forEach((violation, index) => {
-       formData.append(`nature_of_violations[${index}]`, violation);
-      });
+      if (violations.length > 0) {
+       // Append each violation as a separate array item
+       violations.forEach((violation, index) => {
+        formData.append(`nature_of_violations[]`, violation);
+       });
+      }
 
-      formData.append(
-       "violation_receipt",
-       document.getElementById("violationReceipt").value.trim()
-      );
-      formData.append("due_date", document.getElementById("dueDate").value);
+      const violationReceipt = document
+       .getElementById("violationReceipt")
+       .value.trim();
+      if (violationReceipt) {
+       formData.append("violation_receipt", violationReceipt);
+      }
+
+      const dueDate = document.getElementById("dueDate").value;
+      if (dueDate) {
+       formData.append("due_date", dueDate);
+      }
      }
 
-     // Handle image file - renamed from 'image' to match backend
+     // Handle image file
      const imageFile = document.getElementById("businessImage").files[0];
      if (imageFile) {
       formData.append("image", imageFile);
      }
 
-     // Log FormData contents for debugging
+     // Debug log the FormData
      for (let pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
      }
 
      const response = await fetch(`${apiUrl}/inspector/add-inspection`, {
       method: "POST",
       headers: {
        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-       // Remove Content-Type header to let browser set it with boundary for FormData
       },
       body: formData,
      });
 
-     // Log the raw response for debugging
      const responseText = await response.text();
-     console.log("Raw response:", responseText);
 
      let result;
      try {
-      // Try to parse the response as JSON
       result = JSON.parse(responseText);
-     } catch (parseError) {
-      console.error("Failed to parse response as JSON:", parseError);
-      console.log("Response content:", responseText);
-      throw new Error(
-       "Server returned invalid JSON. Please check the console for details."
-      );
+     } catch (e) {
+      console.error("Failed to parse response:", responseText);
+      throw new Error("Server returned invalid JSON response");
      }
 
      if (!response.ok) {
+      if (result.errors) {
+       // Create a formatted error message from validation errors
+       const errorMessages = Object.values(result.errors).flat().join("\n");
+       throw new Error(errorMessages);
+      }
       throw new Error(
        result.message || `HTTP error! status: ${response.status}`
       );
      }
-
-     console.log("Success:", result);
 
      // Hide the form modal
      const violatorModal = bootstrap.Modal.getInstance(
@@ -822,22 +825,20 @@
      // Reset form
      inspectionForm.reset();
 
+     // Reset violations container visibility
+     document.getElementById("natureOfViolationContainer").style.display =
+      "none";
+
      // Refresh the inspections list
      fetchInspections(currentPage);
     } catch (error) {
-     console.error("Error:", error);
-
-     // Create a more detailed error message
-     let errorMessage = "Failed to submit inspection. ";
-     if (error.message) {
-      errorMessage += error.message;
-     }
+     console.error("Submission error:", error);
 
      // Show error in a more user-friendly way
      const errorAlert = document.createElement("div");
      errorAlert.className = "alert alert-danger alert-dismissible fade show";
      errorAlert.innerHTML = `
-            <strong>Error!</strong> ${errorMessage}
+            <strong>Error!</strong> ${error.message}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
 
@@ -851,61 +852,51 @@
     }
    });
 
-   // Separate function to handle the actual form submission
-   async function submitForm(formData) {
-    console.log("Submitting to API:", formData); // Debug log
+   // Add event listener for the violations select
+   document
+    .getElementById("withViolations")
+    .addEventListener("change", function () {
+     const violationsContainer = document.getElementById(
+      "natureOfViolationContainer"
+     );
+     const violationReceipt = document.getElementById("violationReceipt");
+     const dueDate = document.getElementById("dueDate");
+     const violationCheckboxes = document.querySelectorAll(
+      'input[name="natureOfViolation[]"]'
+     );
 
-    // Disable form inputs during submission
-    const formElements = inspectionForm.querySelectorAll(
-     "input, select, button"
-    );
-    formElements.forEach((el) => (el.disabled = true));
-
-    try {
-     const response = await fetch(`${apiUrl}/inspector/add-inspection`, {
-      method: "POST",
-      headers: {
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-      body: JSON.stringify(formData),
-     });
-
-     console.log("API Response status:", response.status); // Debug log
-
-     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `Error: ${response.statusText}`);
+     if (this.value === "true") {
+      violationsContainer.style.display = "block";
+      violationReceipt.required = true;
+      dueDate.required = true;
+      // At least one violation checkbox should be checked
+      violationCheckboxes.forEach((checkbox) => {
+       checkbox.addEventListener("change", validateViolations);
+      });
+     } else {
+      violationsContainer.style.display = "none";
+      violationReceipt.required = false;
+      dueDate.required = false;
+      // Remove validation from checkboxes
+      violationCheckboxes.forEach((checkbox) => {
+       checkbox.removeEventListener("change", validateViolations);
+       checkbox.checked = false;
+      });
+      violationReceipt.value = "";
+      dueDate.value = "";
      }
+    });
 
-     const result = await response.json();
-     console.log("API Response data:", result); // Debug log
-
-     // Hide the form modal
-     const violatorModal = bootstrap.Modal.getInstance(
-      document.getElementById("violatorModal")
-     );
-     violatorModal.hide();
-
-     // Show success modal
-     const successModal = new bootstrap.Modal(
-      document.getElementById("successModal")
-     );
-     successModal.show();
-
-     // Refresh the inspections list
-     fetchInspections(currentPage);
-    } catch (error) {
-     console.error("Submission error:", error); // Debug log
-     const errorMsg = document.createElement("div");
-     errorMsg.className = "error-message text-danger";
-     errorMsg.textContent =
-      error.message || "Failed to submit inspection. Please try again.";
-     inspectionForm.prepend(errorMsg);
-    } finally {
-     // Re-enable form inputs
-     formElements.forEach((el) => (el.disabled = false));
+   // Function to validate that at least one violation is checked
+   function validateViolations() {
+    const violationCheckboxes = document.querySelectorAll(
+     'input[name="natureOfViolation[]"]:checked'
+    );
+    if (violationCheckboxes.length === 0) {
+     // Show error message or handle validation
+     return false;
     }
+    return true;
    }
 
    // Delete functionality
@@ -1120,7 +1111,6 @@
 
    // Function to show inspection details in the modal
    const getImageUrl = (imageUrl) => {
-    console.log("Image URL: ", imageUrl);
     if (!imageUrl) return null;
     return `${CONFIG.APP_URL}/storage/${imageUrl}`;
    };
@@ -1407,22 +1397,10 @@
                                                 <div class="d-flex justify-content-between align-items-start">
                                                     <div class="violation-main flex-grow-1">
                                                         <div class="d-flex align-items-center mb-2">
-                                                            <span class="badge bg-danger rounded-pill me-2">#${
-                                                             index + 1
-                                                            }</span>
                                                             <div class="violations-list">
                                                                 <h6 class="fw-bold text-danger mb-2">Nature of Violations:</h6>
                                                                 <ul class="list-unstyled mb-0">
-                                                                    ${violation.nature_of_violation[0]
-                                                                     .replace(
-                                                                      "[",
-                                                                      ""
-                                                                     )
-                                                                     .replace(
-                                                                      "]",
-                                                                      ""
-                                                                     )
-                                                                     .split(",")
+                                                                    ${violation.nature_of_violation
                                                                      .map(
                                                                       (
                                                                        nature
