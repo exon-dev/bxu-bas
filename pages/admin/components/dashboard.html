@@ -115,6 +115,61 @@
     </div>
    </div>
   </div>
+  <section>
+   <div class="card">
+    <div class="card-body">
+     <h4>Upcoming Due</h4>
+     <p>Violator with 3 days or less than 3 days are posted here.</p>
+     <table class="table">
+      <thead>
+       <tr>
+        <th>No.</th>
+        <th>Business Name</th>
+        <th>Business Status</th>
+        <th>Inspector</th>
+        <th>Inspection Date</th>
+        <th>Due Date</th>
+        <th>Type of Inspection</th>
+        <th>Status</th>
+       </tr>
+      </thead>
+      <tbody id="violators-tbody"></tbody>
+     </table>
+     <nav>
+      <ul class="pagination" id="violators-pagination"></ul>
+     </nav>
+    </div>
+   </div>
+  </section>
+
+  <section class="mt-4">
+   <div class="card">
+    <div class="card-body">
+     <h4>Overdue Violations</h4>
+     <p>Violators without resolving their dues are posted here.</p>
+     <table class="table">
+      <thead>
+       <tr>
+        <th>No.</th>
+        <th>Business Name</th>
+        <th>Business Status</th>
+        <th>Inspector</th>
+        <th>Due Date</th>
+        <th>Days Overdue</th>
+        <th>Status</th>
+       </tr>
+      </thead>
+      <tbody id="overdue-tbody"></tbody>
+     </table>
+     <nav>
+      <ul class="pagination" id="overdue-pagination"></ul>
+     </nav>
+    </div>
+   </div>
+  </section>
+
+  <!-- Violation Detail Modal -->
+  <div class="modal fade" id="violationDetailModal" tabindex="-1"></div>
 
   <script type="module">
    import CONFIG from "/scripts/config.js";
@@ -122,6 +177,16 @@
    const apiUrl = CONFIG.API_BASE_URL;
 
    console.log(apiUrl);
+
+   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const options = {
+     year: "numeric",
+     month: "long",
+     day: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString("en-US", options);
+   };
 
    const getCardInfo = async () => {
     try {
@@ -153,8 +218,659 @@
     }
    };
 
+   const getViolators = async (page = 1) => {
+    try {
+     const violatorsTbody = document.getElementById("violators-tbody");
+     violatorsTbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+     const response = await fetch(
+      `${apiUrl}/inspection/upcoming-dues?page=${page}&with_violations=yes`,
+      {
+       method: "GET",
+       headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+     }
+
+     const data = await response.json();
+     const inspections = data.inspections.data || [];
+     const currentPage = data.inspections.current_page;
+     const totalPages = data.inspections.last_page;
+
+     renderViolatorsTable(inspections, currentPage);
+     renderViolatorsPagination(currentPage, totalPages);
+    } catch (error) {
+     console.error("Error fetching violators:", error);
+     document.getElementById("violators-tbody").innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-danger">
+                    Error loading violators. Please try again.
+                </td>
+            </tr>
+        `;
+    }
+   };
+
+   const renderViolatorsTable = (violators, currentPage) => {
+    const violatorsTbody = document.getElementById("violators-tbody");
+    violatorsTbody.innerHTML = "";
+
+    if (!violators || violators.length === 0) {
+     violatorsTbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">No violations found</td>
+            </tr>
+        `;
+     return;
+    }
+
+    violators.forEach((violator, index) => {
+     const row = document.createElement("tr");
+     row.style.cursor = "pointer";
+     const actualIndex = (currentPage - 1) * 20 + index + 1;
+
+     row.innerHTML = `
+            <td>${actualIndex}</td>
+            <td>${violator.business?.business_name || "N/A"}</td>
+            <td>${violator.business?.status || "N/A"}</td>
+            <td>${violator.inspector?.first_name || "N/A"} ${
+      violator.inspector?.last_name || "N/A"
+     }</td>
+            <td>${formatDate(violator.inspection_date)}</td>
+            <td>${formatDate(violator.violations[0]?.due_date)}</td>
+            <td>${violator.type_of_inspection || "N/A"}</td>
+            <td>
+                <span class="badge ${
+                 violator.violations[0]?.status === "pending"
+                  ? "bg-warning"
+                  : violator.violations[0]?.status === "paid"
+                  ? "bg-success"
+                  : violator.violations[0]?.status === "overdue"
+                  ? "bg-danger"
+                  : "bg-secondary"
+                }">
+                    ${violator.violations[0]?.status?.toUpperCase() || "N/A"}
+                </span>
+            </td>
+        `;
+
+     row.addEventListener("click", () => showViolationDetails(violator));
+     violatorsTbody.appendChild(row);
+    });
+   };
+
+   const renderViolatorsPagination = (currentPage, totalPages) => {
+    const paginationElement = document.getElementById("violators-pagination");
+    paginationElement.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // Previous button
+    const prevButton = createPaginationButton(
+     "Previous",
+     currentPage > 1,
+     () => {
+      if (currentPage > 1) getViolators(currentPage - 1);
+     },
+     "«"
+    );
+    paginationElement.appendChild(prevButton);
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+     const pageButton = createPaginationButton(i.toString(), true, () => {
+      getViolators(i);
+     });
+     if (i === currentPage) pageButton.classList.add("active");
+     paginationElement.appendChild(pageButton);
+    }
+
+    // Next button
+    const nextButton = createPaginationButton(
+     "Next",
+     currentPage < totalPages,
+     () => {
+      if (currentPage < totalPages) getViolators(currentPage + 1);
+     },
+     "»"
+    );
+    paginationElement.appendChild(nextButton);
+   };
+
+   const createPaginationButton = (label, enabled, onClick, symbol = null) => {
+    const li = document.createElement("li");
+    li.classList.add("page-item");
+    if (!enabled) li.classList.add("disabled");
+
+    const a = document.createElement("a");
+    a.classList.add("page-link");
+    a.href = "#";
+    a.innerHTML = symbol || label;
+    a.addEventListener("click", (e) => {
+     e.preventDefault();
+     if (enabled) onClick();
+    });
+
+    li.appendChild(a);
+    return li;
+   };
+
+   const showViolationDetails = async (inspection) => {
+    try {
+     // Clean up any existing modals and backdrops
+     let modalElement = document.getElementById("violationDetailModal");
+     if (modalElement) {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+       modalInstance.dispose();
+      }
+      modalElement.remove();
+     }
+     // Remove any lingering backdrops
+     const backdrops = document.getElementsByClassName("modal-backdrop");
+     while (backdrops.length > 0) {
+      backdrops[0].remove();
+     }
+
+     // Show loading state first
+     const loadingModal = `
+            <div class="modal fade" id="violationDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body text-center p-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading violation details...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+     document.body.insertAdjacentHTML("beforeend", loadingModal);
+     const modal = new bootstrap.Modal(
+      document.getElementById("violationDetailModal")
+     );
+     modal.show();
+
+     // Fetch inspection details
+     const response = await fetch(
+      `${apiUrl}/inspection/inspections/${inspection.inspection_id}`,
+      {
+       headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     if (!response.ok) {
+      throw new Error(`Failed to fetch inspection details: ${response.status}`);
+     }
+
+     const data = await response.json();
+     const inspectionDetails = data.inspection;
+
+     // Create the detailed modal content
+     const detailedModalContent = `
+            <div class="modal fade" id="violationDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header border-bottom-0 bg-danger bg-gradient text-white">
+                            <h5 class="modal-title fw-bold">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Violation Details
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <!-- Business Information -->
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm hover-shadow">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-building fs-4 text-primary me-2"></i>Business Information
+                                            </h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="detail-item">
+                                                        <small class="text-muted d-block">Business Name</small>
+                                                        <span class="fw-semibold">${
+                                                         inspectionDetails
+                                                          .business
+                                                          ?.business_name ||
+                                                         "N/A"
+                                                        }</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="detail-item">
+                                                        <small class="text-muted d-block">Business Permit</small>
+                                                        <span class="fw-semibold">${
+                                                         inspectionDetails
+                                                          .business
+                                                          ?.business_permit ||
+                                                         "N/A"
+                                                        }</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Owner Information -->
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm hover-shadow">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-person fs-4 text-primary me-2"></i>Owner Information
+                                            </h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <small class="text-muted d-block">Owner Name</small>
+                                                        <span class="fw-semibold">${
+                                                         inspectionDetails
+                                                          .business?.owner
+                                                          ?.first_name
+                                                        } ${
+      inspectionDetails.business?.owner?.last_name
+     }</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <small class="text-muted d-block">Email</small>
+                                                        <span class="fw-semibold">${
+                                                         inspectionDetails
+                                                          .business?.owner
+                                                          ?.email || "N/A"
+                                                        }</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <small class="text-muted d-block">Phone</small>
+                                                        <span class="fw-semibold">${
+                                                         inspectionDetails
+                                                          .business?.owner
+                                                          ?.phone_number ||
+                                                         "N/A"
+                                                        }</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Violations List -->
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm hover-shadow">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-exclamation-octagon fs-4 text-danger me-2"></i>Violation Details
+                                            </h6>
+                                            ${inspectionDetails.violations
+                                             .map(
+                                              (violation) => `
+                                                <div class="violation-item p-3 bg-light rounded-3 mb-3">
+                                                    <div class="row g-3">
+                                                        <div class="col-12">
+                                                            <h6 class="fw-bold text-danger mb-2">Nature of Violations:</h6>
+                                                            <ul class="list-unstyled mb-3">
+                                                                ${violation.nature_of_violation
+                                                                 .map(
+                                                                  (nature) => `
+                                                                    <li class="mb-1">
+                                                                        <i class="bi bi-dot text-danger"></i>
+                                                                        ${nature
+                                                                         .trim()
+                                                                         .toUpperCase()}
+                                                                    </li>
+                                                                `
+                                                                 )
+                                                                 .join("")}
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <small class="text-muted d-block">Receipt No.</small>
+                                                                <span class="fw-semibold">${
+                                                                 violation.violation_receipt_no
+                                                                }</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <small class="text-muted d-block">Violation Date</small>
+                                                                <span class="fw-semibold">${formatDate(
+                                                                 violation.violation_date
+                                                                )}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <small class="text-muted d-block">Due Date</small>
+                                                                <span class="fw-semibold">${formatDate(
+                                                                 violation.due_date
+                                                                )}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <small class="text-muted d-block">Status</small>
+                                                                <span class="badge ${
+                                                                 violation.status ===
+                                                                 "pending"
+                                                                  ? "bg-warning"
+                                                                  : violation.status ===
+                                                                    "paid"
+                                                                  ? "bg-success"
+                                                                  : violation.status ===
+                                                                    "overdue"
+                                                                  ? "bg-danger"
+                                                                  : "bg-secondary"
+                                                                } px-3 py-2">${violation.status.toUpperCase()}</span>
+                                                                ${
+                                                                 violation.status ===
+                                                                 "overdue"
+                                                                  ? `
+                                                                    <div class="mt-1">
+                                                                        <small class="text-danger">
+                                                                            <i class="bi bi-exclamation-circle"></i>
+                                                                            ${calculateDaysOverdue(
+                                                                             violation.due_date
+                                                                            )} days overdue
+                                                                        </small>
+                                                                    </div>
+                                                                `
+                                                                  : ""
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `
+                                             )
+                                             .join("")}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- New Modal Footer with Resolve Button -->
+                        ${
+                         inspectionDetails.violations.some(
+                          (v) =>
+                           v.status === "pending" || v.status === "overdue"
+                         )
+                          ? `
+                            <div class="modal-footer border-top bg-light">
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <div class="text-muted">
+                                        <small><i class="bi bi-info-circle me-1"></i>Click resolve to mark this violation as paid</small>
+                                    </div>
+                                    <button 
+                                        class="btn btn-success btn-lg px-4"
+                                        data-violation-id="${inspectionDetails.violations[0].violation_id}"
+                                        onclick="resolveViolation('${inspectionDetails.violations[0].violation_id}', this)">
+                                        <i class="bi bi-check-circle-fill me-2"></i>Resolve Violation
+                                    </button>
+                                </div>
+                            </div>
+                        `
+                          : ""
+                        }
+                    </div>
+                </div>
+            </div>`;
+
+     // Remove loading modal and show detailed modal
+     modalElement = document.getElementById("violationDetailModal");
+     if (modalElement) {
+      modalElement.remove();
+     }
+
+     document.body.insertAdjacentHTML("beforeend", detailedModalContent);
+     const detailedModal = new bootstrap.Modal(
+      document.getElementById("violationDetailModal")
+     );
+     detailedModal.show();
+
+     // Clean up modal and backdrop on close
+     detailedModal._element.addEventListener("hidden.bs.modal", function () {
+      this.remove();
+      const backdrops = document.getElementsByClassName("modal-backdrop");
+      while (backdrops.length > 0) {
+       backdrops[0].remove();
+      }
+      document.body.style.overflow = "";
+      document.body.classList.remove("modal-open");
+     });
+    } catch (error) {
+     console.error("Error showing violation details:", error);
+     // Show error modal if needed
+    }
+   };
+
+   window.resolveViolation = async (violationId, button) => {
+    try {
+     // Disable button and show loading state
+     button.disabled = true;
+     const originalContent = button.innerHTML;
+     button.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Resolving...
+        `;
+
+     const response = await fetch(
+      `${apiUrl}/violations/${violationId}/resolve`,
+      {
+       method: "PUT",
+       headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     if (!response.ok) {
+      throw new Error(`Failed to resolve violation: ${response.status}`);
+     }
+
+     const data = await response.json();
+
+     // Show success message
+     Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: "Violation has been resolved successfully.",
+      showConfirmButton: false,
+      timer: 1500,
+     });
+
+     // Refresh the violations table
+     getViolators(currentPage);
+
+     // Close the modal
+     const modal = bootstrap.Modal.getInstance(
+      document.getElementById("violationDetailModal")
+     );
+     if (modal) {
+      modal.hide();
+     }
+    } catch (error) {
+     console.error("Error resolving violation:", error);
+
+     // Reset button state
+     button.disabled = false;
+     button.innerHTML = originalContent;
+
+     // Show error message
+     Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to resolve violation. Please try again.",
+     });
+    }
+   };
+
+   const getOverdueViolators = async (page = 1) => {
+    try {
+     const overdueTbody = document.getElementById("overdue-tbody");
+     overdueTbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+     const response = await fetch(
+      `${apiUrl}/inspection/violators?page=${page}&status=overdue`,
+      {
+       method: "GET",
+       headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+     }
+
+     const data = await response.json();
+     const inspections = data.inspections.data || [];
+     const currentPage = data.inspections.current_page;
+     const totalPages = data.inspections.last_page;
+
+     renderOverdueTable(inspections, currentPage);
+     renderOverduePagination(currentPage, totalPages);
+    } catch (error) {
+     console.error("Error fetching overdue violators:", error);
+     document.getElementById("overdue-tbody").innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-danger">
+                    Error loading overdue violations. Please try again.
+                </td>
+            </tr>
+        `;
+    }
+   };
+
+   const calculateDaysOverdue = (dueDate) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    const diffTime = Math.abs(today - due);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+   };
+
+   const renderOverdueTable = (violators, currentPage) => {
+    const overdueTbody = document.getElementById("overdue-tbody");
+    overdueTbody.innerHTML = "";
+
+    if (!violators || violators.length === 0) {
+     overdueTbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">No overdue violations found</td>
+            </tr>
+        `;
+     return;
+    }
+
+    violators.forEach((violator, index) => {
+     const row = document.createElement("tr");
+     row.style.cursor = "pointer";
+     const actualIndex = (currentPage - 1) * 20 + index + 1;
+     const daysOverdue = calculateDaysOverdue(violator.violations[0].due_date);
+
+     row.innerHTML = `
+            <td>${actualIndex}</td>
+            <td>${violator.business?.business_name || "N/A"}</td>
+            <td>${violator.business?.status || "N/A"}</td>
+            <td>${violator.inspector?.first_name || "N/A"} ${
+      violator.inspector?.last_name || "N/A"
+     }</td>
+            <td>${formatDate(violator.violations[0].due_date)}</td>
+            <td>
+                <span class="badge bg-danger">${daysOverdue} days</span>
+            </td>
+            <td>
+                <span class="badge bg-danger">OVERDUE</span>
+            </td>
+        `;
+
+     row.addEventListener("click", () => showViolationDetails(violator));
+     overdueTbody.appendChild(row);
+    });
+   };
+
+   const renderOverduePagination = (currentPage, totalPages) => {
+    const paginationElement = document.getElementById("overdue-pagination");
+    paginationElement.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // Previous button
+    const prevButton = createPaginationButton(
+     "Previous",
+     currentPage > 1,
+     () => {
+      if (currentPage > 1) getOverdueViolators(currentPage - 1);
+     },
+     "«"
+    );
+    paginationElement.appendChild(prevButton);
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+     const pageButton = createPaginationButton(i.toString(), true, () => {
+      getOverdueViolators(i);
+     });
+     if (i === currentPage) pageButton.classList.add("active");
+     paginationElement.appendChild(pageButton);
+    }
+
+    // Next button
+    const nextButton = createPaginationButton(
+     "Next",
+     currentPage < totalPages,
+     () => {
+      if (currentPage < totalPages) getOverdueViolators(currentPage + 1);
+     },
+     "»"
+    );
+    paginationElement.appendChild(nextButton);
+   };
+
    // Fetch data on page load
    getCardInfo();
+   getViolators();
+   getOverdueViolators();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
  </body>

@@ -49,7 +49,6 @@
    const apiUrl = CONFIG.API_BASE_URL;
    // Define the handleLogout function first
    const handleLogout = async () => {
-    console.log("Logout button clicked"); // Debugging log
     const response = await fetch(`${apiUrl}/admin/admin-logout`, {
      method: "POST",
      headers: {
@@ -95,7 +94,6 @@
      .then((res) => res.text())
      .then((data) => {
       document.getElementById("sidebar").innerHTML = data;
-      console.log("Sidebar loaded successfully"); // Debugging log
 
       // Add event listeners to sidebar links
       const links = document.querySelectorAll(".nav-links a");
@@ -110,10 +108,8 @@
       // Add event listener for the logout button
       const logoutButton = document.getElementById("logoutButton");
       if (logoutButton) {
-       console.log("Logout button found"); // Debugging log
        logoutButton.addEventListener("click", handleLogout);
       } else {
-       console.error("Logout button not found");
       }
 
       // Load default content (dashboard)
@@ -146,7 +142,6 @@
       }
      })
      .catch((error) => {
-      console.error("Error loading content:", error);
       document.getElementById("content").innerHTML =
        "<h2>Error loading the page. Please try again.</h2>";
      });
