@@ -26,6 +26,8 @@
     background-color: #eff3fc;
     margin: 0;
     padding: 0;
+    padding-right: 0 !important;
+    overflow: auto !important;
    }
    .container {
     width: 80%;
@@ -94,6 +96,10 @@
    .modal-body {
     max-height: 70vh;
     overflow-y: auto;
+   }
+   .modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
    }
   </style>
  </head>
@@ -548,13 +554,31 @@
                                           ?.business_permit || "N/A"
                                         }</p>
                                     </div>
-                                    <div>
+                                    <div class="mb-3">
                                         <label class="text-muted small">Status</label>
                                         <p class="mb-0">
                                             <span class="badge bg-success rounded-pill">${
                                              inspectionDetails.business
                                               ?.status || "N/A"
                                             }</span>
+                                        </p>
+                                    </div>
+                                    <!-- Add Address Information -->
+                                    <div class="mt-3">
+                                        <label class="text-muted small">
+                                            <i class="bi bi-geo-alt-fill me-1"></i>Address
+                                        </label>
+                                        <p class="fw-semibold mb-2">
+                                            ${
+                                             inspectionDetails.business?.address
+                                              ?.street_address || "N/A"
+                                            }<br>
+                                            ${
+                                             inspectionDetails.business?.address
+                                              ?.city || "N/A"
+                                            }, ${
+      inspectionDetails.business?.address?.postal_code || "N/A"
+     }
                                         </p>
                                     </div>
                                 </div>
@@ -752,8 +776,9 @@
       while (backdrops.length > 0) {
        backdrops[0].remove();
       }
-      document.body.style.overflow = "";
       document.body.classList.remove("modal-open");
+      document.body.style.removeProperty("padding-right");
+      document.body.style.overflow = "";
      });
     } catch (error) {
      console.error("Error showing inspection details:", error);

@@ -30,6 +30,7 @@
    body {
     font-family: "Poppins", sans-serif !important;
     background-color: #eff3fc;
+    padding-right: 0 !important;
    }
    .card {
     border: none;
@@ -50,6 +51,17 @@
    }
    .bg-c-yellow {
     background: #ffb64d;
+   }
+   .modal {
+    padding-right: 0 !important;
+   }
+   .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+   }
+   .modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
    }
   </style>
  </head>
@@ -372,7 +384,7 @@
 
    const showViolationDetails = async (inspection) => {
     try {
-     // Clean up any existing modals and backdrops
+     // Clean up any existing modals, backdrops, and body styles
      let modalElement = document.getElementById("violationDetailModal");
      if (modalElement) {
       const modalInstance = bootstrap.Modal.getInstance(modalElement);
@@ -381,11 +393,17 @@
       }
       modalElement.remove();
      }
+
      // Remove any lingering backdrops
      const backdrops = document.getElementsByClassName("modal-backdrop");
      while (backdrops.length > 0) {
       backdrops[0].remove();
      }
+
+     // Reset body styles
+     document.body.style.paddingRight = "";
+     document.body.style.overflow = "";
+     document.body.classList.remove("modal-open");
 
      // Show loading state first
      const loadingModal = `
@@ -662,6 +680,7 @@
       while (backdrops.length > 0) {
        backdrops[0].remove();
       }
+      document.body.style.paddingRight = "";
       document.body.style.overflow = "";
       document.body.classList.remove("modal-open");
      });

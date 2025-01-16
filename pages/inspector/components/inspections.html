@@ -1359,6 +1359,40 @@
                             </div>
                         </div>
 
+                        <!-- Business Location -->
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm hover-shadow">
+                                <div class="card-body">
+                                    <h6 class="card-title fw-bold mb-3">
+                                        <i class="bi bi-geo-alt-fill fs-4 text-primary me-2"></i>Business Location
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="text-muted small">Street Address</label>
+                                            <p class="fw-semibold mb-0">${
+                                             inspectionDetails.business?.address
+                                              ?.street_address || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="text-muted small">City</label>
+                                            <p class="fw-semibold mb-0">${
+                                             inspectionDetails.business?.address
+                                              ?.city || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="text-muted small">Postal Code</label>
+                                            <p class="fw-semibold mb-0">${
+                                             inspectionDetails.business?.address
+                                              ?.postal_code || "N/A"
+                                            }</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Inspection Details -->
                         <div class="col-12">
                             <div class="card border-0 shadow-sm hover-shadow">
@@ -1604,11 +1638,11 @@
 
     // Address fields
     document.getElementById("street").value =
-     inspection.business?.address?.street || "";
+     inspection.business?.address?.street_address || "";
     document.getElementById("city").value =
      inspection.business?.address?.city || "";
     document.getElementById("zip").value =
-     inspection.business?.address?.zip || "";
+     inspection.business?.address?.postal_code || "";
 
     // Inspection fields
     document.getElementById("typeOfInspection").value =
