@@ -107,7 +107,9 @@
    <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content rounded-3 shadow-lg">
      <div class="modal-header border-0">
-      <h5 class="modal-title" id="violatorModalLabel">Business Inspection</h5>
+      <h5 class="modal-title" id="violatorModalLabel">
+       <span id="modalActionText">Add</span> Business Inspection
+      </h5>
       <button
        type="button"
        class="btn-close"
@@ -117,6 +119,7 @@
      </div>
      <div class="modal-body" style="max-height: 500px">
       <form id="inspectionForm">
+       <input type="hidden" id="inspectionId" name="inspectionId" value="" />
        <!-- Owner's Information -->
        <div class="row mb-2">
         <div class="col-md-6">
@@ -482,7 +485,7 @@
      </div>
      <div class="modal-footer border-0 shadow-lg">
       <button type="submit" class="btn btn-primary h6" form="inspectionForm">
-       Submit
+       <span id="submitButtonText">Submit</span>
       </button>
      </div>
     </div>
@@ -944,11 +947,20 @@
                 }">
                     ${inspection.with_violations ? "Yes" : "No"}
                 </span>
+                <button class="btn btn-sm btn-primary edit-inspection ms-2" 
+                    data-inspection-id="${inspection.inspection_id}">
+                    <i class="bi bi-pencil"></i>
+                </button>
             </td>
         `;
 
      // Add click event listener to show inspection details
-     row.addEventListener("click", () => showInspectionDetails(inspection));
+     row.addEventListener("click", (e) => {
+      // Don't show details if clicking the edit button
+      if (!e.target.closest(".edit-inspection")) {
+       showInspectionDetails(inspection);
+      }
+     });
 
      inspectionsTbody.appendChild(row);
     });
@@ -1560,6 +1572,171 @@
     .addEventListener("hidden.bs.modal", function () {
      // Bootstrap handles the body overflow automatically
     });
+
+   let isEditing = false;
+
+   const resetForm = () => {
+    document.getElementById("inspectionForm").reset();
+    document.getElementById("inspectionId").value = "";
+    document.getElementById("natureOfViolationContainer").style.display =
+     "none";
+    isEditing = false;
+    document.getElementById("modalActionText").textContent = "Add";
+    document.getElementById("submitButtonText").textContent = "Submit";
+   };
+
+   const populateForm = (inspection) => {
+    // Basic fields
+    document.getElementById("ownerFirstName").value =
+     inspection.business?.owner?.first_name || "";
+    document.getElementById("ownerLastName").value =
+     inspection.business?.owner?.last_name || "";
+    document.getElementById("ownerEmail").value =
+     inspection.business?.owner?.email || "";
+    document.getElementById("ownerPhoneNumber").value =
+     inspection.business?.owner?.phone_number || "";
+    document.getElementById("businessName").value =
+     inspection.business?.business_name || "";
+    document.getElementById("businessPermit").value =
+     inspection.business?.business_permit || "";
+    document.getElementById("businessStatus").value =
+     inspection.business?.status || "";
+
+    // Address fields
+    document.getElementById("street").value =
+     inspection.business?.address?.street || "";
+    document.getElementById("city").value =
+     inspection.business?.address?.city || "";
+    document.getElementById("zip").value =
+     inspection.business?.address?.zip || "";
+
+    // Inspection fields
+    document.getElementById("typeOfInspection").value =
+     inspection.type_of_inspection;
+    document.getElementById("withViolations").value = inspection.with_violations
+     ? "true"
+     : "false";
+
+    // Handle violations
+    if (inspection.with_violations) {
+     document.getElementById("natureOfViolationContainer").style.display =
+      "block";
+     // Reset all checkboxes first
+     document
+      .querySelectorAll('input[name="natureOfViolation[]"]')
+      .forEach((cb) => (cb.checked = false));
+
+     // Check the relevant violations
+     inspection.violations.forEach((violation) => {
+      violation.nature_of_violation.forEach((nature) => {
+       const checkbox = Array.from(
+        document.querySelectorAll('input[name="natureOfViolation[]"]')
+       ).find((cb) => cb.value.toLowerCase() === nature.toLowerCase());
+       if (checkbox) checkbox.checked = true;
+      });
+
+      if (violation.violation_receipt_no) {
+       document.getElementById("violationReceipt").value =
+        violation.violation_receipt_no;
+      }
+      if (violation.due_date) {
+       document.getElementById("dueDate").value =
+        violation.due_date.split("T")[0];
+      }
+     });
+    }
+   };
+
+   // Update form submission handler
+   inspectionForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    try {
+     const formData = new FormData(this);
+     const inspectionId = document.getElementById("inspectionId").value;
+     const endpoint = isEditing
+      ? `${apiUrl}/inspector/update-inspection/${inspectionId}`
+      : `${apiUrl}/inspector/add-inspection`;
+
+     const method = isEditing ? "PUT" : "POST";
+
+     const response = await fetch(endpoint, {
+      method: method,
+      headers: {
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: formData,
+     });
+
+     if (!response.ok)
+      throw new Error(`HTTP error! status: ${response.status}`);
+
+     // Hide the form modal
+     const violatorModal = bootstrap.Modal.getInstance(
+      document.getElementById("violatorModal")
+     );
+     violatorModal.hide();
+
+     // Show success modal
+     const successModal = new bootstrap.Modal(
+      document.getElementById("successModal")
+     );
+     successModal.show();
+
+     // Reset form and refresh table
+     resetForm();
+     fetchInspections(currentPage);
+    } catch (error) {
+     console.error("Submission error:", error);
+     // Show error message
+    }
+   });
+
+   // Add click handler for edit buttons
+   document.addEventListener("click", async function (e) {
+    if (e.target.closest(".edit-inspection")) {
+     e.preventDefault();
+     e.stopPropagation(); // Stop the click event from bubbling up to the row
+
+     const button = e.target.closest(".edit-inspection");
+     const inspectionId = button.dataset.inspectionId;
+
+     try {
+      const response = await fetch(
+       `${apiUrl}/inspection/inspections/${inspectionId}`,
+       {
+        headers: {
+         Accept: "application/json",
+         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+       }
+      );
+
+      if (!response.ok)
+       throw new Error(`HTTP error! status: ${response.status}`);
+
+      const data = await response.json();
+      isEditing = true;
+      document.getElementById("modalActionText").textContent = "Update";
+      document.getElementById("submitButtonText").textContent = "Update";
+      document.getElementById("inspectionId").value = inspectionId;
+
+      populateForm(data.inspection);
+
+      const modal = new bootstrap.Modal(
+       document.getElementById("violatorModal")
+      );
+      modal.show();
+     } catch (error) {
+      console.error("Error fetching inspection details:", error);
+     }
+    }
+   });
+
+   // Reset form when modal is hidden
+   document
+    .getElementById("violatorModal")
+    .addEventListener("hidden.bs.modal", resetForm);
   </script>
  </body>
 </html>

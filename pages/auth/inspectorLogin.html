@@ -142,12 +142,7 @@
       }),
      });
 
-     console.log("Response: ", response);
-
      const data = await response.json();
-
-     console.log(data);
-
      // Check if the login is successful
      if (response.ok) {
       const token = data.token.split("|")[1]; // Get everything after the pipe
