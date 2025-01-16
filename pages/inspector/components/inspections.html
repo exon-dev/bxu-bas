@@ -558,11 +558,11 @@
     <h4>Inspected Businesses</h4>
     <section class="card mt-3">
      <div class="card-body">
-      <h4>Filter & Search</h4>
+      <h4 class="mb-4">Filter & Search</h4>
       <div class="filters">
        <form id="filters-form">
-        <div class="row">
-         <div class="col-md-3">
+        <div class="row g-3">
+         <div class="col-md-4">
           <label for="search-name" class="form-label"
            >Search Business Name</label
           >
@@ -573,13 +573,22 @@
            placeholder="Enter business name..."
           />
          </div>
-         <div class="col-md-3">
+         <div class="col-md-4">
+          <label for="receipt-no" class="form-label">Receipt No:</label>
+          <input
+           type="text"
+           class="form-control"
+           id="receipt-no"
+           placeholder="Search by violation receipt no..."
+          />
+         </div>
+         <div class="col-md-4">
           <label for="inspection-date" class="form-label"
            >Filter by Inspection Date</label
           >
           <input type="date" id="inspection-date" class="form-control" />
          </div>
-         <div class="col-md-3">
+         <div class="col-md-4">
           <label for="violation" class="form-label">Filter by Violation</label>
           <select id="violation" class="form-select">
            <option value="">Select Violation</option>
@@ -587,7 +596,7 @@
            <option value="no">No</option>
           </select>
          </div>
-         <div class="col-md-3">
+         <div class="col-md-4">
           <label for="sort-order" class="form-label">Sort by Date</label>
           <select id="sort-order" class="form-select">
            <option value="latest">Latest to Oldest</option>
@@ -795,11 +804,6 @@
       ? `${apiUrl}/inspector/update-inspection/${inspectionId}`
       : `${apiUrl}/inspector/add-inspection`;
 
-     // Log formData for debugging
-     for (let pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-     }
-
      const response = await fetch(endpoint, {
       method: "POST",
       headers: {
@@ -994,6 +998,7 @@
 
      const inspectionDate = document.getElementById("inspection-date").value;
      const violation = document.getElementById("violation").value;
+     const receiptNo = document.getElementById("receipt-no").value;
      const searchName = document.getElementById("search-name").value;
      const sortOrder = document.getElementById("sort-order").value;
      const sortOrderParam = sortOrder === "oldest" ? "asc" : "desc";
@@ -1002,6 +1007,7 @@
       page: page,
       ...(inspectionDate && { inspection_date: inspectionDate }),
       ...(violation && { with_violations: violation }),
+      ...(receiptNo && { violation_receipt_no: receiptNo }),
       ...(searchName && { business_name: searchName }),
       sort_order: sortOrderParam,
      });
@@ -1028,7 +1034,7 @@
      currentPage = data.inspections.current_page || 1;
      recordsPerPage = data.inspections.per_page || 15;
 
-     renderTable(); // Call to render the table with the fetched data
+     renderTable();
     } catch (error) {
      console.error("Error fetching inspections:", error);
      const inspectionsTbody = document.getElementById("inspections-tbody");
@@ -1042,36 +1048,47 @@
     }
    };
 
+   // First, define the debounce function at the top of your script
+   const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+     clearTimeout(timeoutId);
+     timeoutId = setTimeout(() => func.apply(null, args), delay);
+    };
+   };
+
+   // Create a debounced version of fetchInspections
+   const debouncedFetchInspections = debounce((page = 1) => {
+    fetchInspections(page);
+   }, 300);
+
+   // Update your filter setup
    const setupFilterListeners = () => {
     const filterElements = [
+     "search-name",
      "inspection-date",
      "violation",
-     "search-name",
+     "receipt-no",
      "sort-order",
     ];
 
     filterElements.forEach((elementId) => {
      const element = document.getElementById(elementId);
      if (element) {
-      if (element.type === "text") {
-       // Add input event listener for text search
-       element.addEventListener("input", () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-         currentPage = 1;
-         fetchInspections(currentPage);
-        }, 300);
-       });
-      } else {
-       // For other elements, keep the change event
-       element.addEventListener("change", () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-         currentPage = 1;
-         fetchInspections(currentPage);
-        }, 300);
-       });
-      }
+      // Remove any existing listeners first
+      const newElement = element.cloneNode(true);
+      element.parentNode.replaceChild(newElement, element);
+
+      // Add the new listener
+      newElement.addEventListener("input", () => {
+       currentPage = 1;
+       debouncedFetchInspections(currentPage);
+      });
+
+      newElement.addEventListener("change", () => {
+       currentPage = 1;
+       debouncedFetchInspections(currentPage);
+      });
      }
     });
    };
@@ -1786,11 +1803,6 @@
       ? `${apiUrl}/inspector/update-inspection/${inspectionId}`
       : `${apiUrl}/inspector/add-inspection`;
 
-     // Log formData for debugging
-     for (let pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-     }
-
      const response = await fetch(endpoint, {
       method: "POST",
       headers: {
@@ -1900,6 +1912,12 @@
     .addEventListener("hidden.bs.modal", function () {
      cleanupModal();
     });
+
+   // Call setupFilterListeners after the DOM is loaded
+   document.addEventListener("DOMContentLoaded", () => {
+    setupFilterListeners();
+    fetchInspections(currentPage);
+   });
   </script>
  </body>
 </html>
