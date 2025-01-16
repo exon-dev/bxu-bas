@@ -101,6 +101,10 @@
     overflow: auto !important;
     padding-right: 0 !important;
    }
+   .table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    cursor: pointer;
+   }
   </style>
  </head>
  <body id="violations">
@@ -159,7 +163,7 @@
       </form>
      </div>
      <h4>Inspected Businesses</h4>
-     <table class="table">
+     <table class="table table-hover">
       <thead>
        <tr>
         <th>No.</th>
@@ -171,7 +175,9 @@
         <th>With Violations</th>
        </tr>
       </thead>
-      <tbody id="inspections-tbody"></tbody>
+      <tbody id="inspections-tbody">
+       <!-- Rendered rows will be inserted here -->
+      </tbody>
      </table>
      <nav>
       <ul class="pagination" id="pagination-controls"></ul>
@@ -232,6 +238,7 @@
 
     inspectionsData.forEach((inspection, index) => {
      const row = document.createElement("tr");
+     row.className = "inspection-row";
      row.style.cursor = "pointer";
      const actualIndex = (currentPage - 1) * recordsPerPage + index + 1;
 
@@ -239,17 +246,25 @@
             <td>${actualIndex}</td>
             <td>${inspection.business?.business_name || "N/A"}</td>
             <td>${inspection.business?.status || "N/A"}</td>
-            <td>${inspection.inspector?.first_name || "N/A"} ${
+            <td>${inspection.inspector?.first_name || ""} ${
       inspection.inspector?.last_name || "N/A"
      }</td>
             <td>${formatDate(inspection.inspection_date)}</td>
             <td>${inspection.type_of_inspection || "N/A"}</td>
-            <td><span class="badge ${
-             inspection.with_violations ? "bg-danger" : "bg-success"
-            }">${inspection.with_violations ? "Yes" : "No"}</span></td>
+            <td class="align-middle">
+                <span class="badge ${
+                 inspection.with_violations ? "bg-danger" : "bg-success"
+                } py-2 px-3">
+                    ${inspection.with_violations ? "Yes" : "No"}
+                </span>
+            </td>
         `;
 
-     row.addEventListener("click", () => showInspectionDetails(inspection));
+     // Add click event listener to show inspection details
+     row.addEventListener("click", () => {
+      showInspectionDetails(inspection);
+     });
+
      inspectionsTbody.appendChild(row);
     });
 
@@ -534,8 +549,8 @@
 
                     <div class="row g-4">
                         <!-- Business Information -->
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm hover-shadow">
                                 <div class="card-body">
                                     <h6 class="card-title fw-bold mb-3">
                                         <i class="bi bi-building fs-4 text-primary me-2"></i>Business Information
@@ -585,39 +600,35 @@
                             </div>
                         </div>
 
-                        <!-- Owner Information -->
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        <!-- Business Location -->
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm hover-shadow">
                                 <div class="card-body">
                                     <h6 class="card-title fw-bold mb-3">
-                                        <i class="bi bi-person fs-4 text-primary me-2"></i>Owner Information
+                                        <i class="bi bi-geo-alt-fill fs-4 text-primary me-2"></i>Business Location
                                     </h6>
-                                    <div class="mb-3">
-                                        <label class="text-muted small">Owner Name</label>
-                                        <p class="fw-semibold mb-2">${
-                                         inspectionDetails.business?.owner
-                                          ?.first_name
-                                        } ${
-      inspectionDetails.business?.owner?.last_name
-     }</p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="text-muted small">
-                                            <i class="bi bi-envelope-fill me-1"></i>Email
-                                        </label>
-                                        <p class="fw-semibold mb-2">${
-                                         inspectionDetails.business?.owner
-                                          ?.email || "N/A"
-                                        }</p>
-                                    </div>
-                                    <div>
-                                        <label class="text-muted small">
-                                            <i class="bi bi-telephone-fill me-1"></i>Phone
-                                        </label>
-                                        <p class="fw-semibold mb-0">${
-                                         inspectionDetails.business?.owner
-                                          ?.phone_number || "N/A"
-                                        }</p>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="text-muted small">Street Address</label>
+                                            <p class="fw-semibold mb-0">${
+                                             inspectionDetails.business?.address
+                                              ?.street_address || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="text-muted small">City</label>
+                                            <p class="fw-semibold mb-0">${
+                                             inspectionDetails.business?.address
+                                              ?.city || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="text-muted small">Postal Code</label>
+                                            <p class="fw-semibold mb-0">${
+                                             inspectionDetails.business?.address
+                                              ?.postal_code || "N/A"
+                                            }</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

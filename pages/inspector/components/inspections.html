@@ -79,6 +79,11 @@
    max-height: 70vh;
    overflow-y: auto;
   }
+
+  .table-hover tbody tr:hover {
+   background-color: rgba(0, 0, 0, 0.05) !important;
+   cursor: pointer;
+  }
  </style>
  <body>
   <div class="card">
@@ -594,7 +599,7 @@
       </div>
      </div>
     </section>
-    <table class="table">
+    <table class="table table-hover">
      <thead>
       <tr>
        <th>No.</th>
@@ -603,6 +608,7 @@
        <th>Inspection Date</th>
        <th>Type of Inspection</th>
        <th>With Violations</th>
+       <th></th>
       </tr>
      </thead>
      <tbody id="inspections-tbody">
@@ -693,98 +699,108 @@
    // Initial call to set the required attributes correctly on page load
    toggleViolationFields();
 
-   // Form submission handling
-   const inspectionForm = document.getElementById("inspectionForm");
+   // Add cleanup modal function at the top level
+   const cleanupModal = () => {
+    // Remove modal backdrop
+    const backdrops = document.getElementsByClassName("modal-backdrop");
+    while (backdrops.length > 0) {
+     backdrops[0].remove();
+    }
 
+    // Reset body styles
+    document.body.classList.remove("modal-open");
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
+   };
+
+   // Update the form submission handler
    inspectionForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     try {
      const formData = new FormData();
 
-     // Basic fields
+     // Map form fields to backend expected names
      formData.append(
       "owner_first_name",
-      document.getElementById("ownerFirstName").value.trim()
+      document.getElementById("ownerFirstName").value
      );
      formData.append(
       "owner_last_name",
-      document.getElementById("ownerLastName").value.trim()
+      document.getElementById("ownerLastName").value
      );
      formData.append(
       "owner_email",
-      document.getElementById("ownerEmail").value.trim()
+      document.getElementById("ownerEmail").value
      );
      formData.append(
       "owner_phone_number",
-      document.getElementById("ownerPhoneNumber").value.trim()
+      document.getElementById("ownerPhoneNumber").value
      );
      formData.append(
       "business_name",
-      document.getElementById("businessName").value.trim()
+      document.getElementById("businessName").value
      );
      formData.append(
       "business_permit",
-      document.getElementById("businessPermit").value.trim()
+      document.getElementById("businessPermit").value
      );
      formData.append(
       "business_status",
       document.getElementById("businessStatus").value
      );
-
-     // Address fields
-     formData.append("street", document.getElementById("street").value.trim());
-     formData.append("city", document.getElementById("city").value.trim());
-     formData.append("zip", document.getElementById("zip").value.trim());
-
-     // Inspection fields
+     formData.append("street", document.getElementById("street").value);
+     formData.append("city", document.getElementById("city").value);
+     formData.append("zip", document.getElementById("zip").value);
      formData.append(
       "type_of_inspection",
       document.getElementById("typeOfInspection").value
      );
 
-     // Convert with_violations select value to boolean
-     const withViolationsSelect = document.getElementById("withViolations");
-     const hasViolations = withViolationsSelect.value === "true";
-     formData.append("with_violations", hasViolations ? "1" : "0");
+     // Handle with_violations
+     const withViolationsValue =
+      document.getElementById("withViolations").value;
+     formData.append("with_violations", withViolationsValue);
 
-     // Only append violation-related fields if hasViolations is true
-     if (hasViolations) {
-      const violations = Array.from(
+     // Handle violations if "Yes" is selected
+     if (withViolationsValue === "true") {
+      const selectedViolations = Array.from(
        document.querySelectorAll('input[name="natureOfViolation[]"]:checked')
-      ).map((checkbox) => checkbox.value);
+      ).map((cb) => cb.value);
 
-      if (violations.length > 0) {
-       // Append each violation as a separate array item
-       violations.forEach((violation, index) => {
-        formData.append(`nature_of_violations[]`, violation);
-       });
-      }
+      selectedViolations.forEach((violation) => {
+       formData.append("nature_of_violations[]", violation);
+      });
 
-      const violationReceipt = document
-       .getElementById("violationReceipt")
-       .value.trim();
-      if (violationReceipt) {
-       formData.append("violation_receipt", violationReceipt);
-      }
-
-      const dueDate = document.getElementById("dueDate").value;
-      if (dueDate) {
-       formData.append("due_date", dueDate);
-      }
+      formData.append(
+       "violation_receipt",
+       document.getElementById("violationReceipt").value
+      );
+      formData.append("due_date", document.getElementById("dueDate").value);
      }
 
-     // Handle image file
-     const imageFile = document.getElementById("businessImage").files[0];
-     if (imageFile) {
-      formData.append("image", imageFile);
+     // Handle file upload
+     const businessImage = document.getElementById("businessImage").files[0];
+     if (businessImage) {
+      formData.append("image", businessImage);
      }
 
-     // Debug log the FormData
+     // Add inspection ID for updates
+     const inspectionId = document.getElementById("inspectionId").value;
+     if (isEditing) {
+      formData.append("_method", "PUT");
+     }
+
+     const endpoint = isEditing
+      ? `${apiUrl}/inspector/update-inspection/${inspectionId}`
+      : `${apiUrl}/inspector/add-inspection`;
+
+     // Log formData for debugging
      for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
      }
 
-     const response = await fetch(`${apiUrl}/inspector/add-inspection`, {
+     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -792,32 +808,19 @@
       body: formData,
      });
 
-     const responseText = await response.text();
-
-     let result;
-     try {
-      result = JSON.parse(responseText);
-     } catch (e) {
-      console.error("Failed to parse response:", responseText);
-      throw new Error("Server returned invalid JSON response");
-     }
-
      if (!response.ok) {
-      if (result.errors) {
-       // Create a formatted error message from validation errors
-       const errorMessages = Object.values(result.errors).flat().join("\n");
-       throw new Error(errorMessages);
-      }
+      const errorData = await response.json();
       throw new Error(
-       result.message || `HTTP error! status: ${response.status}`
+       errorData.message || `HTTP error! status: ${response.status}`
       );
      }
 
-     // Hide the form modal
+     // Hide the form modal and cleanup
      const violatorModal = bootstrap.Modal.getInstance(
       document.getElementById("violatorModal")
      );
      violatorModal.hide();
+     cleanupModal();
 
      // Show success modal
      const successModal = new bootstrap.Modal(
@@ -825,18 +828,11 @@
      );
      successModal.show();
 
-     // Reset form
-     inspectionForm.reset();
-
-     // Reset violations container visibility
-     document.getElementById("natureOfViolationContainer").style.display =
-      "none";
-
-     // Refresh the inspections list
+     // Reset form and refresh table
+     resetForm();
      fetchInspections(currentPage);
     } catch (error) {
      console.error("Submission error:", error);
-
      // Show error in a more user-friendly way
      const errorAlert = document.createElement("div");
      errorAlert.className = "alert alert-danger alert-dismissible fade show";
@@ -854,6 +850,19 @@
      }, 5000);
     }
    });
+
+   // Add event listeners for modal hidden events
+   document
+    .getElementById("violatorModal")
+    .addEventListener("hidden.bs.modal", function () {
+     cleanupModal();
+    });
+
+   document
+    .getElementById("successModal")
+    .addEventListener("hidden.bs.modal", function () {
+     cleanupModal();
+    });
 
    // Add event listener for the violations select
    document
@@ -941,13 +950,15 @@
             <td>${inspection.business?.status || "N/A"}</td>
             <td>${formatDate(inspection.inspection_date)}</td>
             <td>${inspection.type_of_inspection || "N/A"}</td>
-            <td>
+            <td class="align-middle">
                 <span class="badge ${
                  inspection.with_violations ? "bg-danger" : "bg-success"
-                }">
+                } py-2 px-3">
                     ${inspection.with_violations ? "Yes" : "No"}
                 </span>
-                <button class="btn btn-sm btn-primary edit-inspection ms-2" 
+            </td>
+            <td class="align-middle text-end">
+                <button class="btn btn-sm btn-primary edit-inspection" 
                     data-inspection-id="${inspection.inspection_id}">
                     <i class="bi bi-pencil"></i>
                 </button>
@@ -1652,9 +1663,15 @@
      : "false";
 
     // Handle violations
-    if (inspection.with_violations) {
+    if (
+     inspection.with_violations &&
+     inspection.violations &&
+     Array.isArray(inspection.violations)
+    ) {
+     document.getElementById("withViolations").value = "true";
      document.getElementById("natureOfViolationContainer").style.display =
       "block";
+
      // Reset all checkboxes first
      document
       .querySelectorAll('input[name="natureOfViolation[]"]')
@@ -1662,22 +1679,28 @@
 
      // Check the relevant violations
      inspection.violations.forEach((violation) => {
-      violation.nature_of_violation.forEach((nature) => {
-       const checkbox = Array.from(
-        document.querySelectorAll('input[name="natureOfViolation[]"]')
-       ).find((cb) => cb.value.toLowerCase() === nature.toLowerCase());
-       if (checkbox) checkbox.checked = true;
-      });
+      if (Array.isArray(violation.nature_of_violation)) {
+       violation.nature_of_violation.forEach((nature) => {
+        const checkbox = Array.from(
+         document.querySelectorAll('input[name="natureOfViolation[]"]')
+        ).find((cb) => cb.value.toLowerCase() === nature.toLowerCase());
+        if (checkbox) checkbox.checked = true;
+       });
 
-      if (violation.violation_receipt_no) {
-       document.getElementById("violationReceipt").value =
-        violation.violation_receipt_no;
-      }
-      if (violation.due_date) {
-       document.getElementById("dueDate").value =
-        violation.due_date.split("T")[0];
+       if (violation.violation_receipt_no) {
+        document.getElementById("violationReceipt").value =
+         violation.violation_receipt_no;
+       }
+       if (violation.due_date) {
+        document.getElementById("dueDate").value =
+         violation.due_date.split("T")[0];
+       }
       }
      });
+    } else {
+     document.getElementById("withViolations").value = "false";
+     document.getElementById("natureOfViolationContainer").style.display =
+      "none";
     }
    };
 
@@ -1686,30 +1709,109 @@
     e.preventDefault();
 
     try {
-     const formData = new FormData(this);
+     const formData = new FormData();
+
+     // Map form fields to backend expected names
+     formData.append(
+      "owner_first_name",
+      document.getElementById("ownerFirstName").value
+     );
+     formData.append(
+      "owner_last_name",
+      document.getElementById("ownerLastName").value
+     );
+     formData.append(
+      "owner_email",
+      document.getElementById("ownerEmail").value
+     );
+     formData.append(
+      "owner_phone_number",
+      document.getElementById("ownerPhoneNumber").value
+     );
+     formData.append(
+      "business_name",
+      document.getElementById("businessName").value
+     );
+     formData.append(
+      "business_permit",
+      document.getElementById("businessPermit").value
+     );
+     formData.append(
+      "business_status",
+      document.getElementById("businessStatus").value
+     );
+     formData.append("street", document.getElementById("street").value);
+     formData.append("city", document.getElementById("city").value);
+     formData.append("zip", document.getElementById("zip").value);
+     formData.append(
+      "type_of_inspection",
+      document.getElementById("typeOfInspection").value
+     );
+
+     // Handle with_violations
+     const withViolationsValue =
+      document.getElementById("withViolations").value;
+     formData.append("with_violations", withViolationsValue);
+
+     // Handle violations if "Yes" is selected
+     if (withViolationsValue === "true") {
+      const selectedViolations = Array.from(
+       document.querySelectorAll('input[name="natureOfViolation[]"]:checked')
+      ).map((cb) => cb.value);
+
+      selectedViolations.forEach((violation) => {
+       formData.append("nature_of_violations[]", violation);
+      });
+
+      formData.append(
+       "violation_receipt",
+       document.getElementById("violationReceipt").value
+      );
+      formData.append("due_date", document.getElementById("dueDate").value);
+     }
+
+     // Handle file upload
+     const businessImage = document.getElementById("businessImage").files[0];
+     if (businessImage) {
+      formData.append("image", businessImage);
+     }
+
+     // Add inspection ID for updates
      const inspectionId = document.getElementById("inspectionId").value;
+     if (isEditing) {
+      formData.append("_method", "PUT");
+     }
+
      const endpoint = isEditing
       ? `${apiUrl}/inspector/update-inspection/${inspectionId}`
       : `${apiUrl}/inspector/add-inspection`;
 
-     const method = isEditing ? "PUT" : "POST";
+     // Log formData for debugging
+     for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+     }
 
      const response = await fetch(endpoint, {
-      method: method,
+      method: "POST",
       headers: {
        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
       body: formData,
      });
 
-     if (!response.ok)
-      throw new Error(`HTTP error! status: ${response.status}`);
+     if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+       errorData.message || `HTTP error! status: ${response.status}`
+      );
+     }
 
-     // Hide the form modal
+     // Hide the form modal and cleanup
      const violatorModal = bootstrap.Modal.getInstance(
       document.getElementById("violatorModal")
      );
      violatorModal.hide();
+     cleanupModal();
 
      // Show success modal
      const successModal = new bootstrap.Modal(
@@ -1722,7 +1824,21 @@
      fetchInspections(currentPage);
     } catch (error) {
      console.error("Submission error:", error);
-     // Show error message
+     // Show error in a more user-friendly way
+     const errorAlert = document.createElement("div");
+     errorAlert.className = "alert alert-danger alert-dismissible fade show";
+     errorAlert.innerHTML = `
+            <strong>Error!</strong> ${error.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+     // Insert the alert at the top of the form
+     inspectionForm.insertBefore(errorAlert, inspectionForm.firstChild);
+
+     // Remove the alert after 5 seconds
+     setTimeout(() => {
+      errorAlert.remove();
+     }, 5000);
     }
    });
 
@@ -1771,6 +1887,19 @@
    document
     .getElementById("violatorModal")
     .addEventListener("hidden.bs.modal", resetForm);
+
+   // Add event listeners for modal hidden events
+   document
+    .getElementById("violatorModal")
+    .addEventListener("hidden.bs.modal", function () {
+     cleanupModal();
+    });
+
+   document
+    .getElementById("successModal")
+    .addEventListener("hidden.bs.modal", function () {
+     cleanupModal();
+    });
   </script>
  </body>
 </html>
