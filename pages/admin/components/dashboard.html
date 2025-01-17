@@ -64,6 +64,12 @@
     padding-right: 0 !important;
    }
   </style>
+  <!-- Add SweetAlert2 CSS and JS -->
+  <link
+   href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css"
+   rel="stylesheet"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
  </head>
  <body id="dashboard">
   <div class="card mb-4">
@@ -394,6 +400,9 @@
       modalElement.remove();
      }
 
+     // Log the inspection object to verify we have the data
+     console.log("Inspection object:", inspection);
+
      // Create modal content
      const detailedModalContent = `
             <div class="modal fade" id="violationDetailModal" tabindex="-1">
@@ -551,6 +560,23 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Modal Footer with Resolve Button -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            ${
+                             inspection.violations.some(
+                              (v) => v.status !== "paid"
+                             )
+                              ? `<button 
+                                    class="btn btn-success" 
+                                    onclick="resolveInspection('${inspection.inspection_id}', this)"
+                                    data-inspection-id="${inspection.inspection_id}"
+                                >
+                                    <i class="bi bi-check-circle me-2"></i>Resolve Violation
+                                </button>`
+                              : ""
+                            }
+                        </div>
                     </div>
                 </div>
             </div>`;
@@ -577,18 +603,28 @@
     }
    };
 
-   window.resolveViolation = async (violationId, button) => {
+   window.resolveInspection = async (inspectionId, button) => {
+    // Get inspection ID from data attribute as fallback
+    inspectionId = inspectionId || button.dataset.inspectionId;
+
+    console.log("Inspection ID:", inspectionId); // Debug log
+
+    const originalContent = button.innerHTML;
+
     try {
+     if (!inspectionId) {
+      throw new Error("No inspection ID provided");
+     }
+
      // Disable button and show loading state
      button.disabled = true;
-     const originalContent = button.innerHTML;
      button.innerHTML = `
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             Resolving...
         `;
 
      const response = await fetch(
-      `${apiUrl}/violations/${violationId}/resolve`,
+      `${apiUrl}/inspection/resolve-inspection/${inspectionId}`,
       {
        method: "PUT",
        headers: {
@@ -599,22 +635,30 @@
      );
 
      if (!response.ok) {
-      throw new Error(`Failed to resolve violation: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Response:", errorData);
+      throw new Error(`Failed to resolve inspection: ${response.status}`);
      }
 
-     const data = await response.json();
-
      // Show success message
-     Swal.fire({
-      icon: "success",
-      title: "Success!",
-      text: "Violation has been resolved successfully.",
-      showConfirmButton: false,
-      timer: 1500,
-     });
+     try {
+      Swal.fire({
+       icon: "success",
+       title: "Success!",
+       text: "Inspection has been resolved successfully.",
+       showConfirmButton: false,
+       timer: 1500,
+      });
+     } catch (e) {
+      alert("Inspection has been resolved successfully.");
+     }
 
-     // Refresh the violations table
-     getViolators(currentPage);
+     // Refresh the data
+     await Promise.all([
+      getCardInfo(),
+      getViolators(1),
+      getOverdueViolators(1),
+     ]);
 
      // Close the modal
      const modal = bootstrap.Modal.getInstance(
@@ -624,18 +668,22 @@
       modal.hide();
      }
     } catch (error) {
-     console.error("Error resolving violation:", error);
+     console.error("Error resolving inspection:", error);
 
      // Reset button state
      button.disabled = false;
      button.innerHTML = originalContent;
 
      // Show error message
-     Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Failed to resolve violation. Please try again.",
-     });
+     try {
+      Swal.fire({
+       icon: "error",
+       title: "Error",
+       text: error.message || "Failed to resolve inspection. Please try again.",
+      });
+     } catch (e) {
+      alert(error.message || "Failed to resolve inspection. Please try again.");
+     }
     }
    };
 

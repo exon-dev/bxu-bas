@@ -11,9 +11,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-   href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+   href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
    rel="stylesheet"
   />
+  <link rel="stylesheet" href="/css/admin/reports.css" />
+  <!-- Chart.js for graphs -->
+  <script
+   src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"
+   integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw=="
+   crossorigin="anonymous"
+   referrerpolicy="no-referrer"
+  ></script>
   <style>
    body {
     font-family: "Poppins", sans-serif !important;
@@ -38,5 +46,50 @@
     <button class="btn btn-primary">Download Report</button>
    </div>
   </div>
+  <section>
+   <!-- implement charts in here  -->
+   <!-- Pie Chart for [ Violation, Overdue, Resolved ] -->
+   <!-- Line Graph for Nunmber of violators  in a month [ progressive ]  -->
+   <!-- Bar graph for comparing violation and inspections with not violation -->
+   <div>
+    <canvas
+     id="myChart"
+     width="400"
+     height="400"
+     style="border: 1px solid black"
+    ></canvas>
+   </div>
+  </section>
+  <script>
+   // Ensure this script runs after Chart.js is loaded
+   document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById("myChart").getContext("2d");
+
+    new Chart(ctx, {
+     type: "bar",
+     data: {
+      labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+      datasets: [
+       {
+        label: "# of Votes",
+        data: [12, 19, 3, 5, 2, 3],
+        borderWidth: 1,
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)",
+       },
+      ],
+     },
+     options: {
+      scales: {
+       y: {
+        beginAtZero: true,
+       },
+      },
+     },
+    });
+   });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
  </body>
 </html>
