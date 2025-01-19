@@ -489,7 +489,12 @@
       </form>
      </div>
      <div class="modal-footer border-0 shadow-lg">
-      <button type="submit" class="btn btn-primary h6" form="inspectionForm">
+      <button
+       type="submit"
+       class="btn btn-primary h6"
+       form="inspectionForm"
+       id="submitButton"
+      >
        <span id="submitButtonText">Submit</span>
       </button>
      </div>
@@ -726,7 +731,18 @@
    inspectionForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    // Get the submit button and store its original content
+    const submitButton = document.getElementById("submitButton");
+    const originalContent = submitButton.innerHTML;
+
     try {
+     // Disable button and show loading state
+     submitButton.disabled = true;
+     submitButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            ${isEditing ? "Updating..." : "Submitting..."}
+        `;
+
      const formData = new FormData();
 
      // Map form fields to backend expected names
@@ -852,6 +868,10 @@
      setTimeout(() => {
       errorAlert.remove();
      }, 5000);
+    } finally {
+     // Always restore the button to its original state
+     submitButton.disabled = false;
+     submitButton.innerHTML = originalContent;
     }
    });
 
@@ -1725,7 +1745,18 @@
    inspectionForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    // Get the submit button and store its original content
+    const submitButton = document.getElementById("submitButton");
+    const originalContent = submitButton.innerHTML;
+
     try {
+     // Disable button and show loading state
+     submitButton.disabled = true;
+     submitButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            ${isEditing ? "Updating..." : "Submitting..."}
+        `;
+
      const formData = new FormData();
 
      // Map form fields to backend expected names
@@ -1851,6 +1882,10 @@
      setTimeout(() => {
       errorAlert.remove();
      }, 5000);
+    } finally {
+     // Always restore the button to its original state
+     submitButton.disabled = false;
+     submitButton.innerHTML = originalContent;
     }
    });
 

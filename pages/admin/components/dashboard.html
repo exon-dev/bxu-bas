@@ -70,6 +70,19 @@
    rel="stylesheet"
   />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link
+   rel="stylesheet"
+   type="text/css"
+   href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  />
+  <script
+   type="text/javascript"
+   src="https://cdn.jsdelivr.net/npm/toastify-js"
+  ></script>
+  <link
+   href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.min.css"
+   rel="stylesheet"
+  />
  </head>
  <body id="dashboard">
   <div class="card mb-4">
@@ -81,9 +94,9 @@
     </p>
    </div>
   </div>
-  <div class="row">
-   <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-pink order-card">
+  <div class="row justify-content-between g-3">
+   <div class="col">
+    <div class="card bg-c-yellow order-card h-100">
      <div class="card-body">
       <h6 class="mb-2">Total Inspectors</h6>
       <div class="d-flex align-items-center gap-2">
@@ -93,8 +106,8 @@
      </div>
     </div>
    </div>
-   <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-blue order-card">
+   <div class="col">
+    <div class="card bg-c-blue order-card h-100">
      <div class="card-body">
       <h6 class="mb-2">Total Inspections</h6>
       <div class="d-flex align-items-center gap-2">
@@ -104,13 +117,24 @@
      </div>
     </div>
    </div>
-   <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-green order-card">
+   <div class="col">
+    <div class="card bg-c-green order-card h-100">
+     <div class="card-body">
+      <h6 class="mb-2">Resolved Inspections</h6>
+      <div class="d-flex align-items-center gap-2">
+       <i class="fa fa-check-circle text-white" aria-label="Resolved Icon"></i>
+       <h2 id="total_resolved_inspections">0</h2>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="col">
+    <div class="card bg-c-yellow order-card h-100">
      <div class="card-body">
       <h6 class="mb-2">Total Violations</h6>
       <div class="d-flex align-items-center gap-2">
        <i
-        class="fa fa-check-circle text-white"
+        class="fa fa-exclamation-circle text-white"
         aria-label="Violations Icon"
        ></i>
        <h2 id="total_violations">0</h2>
@@ -118,8 +142,8 @@
      </div>
     </div>
    </div>
-   <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-yellow order-card">
+   <div class="col">
+    <div class="card bg-c-pink order-card h-100">
      <div class="card-body">
       <h6 class="mb-2">Overdue Violations</h6>
       <div class="d-flex align-items-center gap-2">
@@ -133,11 +157,45 @@
     </div>
    </div>
   </div>
+  <section class="mt-4">
+   <div class="card">
+    <div class="card-body">
+     <h4>List of Violators</h4>
+     <p class="text-secondary">Business establishments with violations</p>
+     <div class="table-responsive">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>No.</th>
+         <th>Business Name</th>
+         <th>Owner</th>
+         <th>Business Status</th>
+         <th>Inspection Date</th>
+         <th>Due Date</th>
+         <th>Type of Inspection</th>
+         <th>Status</th>
+        </tr>
+       </thead>
+       <tbody id="all-violators-tbody"></tbody>
+      </table>
+     </div>
+     <nav>
+      <ul
+       class="pagination justify-content-end"
+       id="all-violators-pagination"
+      ></ul>
+     </nav>
+    </div>
+   </div>
+  </section>
+
   <section>
    <div class="card">
     <div class="card-body">
      <h4>Upcoming Due</h4>
-     <p>Violator with 3 days or less than 3 days are posted here.</p>
+     <p class="text-secondary">
+      Violator with 3 days or less than 3 days are posted here.
+     </p>
      <table class="table">
       <thead>
        <tr>
@@ -164,7 +222,9 @@
    <div class="card">
     <div class="card-body">
      <h4>Overdue Violations</h4>
-     <p>Violators without resolving their dues are posted here.</p>
+     <p class="text-secondary">
+      Violators without resolving their dues are posted here.
+     </p>
      <table class="table">
       <thead>
        <tr>
@@ -186,15 +246,138 @@
    </div>
   </section>
 
+  <!-- Add this after the Overdue Violations section -->
+
   <!-- Violation Detail Modal -->
   <div class="modal fade" id="violationDetailModal" tabindex="-1"></div>
+
+  <!-- Add this modal HTML at the bottom of the body, before the scripts -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0">
+     <div class="modal-body text-center p-4">
+      <div class="mb-4">
+       <i
+        class="bi bi-check-circle-fill text-success"
+        style="font-size: 4rem"
+       ></i>
+      </div>
+      <h4 class="mb-3">Resolution Successful!</h4>
+      <p class="text-muted mb-4">
+       The violation has been successfully resolved.
+      </p>
+      <button
+       type="button"
+       class="btn btn-success px-4"
+       data-bs-dismiss="modal"
+      >
+       Close
+      </button>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <script type="module">
+   import CONFIG from "/scripts/config.js";
+
+   // Make resolveInspection globally available
+   window.resolveInspection = async (inspectionId, button) => {
+    try {
+     // Store original button text before modifying
+     const originalText = button.textContent;
+
+     // Disable the button and show loading state
+     button.disabled = true;
+     button.innerHTML = `
+       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+       Resolving...
+     `;
+
+     // Make the API request
+     const response = await fetch(
+      `${CONFIG.API_BASE_URL}/violations/resolve/${inspectionId}`,
+      {
+       method: "PUT",
+       headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     // Check if the response is ok
+     if (!response.ok) {
+      throw new Error(
+       `Failed to resolve violation (Status: ${response.status})`
+      );
+     }
+
+     // Parse the response
+     const data = await response.json();
+
+     // Close the violation details modal first
+     const violationDetailModal = bootstrap.Modal.getInstance(
+      document.getElementById("violationDetailModal")
+     );
+     if (violationDetailModal) {
+      violationDetailModal.hide();
+     }
+
+     // Show success modal
+     const successModal = new bootstrap.Modal(
+      document.getElementById("successModal")
+     );
+     successModal.show();
+
+     // Add event listener for when success modal is hidden
+     document
+      .getElementById("successModal")
+      .addEventListener("hidden.bs.modal", function () {
+       window.location.reload();
+      });
+    } catch (error) {
+     console.error("Error resolving violation:", error);
+
+     // Show error message using Toastify
+     Toastify({
+      text: "Failed to resolve violation. Please try again.",
+      duration: 3000,
+      gravity: "top",
+      position: "right",
+      style: {
+       background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+      },
+     }).showToast();
+
+     // Reset button state
+     button.disabled = false;
+     button.innerHTML = originalText;
+    }
+   };
+
+   // Also make showAlert globally available
+   window.showAlert = (type, message) => {
+    Toastify({
+     text: message,
+     duration: 3000,
+     gravity: "top",
+     position: "right",
+     style: {
+      background:
+       type === "success"
+        ? "linear-gradient(to right, #00b09b, #96c93d)"
+        : "linear-gradient(to right, #ff5f6d, #ffc371)",
+     },
+    }).showToast();
+   };
+  </script>
 
   <script type="module">
    import CONFIG from "/scripts/config.js";
 
    const apiUrl = CONFIG.API_BASE_URL;
-
-   console.log(apiUrl);
 
    const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -216,29 +399,37 @@
       },
      });
 
-     console.log(res);
-
      if (!res.ok) {
       throw new Error(`Error: ${res.status} - ${res.statusText}`);
      }
 
      const data = await res.json();
      document.getElementById("total_inspectors").textContent =
-      data.total_inspectors || 0;
+      data.total_inspectors === undefined ? 0 : data.total_inspectors;
      document.getElementById("total_inspections").textContent =
-      data.total_inspections || 0;
+      data.total_inspections === undefined ? 0 : data.total_inspections;
+     document.getElementById("total_resolved_inspections").textContent =
+      data.total_resolved_inspections === undefined
+       ? 0
+       : data.total_resolved_inspections;
      document.getElementById("total_violations").textContent =
-      data.total_violations || 0;
+      data.total_violations === undefined ? 0 : data.total_violations;
      document.getElementById("overdue_violations").textContent =
-      data.overdue_violations || 0;
+      data.overdue_violations === undefined ? 0 : data.overdue_violations;
     } catch (error) {
      console.error(error.message);
+     document.getElementById("total_inspectors").textContent = 0;
+     document.getElementById("total_inspections").textContent = 0;
+     document.getElementById("total_resolved_inspections").textContent = 0;
+     document.getElementById("total_violations").textContent = 0;
+     document.getElementById("overdue_violations").textContent = 0;
     }
    };
 
    const getViolators = async (page = 1) => {
     try {
      const violatorsTbody = document.getElementById("violators-tbody");
+     // Show loading state
      violatorsTbody.innerHTML = `
         <tr>
             <td colspan="8" class="text-center">
@@ -266,12 +457,15 @@
      }
 
      const data = await response.json();
-     console.log("Upcoming dues data:", data); // Debug log
-     const inspections = data.inspections || [];
 
-     renderViolatorsTable(inspections);
-     // Update pagination if needed
-     if (data.last_page > 1) {
+     // Clear pagination if no data or empty inspections
+     if (!data.inspections || data.inspections.length === 0) {
+      document.getElementById("violators-pagination").innerHTML = "";
+     }
+
+     renderViolatorsTable(data.inspections || []);
+     // Only render pagination if we have data and multiple pages
+     if (data.inspections?.length > 0 && data.last_page > 1) {
       renderViolatorsPagination(data.current_page, data.last_page);
      }
     } catch (error) {
@@ -283,6 +477,8 @@
             </td>
         </tr>
     `;
+     // Clear pagination on error
+     document.getElementById("violators-pagination").innerHTML = "";
     }
    };
 
@@ -392,304 +588,298 @@
     return li;
    };
 
-   const showViolationDetails = async (inspection) => {
+   const showViolationDetails = (inspection) => {
     try {
-     // Clean up any existing modals
-     let modalElement = document.getElementById("violationDetailModal");
-     if (modalElement) {
-      modalElement.remove();
+     console.log("Inspection details:", inspection);
+
+     // Get the first violation since we're displaying per inspection
+     const violation = inspection.violations[0];
+
+     // Check if nature_of_violation exists and is an array
+     const violationsList = Array.isArray(violation.nature_of_violation)
+      ? violation.nature_of_violation
+         .map(
+          (nature) => `
+                <li class="mb-1">
+                    <i class="bi bi-dot text-danger"></i>
+                    ${nature.trim().toUpperCase()}
+                </li>
+            `
+         )
+         .join("")
+      : '<li><i class="bi bi-dot"></i> No violations listed</li>';
+
+     // Remove existing modal if it exists
+     const existingModal = document.getElementById("violationDetailModal");
+     if (existingModal) {
+      existingModal.remove();
      }
 
-     // Log the inspection object to verify we have the data
-     console.log("Inspection object:", inspection);
-
-     // Create modal content
-     const detailedModalContent = `
-            <div class="modal fade" id="violationDetailModal" tabindex="-1">
+     // Create new modal with updated styling
+     const modalHTML = `
+            <div class="modal fade" id="violationDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header bg-danger bg-gradient text-white">
+                        <div class="modal-header border-bottom-0 bg-primary bg-gradient text-white">
                             <h5 class="modal-title fw-bold">
-                                <i class="bi bi-exclamation-triangle me-2"></i>Violation Details
+                                <i class="bi bi-clipboard2-check me-2"></i>Violation Details
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body p-4">
-                            <!-- Business Information -->
-                            <div class="card border-0 shadow-sm hover-shadow mb-4">
-                                <div class="card-body">
-                                    <h6 class="card-title fw-bold mb-3">
-                                        <i class="bi bi-building fs-4 text-primary me-2"></i>Business Information
-                                    </h6>
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <div class="detail-item">
-                                                <small class="text-muted d-block">Business Name</small>
-                                                <span class="fw-semibold">${
-                                                 inspection.business
-                                                  ?.business_name || "N/A"
-                                                }</span>
-                                            </div>
+                        <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+                            <!-- Business Image Section -->
+                            <div class="text-center mb-4">
+                                ${
+                                 inspection.business.image_url
+                                  ? `<div class="position-relative d-inline-block">
+                                        <img src="${CONFIG.APP_URL}/storage/${inspection.business.image_url}" 
+                                            alt="Business Image" 
+                                            class="rounded-3 shadow-sm" 
+                                            style="max-height: 200px; width: auto; object-fit: cover"
+                                            onerror="this.onerror=null; this.src='/assets/images/no-image.png';">
+                                        <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
+                                            <small>${inspection.business.business_name}</small>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="detail-item">
-                                                <small class="text-muted d-block">Business Permit</small>
-                                                <span class="fw-semibold">${
+                                    </div>`
+                                  : `<div class="text-center p-4 bg-light rounded-3">
+                                        <i class="bi bi-building-x display-1 text-muted"></i>
+                                        <p class="text-muted mt-2">No business image available</p>
+                                    </div>`
+                                }
+                            </div>
+
+                            <div class="row g-4">
+                                <!-- Business Information -->
+                                <div class="col-6">
+                                    <div class="card border-0 shadow-sm hover-shadow">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-building fs-4 text-primary me-2"></i>Business Information
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Business Name</label>
+                                                <p class="fw-semibold mb-2">${
                                                  inspection.business
-                                                  ?.business_permit || "N/A"
-                                                }</span>
+                                                  .business_name || "N/A"
+                                                }</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Business Permit</label>
+                                                <p class="fw-semibold mb-2">${
+                                                 inspection.business
+                                                  .business_permit || "N/A"
+                                                }</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Status</label>
+                                                <p class="mb-0">
+                                                    <span class="badge bg-success rounded-pill">${
+                                                     inspection.business
+                                                      .status || "N/A"
+                                                    }</span>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Owner Information -->
-                            <div class="card border-0 shadow-sm hover-shadow mb-4">
-                                <div class="card-body">
-                                    <h6 class="card-title fw-bold mb-3">
-                                        <i class="bi bi-person fs-4 text-primary me-2"></i>Owner Information
-                                    </h6>
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <div class="detail-item">
-                                                <small class="text-muted d-block">Owner Name</small>
-                                                <span class="fw-semibold">${
-                                                 inspection.business?.owner
-                                                  ?.first_name || ""
+                                <!-- Owner Information -->
+                                <div class="col-md-6">
+                                    <div class="card border-0 shadow-sm hover-shadow">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-person fs-4 text-primary me-2"></i>Owner Information
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">Owner Name</label>
+                                                <p class="fw-semibold mb-2">${
+                                                 inspection.business.owner
+                                                  .first_name || ""
                                                 } ${
-      inspection.business?.owner?.last_name || "N/A"
-     }</span>
+      inspection.business.owner.last_name || "N/A"
+     }</p>
                                             </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="detail-item">
-                                                <small class="text-muted d-block">Email</small>
-                                                <span class="fw-semibold">${
-                                                 inspection.business?.owner
-                                                  ?.email || "N/A"
-                                                }</span>
+                                            <div class="mb-3">
+                                                <label class="text-muted small">
+                                                    <i class="bi bi-envelope-fill me-1"></i>Email
+                                                </label>
+                                                <p class="fw-semibold mb-2">${
+                                                 inspection.business.owner
+                                                  .email || "N/A"
+                                                }</p>
                                             </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="detail-item">
-                                                <small class="text-muted d-block">Phone</small>
-                                                <span class="fw-semibold">${
-                                                 inspection.business?.owner
-                                                  ?.phone_number || "N/A"
-                                                }</span>
+                                            <div>
+                                                <label class="text-muted small">
+                                                    <i class="bi bi-telephone-fill me-1"></i>Phone
+                                                </label>
+                                                <p class="fw-semibold mb-0">${
+                                                 inspection.business.owner
+                                                  .phone_number || "N/A"
+                                                }</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Violations -->
-                            <div class="card border-0 shadow-sm hover-shadow">
-                                <div class="card-body">
-                                    <h6 class="card-title fw-bold mb-3">
-                                        <i class="bi bi-exclamation-triangle fs-4 text-danger me-2"></i>Violations
-                                    </h6>
-                                    ${inspection.violations
-                                     .map(
-                                      (violation) => `
-                                        <div class="violation-item p-3 bg-light rounded-3 mb-3">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div class="flex-grow-1">
-                                                    <h6 class="fw-bold text-danger mb-2">Nature of Violations:</h6>
-                                                    <ul class="list-unstyled mb-3">
-                                                        ${violation.nature_of_violation
-                                                         .map(
-                                                          (nature) => `
-                                                            <li class="mb-1">
-                                                                <i class="bi bi-dot text-danger"></i>
-                                                                ${nature.toUpperCase()}
-                                                            </li>
-                                                        `
-                                                         )
-                                                         .join("")}
-                                                    </ul>
-                                                    <div class="row g-3">
-                                                        <div class="col-md-4">
-                                                            <div class="detail-item">
-                                                                <small class="text-muted d-block">Receipt No.</small>
-                                                                <span class="fw-semibold">${
-                                                                 violation.violation_receipt_no
-                                                                }</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="detail-item">
-                                                                <small class="text-muted d-block">Violation Date</small>
-                                                                <span class="fw-semibold">${formatDate(
-                                                                 violation.violation_date
-                                                                )}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <div class="detail-item">
-                                                                <small class="text-muted d-block">Due Date</small>
-                                                                <span class="fw-semibold">${formatDate(
-                                                                 violation.due_date
-                                                                )}</span>
-                                                            </div>
-                                                        </div>
+                                <!-- Inspection Details -->
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm hover-shadow">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-clipboard-data fs-4 text-primary me-2"></i>Inspection Details
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="text-muted small">Inspection Date</label>
+                                                    <p class="fw-semibold mb-0">${formatDate(
+                                                     inspection.inspection_date
+                                                    )}</p>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="text-muted small">Type of Inspection</label>
+                                                    <p class="fw-semibold mb-0">${
+                                                     inspection.type_of_inspection ||
+                                                     "N/A"
+                                                    }</p>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="text-muted small">Inspector</label>
+                                                    <p class="fw-semibold mb-0">${
+                                                     inspection.inspector
+                                                      .first_name || ""
+                                                    } ${
+      inspection.inspector.last_name || "N/A"
+     }</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Violation Information -->
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm hover-shadow">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-3">
+                                                <i class="bi bi-clipboard-x fs-4 text-danger me-2"></i>Violation Information
+                                            </h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <label class="text-muted small">Receipt No.</label>
+                                                        <p class="fw-semibold mb-0">${
+                                                         violation.violation_receipt_no ||
+                                                         "N/A"
+                                                        }</p>
                                                     </div>
                                                 </div>
-                                                <div class="ms-3">
-                                                    <span class="badge ${
-                                                     violation.status ===
-                                                     "pending"
-                                                      ? "bg-warning"
-                                                      : violation.status ===
-                                                        "paid"
-                                                      ? "bg-success"
-                                                      : violation.status ===
-                                                        "overdue"
-                                                      ? "bg-danger"
-                                                      : "bg-secondary"
-                                                    } rounded-pill px-3 py-2">
-                                                        ${violation.status.toUpperCase()}
-                                                    </span>
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <label class="text-muted small">Violation Date</label>
+                                                        <p class="fw-semibold mb-0">${formatDate(
+                                                         violation.violation_date
+                                                        )}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <label class="text-muted small">Due Date</label>
+                                                        <p class="fw-semibold mb-0">${formatDate(
+                                                         violation.due_date
+                                                        )}</p>
+                                                    </div>
+                                                </div>
+                                                ${
+                                                 violation.days_overdue
+                                                  ? `
+                                                    <div class="col-md-4">
+                                                        <div class="detail-item">
+                                                            <label class="text-muted small">Days Overdue</label>
+                                                            <p class="fw-semibold mb-0 text-danger">${violation.days_overdue} days</p>
+                                                        </div>
+                                                    </div>
+                                                `
+                                                  : ""
+                                                }
+                                                <div class="col-12">
+                                                    <div class="detail-item">
+                                                        <label class="text-muted small">Status</label>
+                                                        <p class="mb-0">
+                                                            <span class="badge ${
+                                                             violation.status?.toLowerCase() ===
+                                                             "pending"
+                                                              ? "bg-warning"
+                                                              : violation.status?.toLowerCase() ===
+                                                                "paid"
+                                                              ? "bg-success"
+                                                              : violation.status?.toLowerCase() ===
+                                                                "overdue"
+                                                              ? "bg-danger"
+                                                              : "bg-secondary"
+                                                            } rounded-pill px-3 py-2">
+                                                                ${
+                                                                 violation.status?.toUpperCase() ||
+                                                                 "N/A"
+                                                                }
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="violations-list">
+                                                        <h6 class="fw-bold text-danger mb-2">Nature of Violations:</h6>
+                                                        <ul class="list-unstyled mb-0">
+                                                            ${violationsList}
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    `
-                                     )
-                                     .join("")}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Modal Footer with Resolve Button -->
-                        <div class="modal-footer">
+                        <div class="modal-footer border-0">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             ${
-                             inspection.violations.some(
-                              (v) => v.status !== "paid"
-                             )
-                              ? `<button 
-                                    class="btn btn-success" 
-                                    onclick="resolveInspection('${inspection.inspection_id}', this)"
-                                    data-inspection-id="${inspection.inspection_id}"
-                                >
-                                    <i class="bi bi-check-circle me-2"></i>Resolve Violation
-                                </button>`
+                             violation.status?.toLowerCase() === "pending"
+                              ? `
+                                <button type="button" class="btn btn-primary" onclick="resolveInspection('${inspection.inspection_id}', this)">
+                                    Resolve Violation
+                                </button>
+                            `
                               : ""
                             }
                         </div>
                     </div>
                 </div>
-            </div>`;
-
-     // Add modal to DOM and show it
-     document.body.insertAdjacentHTML("beforeend", detailedModalContent);
-     const modal = new bootstrap.Modal(
-      document.getElementById("violationDetailModal")
-     );
-     modal.show();
-
-     // Clean up modal on close
-     document
-      .getElementById("violationDetailModal")
-      .addEventListener("hidden.bs.modal", function () {
-       this.remove();
-       const backdrops = document.getElementsByClassName("modal-backdrop");
-       while (backdrops.length > 0) {
-        backdrops[0].remove();
-       }
-      });
-    } catch (error) {
-     console.error("Error showing violation details:", error);
-    }
-   };
-
-   window.resolveInspection = async (inspectionId, button) => {
-    // Get inspection ID from data attribute as fallback
-    inspectionId = inspectionId || button.dataset.inspectionId;
-
-    console.log("Inspection ID:", inspectionId); // Debug log
-
-    const originalContent = button.innerHTML;
-
-    try {
-     if (!inspectionId) {
-      throw new Error("No inspection ID provided");
-     }
-
-     // Disable button and show loading state
-     button.disabled = true;
-     button.innerHTML = `
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Resolving...
+            </div>
         `;
 
-     const response = await fetch(
-      `${apiUrl}/inspection/resolve-inspection/${inspectionId}`,
-      {
-       method: "PUT",
-       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-       },
-      }
-     );
+     // Add modal to DOM
+     document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("Response:", errorData);
-      throw new Error(`Failed to resolve inspection: ${response.status}`);
-     }
+     // Get the new modal element
+     const modalElement = document.getElementById("violationDetailModal");
 
-     // Show success message
-     try {
-      Swal.fire({
-       icon: "success",
-       title: "Success!",
-       text: "Inspection has been resolved successfully.",
-       showConfirmButton: false,
-       timer: 1500,
-      });
-     } catch (e) {
-      alert("Inspection has been resolved successfully.");
-     }
+     // Initialize and show the modal
+     const bsModal = new bootstrap.Modal(modalElement);
+     bsModal.show();
 
-     // Refresh the data
-     await Promise.all([
-      getCardInfo(),
-      getViolators(1),
-      getOverdueViolators(1),
-     ]);
-
-     // Close the modal
-     const modal = bootstrap.Modal.getInstance(
-      document.getElementById("violationDetailModal")
-     );
-     if (modal) {
-      modal.hide();
-     }
+     // Clean up modal when hidden
+     modalElement.addEventListener("hidden.bs.modal", function () {
+      modalElement.remove();
+     });
     } catch (error) {
-     console.error("Error resolving inspection:", error);
-
-     // Reset button state
-     button.disabled = false;
-     button.innerHTML = originalContent;
-
-     // Show error message
-     try {
-      Swal.fire({
-       icon: "error",
-       title: "Error",
-       text: error.message || "Failed to resolve inspection. Please try again.",
-      });
-     } catch (e) {
-      alert(error.message || "Failed to resolve inspection. Please try again.");
-     }
+     console.error("Error showing violation details:", error);
+     alert("Error showing violation details. Please try again.");
     }
    };
 
    const getOverdueViolators = async (page = 1) => {
     try {
      const overdueTbody = document.getElementById("overdue-tbody");
+     // Show loading state
      overdueTbody.innerHTML = `
             <tr>
                 <td colspan="7" class="text-center">
@@ -717,13 +907,15 @@
      }
 
      const data = await response.json();
-     console.log("Overdue data:", data); // Debug log
 
-     // Access the inspections array directly since it's a different endpoint
-     const inspections = data.inspections || [];
+     // Clear pagination if no data or empty inspections
+     if (!data.inspections || data.inspections.length === 0) {
+      document.getElementById("overdue-pagination").innerHTML = "";
+     }
 
-     renderOverdueTable(inspections);
-     if (data.last_page > 1) {
+     renderOverdueTable(data.inspections || []);
+     // Only render pagination if we have data and multiple pages
+     if (data.inspections?.length > 0 && data.last_page > 1) {
       renderOverduePagination(data.current_page, data.last_page);
      }
     } catch (error) {
@@ -735,6 +927,8 @@
                 </td>
             </tr>
         `;
+     // Clear pagination on error
+     document.getElementById("overdue-pagination").innerHTML = "";
     }
    };
 
@@ -819,10 +1013,173 @@
     paginationElement.appendChild(nextButton);
    };
 
-   // Fetch data on page load
+   const getAllViolators = async (page = 1) => {
+    try {
+     const violatorsTbody = document.getElementById("all-violators-tbody");
+     violatorsTbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </td>
+        </tr>
+     `;
+
+     const response = await fetch(
+      `${apiUrl}/violation/all-violators?page=${page}`,
+      {
+       headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+     }
+
+     const data = await response.json();
+     console.log("All violators data:", data);
+
+     // Clear pagination if no data or empty inspections
+     if (!data.inspections.data || data.inspections.data.length === 0) {
+      document.getElementById("all-violators-pagination").innerHTML = "";
+     }
+
+     renderAllViolatorsTable(data.inspections.data || []);
+     // Only render pagination if we have data and multiple pages
+     if (data.inspections.data?.length > 0 && data.inspections.last_page > 1) {
+      renderAllViolatorsPagination(
+       data.inspections.current_page,
+       data.inspections.last_page
+      );
+     }
+    } catch (error) {
+     console.error("Error fetching all violators:", error);
+     document.getElementById("all-violators-tbody").innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center text-danger">
+                Error loading violators. Please try again.
+            </td>
+        </tr>
+     `;
+     // Clear pagination on error
+     document.getElementById("all-violators-pagination").innerHTML = "";
+    }
+   };
+
+   const renderAllViolatorsTable = (inspections) => {
+    const tbody = document.getElementById("all-violators-tbody");
+    tbody.innerHTML = "";
+
+    if (!inspections || inspections.length === 0) {
+     tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center">No violators found</td>
+            </tr>
+        `;
+     return;
+    }
+
+    inspections.forEach((inspection, index) => {
+     // Get the pending violations only
+     const pendingViolations = inspection.violations.filter(
+      (v) => v.status.toLowerCase() === "pending"
+     );
+
+     if (pendingViolations.length === 0) return; // Skip if no pending violations
+
+     const row = document.createElement("tr");
+     row.className = "cursor-pointer hover-bg-light";
+     row.style.cursor = "pointer"; // Add explicit cursor style
+
+     const business = inspection.business;
+     const owner = business.owner;
+
+     row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${business.business_name || "N/A"}</td>
+            <td>${owner.first_name || ""} ${owner.last_name || "N/A"}</td>
+            <td>${business.status || "N/A"}</td>
+            <td>${formatDate(inspection.inspection_date)}</td>
+            <td>${formatDate(pendingViolations[0].due_date) || "N/A"}</td>
+            <td>${inspection.type_of_inspection || "N/A"}</td>
+            <td>
+                <span class="badge ${
+                 pendingViolations[0].status.toLowerCase() === "pending"
+                  ? "bg-warning"
+                  : pendingViolations[0].status.toLowerCase() === "paid"
+                  ? "bg-success"
+                  : pendingViolations[0].status.toLowerCase() === "overdue"
+                  ? "bg-danger"
+                  : "bg-secondary"
+                } rounded-pill">
+                    ${pendingViolations[0].status.toUpperCase()}
+                </span>
+            </td>
+        `;
+
+     // Add hover effect
+     row.addEventListener("mouseenter", () => {
+      row.classList.add("bg-light");
+     });
+
+     row.addEventListener("mouseleave", () => {
+      row.classList.remove("bg-light");
+     });
+
+     row.addEventListener("click", () => showViolationDetails(inspection));
+     tbody.appendChild(row);
+    });
+   };
+
+   const renderAllViolatorsPagination = (currentPage, totalPages) => {
+    const paginationElement = document.getElementById(
+     "all-violators-pagination"
+    );
+    paginationElement.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // Previous button
+    const prevButton = createPaginationButton(
+     "Previous",
+     currentPage > 1,
+     () => {
+      if (currentPage > 1) getAllViolators(currentPage - 1);
+     },
+     "«"
+    );
+    paginationElement.appendChild(prevButton);
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+     const pageButton = createPaginationButton(i.toString(), true, () => {
+      getAllViolators(i);
+     });
+     if (i === currentPage) pageButton.classList.add("active");
+     paginationElement.appendChild(pageButton);
+    }
+
+    // Next button
+    const nextButton = createPaginationButton(
+     "Next",
+     currentPage < totalPages,
+     () => {
+      if (currentPage < totalPages) getAllViolators(currentPage + 1);
+     },
+     "»"
+    );
+    paginationElement.appendChild(nextButton);
+   };
+
+   // Add this to your existing initialization code
    getCardInfo();
    getViolators(1);
-   getOverdueViolators();
+   getOverdueViolators(1);
+   getAllViolators(1);
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
  </body>
