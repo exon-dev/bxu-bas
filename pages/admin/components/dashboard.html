@@ -63,6 +63,21 @@
     overflow: auto !important;
     padding-right: 0 !important;
    }
+   body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+   }
+   .modal {
+    overflow-y: hidden !important;
+   }
+   .modal-dialog {
+    overflow-y: initial !important;
+   }
+   .modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+   }
   </style>
   <!-- Add SweetAlert2 CSS and JS -->
   <link
@@ -296,7 +311,7 @@
 
      // Make the API request
      const response = await fetch(
-      `${CONFIG.API_BASE_URL}/violations/resolve/${inspectionId}`,
+      `${CONFIG.API_BASE_URL}/inspection/resolve-inspection/${inspectionId}`,
       {
        method: "PUT",
        headers: {
@@ -590,55 +605,37 @@
 
    const showViolationDetails = (inspection) => {
     try {
-     console.log("Inspection details:", inspection);
-
-     // Get the first violation since we're displaying per inspection
      const violation = inspection.violations[0];
 
-     // Check if nature_of_violation exists and is an array
-     const violationsList = Array.isArray(violation.nature_of_violation)
-      ? violation.nature_of_violation
-         .map(
-          (nature) => `
-                <li class="mb-1">
-                    <i class="bi bi-dot text-danger"></i>
-                    ${nature.trim().toUpperCase()}
-                </li>
-            `
-         )
-         .join("")
-      : '<li><i class="bi bi-dot"></i> No violations listed</li>';
-
-     // Remove existing modal if it exists
-     const existingModal = document.getElementById("violationDetailModal");
-     if (existingModal) {
-      existingModal.remove();
-     }
-
-     // Create new modal with updated styling
+     // Create modal HTML
      const modalHTML = `
-            <div class="modal fade" id="violationDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal fade" id="violationDetailModal" tabindex="-1" aria-labelledby="violationDetailModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content border-0 shadow-lg">
                         <div class="modal-header border-bottom-0 bg-primary bg-gradient text-white">
-                            <h5 class="modal-title fw-bold">
+                            <h5 class="modal-title fw-bold" id="violationDetailModalLabel">
                                 <i class="bi bi-clipboard2-check me-2"></i>Violation Details
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+                        <div class="modal-body p-4">
                             <!-- Business Image Section -->
                             <div class="text-center mb-4">
                                 ${
-                                 inspection.business.image_url
+                                 inspection.image_url
                                   ? `<div class="position-relative d-inline-block">
-                                        <img src="${CONFIG.APP_URL}/storage/${inspection.business.image_url}" 
+                                        <img src="${CONFIG.APP_URL}/storage/${
+                                     inspection.image_url
+                                    }" 
                                             alt="Business Image" 
                                             class="rounded-3 shadow-sm" 
                                             style="max-height: 200px; width: auto; object-fit: cover"
                                             onerror="this.onerror=null; this.src='/assets/images/no-image.png';">
                                         <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
-                                            <small>${inspection.business.business_name}</small>
+                                            <small>${
+                                             inspection.business
+                                              ?.business_name || "N/A"
+                                            }</small>
                                         </div>
                                     </div>`
                                   : `<div class="text-center p-4 bg-light rounded-3">
@@ -829,7 +826,24 @@
                                                     <div class="violations-list">
                                                         <h6 class="fw-bold text-danger mb-2">Nature of Violations:</h6>
                                                         <ul class="list-unstyled mb-0">
-                                                            ${violationsList}
+                                                            ${
+                                                             Array.isArray(
+                                                              violation.nature_of_violation
+                                                             )
+                                                              ? violation.nature_of_violation
+                                                                 .map(
+                                                                  (nature) => `
+                                                                       <li class="mb-1">
+                                                                           <i class="bi bi-dot text-danger"></i>
+                                                                           ${nature
+                                                                            .trim()
+                                                                            .toUpperCase()}
+                                                                       </li>
+                                                                   `
+                                                                 )
+                                                                 .join("")
+                                                              : '<li><i class="bi bi-dot"></i> No violations listed</li>'
+                                                            }
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -856,20 +870,33 @@
             </div>
         `;
 
+     // Remove existing modal if present
+     const existingModal = document.getElementById("violationDetailModal");
+     if (existingModal) {
+      existingModal.remove();
+     }
+
      // Add modal to DOM
      document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-     // Get the new modal element
+     // Initialize modal with proper options
      const modalElement = document.getElementById("violationDetailModal");
-
-     // Initialize and show the modal
-     const bsModal = new bootstrap.Modal(modalElement);
-     bsModal.show();
-
-     // Clean up modal when hidden
-     modalElement.addEventListener("hidden.bs.modal", function () {
-      modalElement.remove();
+     const modal = new bootstrap.Modal(modalElement, {
+      backdrop: "static",
+      keyboard: false,
+      focus: true,
      });
+
+     // Add event listeners for proper cleanup
+     modalElement.addEventListener("hidden.bs.modal", () => {
+      modal.dispose();
+      modalElement.remove();
+      document.body.classList.remove("modal-open");
+      document.body.style.removeProperty("padding-right");
+     });
+
+     // Show the modal
+     modal.show();
     } catch (error) {
      console.error("Error showing violation details:", error);
      alert("Error showing violation details. Please try again.");
