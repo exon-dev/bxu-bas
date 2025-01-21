@@ -353,8 +353,6 @@
        window.location.reload();
       });
     } catch (error) {
-     console.error("Error resolving violation:", error);
-
      // Show error message using Toastify
      Toastify({
       text: "Failed to resolve violation. Please try again.",
@@ -432,7 +430,6 @@
      document.getElementById("overdue_violations").textContent =
       data.overdue_violations === undefined ? 0 : data.overdue_violations;
     } catch (error) {
-     console.error(error.message);
      document.getElementById("total_inspectors").textContent = 0;
      document.getElementById("total_inspections").textContent = 0;
      document.getElementById("total_resolved_inspections").textContent = 0;
@@ -484,7 +481,6 @@
       renderViolatorsPagination(data.current_page, data.last_page);
      }
     } catch (error) {
-     console.error("Error fetching violators:", error);
      document.getElementById("violators-tbody").innerHTML = `
         <tr>
             <td colspan="8" class="text-center text-danger">
@@ -611,7 +607,7 @@
      const modalHTML = `
             <div class="modal fade" id="violationDetailModal" tabindex="-1" aria-labelledby="violationDetailModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                    <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-content border-0 shadow-sm">
                         <div class="modal-header border-bottom-0 bg-primary bg-gradient text-white">
                             <h5 class="modal-title fw-bold" id="violationDetailModalLabel">
                                 <i class="bi bi-clipboard2-check me-2"></i>Violation Details
@@ -898,7 +894,6 @@
      // Show the modal
      modal.show();
     } catch (error) {
-     console.error("Error showing violation details:", error);
      alert("Error showing violation details. Please try again.");
     }
    };
@@ -946,7 +941,6 @@
       renderOverduePagination(data.current_page, data.last_page);
      }
     } catch (error) {
-     console.error("Error fetching overdue violators:", error);
      document.getElementById("overdue-tbody").innerHTML = `
             <tr>
                 <td colspan="7" class="text-center text-danger">
@@ -1068,7 +1062,6 @@
      }
 
      const data = await response.json();
-     console.log("All violators data:", data);
 
      // Clear pagination if no data or empty inspections
      if (!data.inspections.data || data.inspections.data.length === 0) {
@@ -1084,7 +1077,6 @@
       );
      }
     } catch (error) {
-     console.error("Error fetching all violators:", error);
      document.getElementById("all-violators-tbody").innerHTML = `
         <tr>
             <td colspan="8" class="text-center text-danger">
