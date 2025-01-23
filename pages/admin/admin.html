@@ -149,17 +149,29 @@
 
    function executeScriptsInElement(element) {
     const scriptTags = element.querySelectorAll("script");
+
+    // Process scripts sequentially
     scriptTags.forEach((script) => {
      const newScript = document.createElement("script");
 
-     // If the script uses ES6 imports, set type="module"
-     if (script.type === "module" || script.src.includes(".js")) {
-      newScript.type = "module";
+     // Copy all attributes from the original script
+     Array.from(script.attributes).forEach((attr) => {
+      newScript.setAttribute(attr.name, attr.value);
+     });
+
+     // Handle both inline and external scripts
+     if (script.src) {
+      newScript.src = script.src;
+      // Wait for external script to load
+      newScript.onload = () => {
+       console.log(`External script ${script.src} loaded`);
+      };
+     } else {
+      newScript.textContent = script.textContent;
      }
 
-     newScript.textContent = script.textContent;
-     document.body.appendChild(newScript);
-     document.body.removeChild(newScript); // Remove after execution
+     // Replace the old script with the new one
+     script.parentNode.replaceChild(newScript, script);
     });
    }
 
