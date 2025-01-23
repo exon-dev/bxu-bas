@@ -89,6 +89,17 @@
    .table-danger {
     --bs-table-bg: rgba(220, 53, 69, 0.1);
    }
+
+   .soft-card {
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: none !important;
+   }
+
+   .soft-card:hover {
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    background-color: rgba(0, 0, 0, 0.01);
+    transition: all 0.2s ease-in-out;
+   }
   </style>
   <!-- Add SweetAlert2 CSS and JS -->
   <link
@@ -343,11 +354,7 @@
      );
 
      // Check if the response is ok
-     if (!response.ok) {
-      throw new Error(
-       `Failed to resolve violation (Status: ${response.status})`
-      );
-     }
+
 
      // Parse the response
      const data = await response.json();
@@ -432,9 +439,6 @@
       },
      });
 
-     if (!res.ok) {
-      throw new Error(`Error: ${res.status} - ${res.statusText}`);
-     }
 
      const data = await res.json();
      document.getElementById("total_inspectors").textContent =
@@ -493,9 +497,6 @@
       }
      );
 
-     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-     }
 
      const data = await response.json();
 
@@ -511,10 +512,10 @@
        document.getElementById("inspections-pagination").innerHTML = "";
       }
      } else {
-      throw new Error("Invalid response from server");
+    //   throw new Error("Invalid response from server");
+    console.log("Invalid response from server")
      }
     } catch (error) {
-     console.error("Fetch error:", error);
      document.getElementById("inspections-tbody").innerHTML = `
         <tr>
             <td colspan="8" class="text-center text-danger">
@@ -611,7 +612,7 @@
                 <span class="badge ${
                  violation.status?.toLowerCase() === "pending"
                   ? "bg-warning"
-                  : violation.status?.toLowerCase() === "paid"
+                  : violation.status?.toLowerCase() === "resolved"
                   ? "bg-success"
                   : violation.status?.toLowerCase() === "overdue"
                   ? "bg-danger"
@@ -747,7 +748,7 @@
                         <!-- Business Information -->
                         <div class="row g-4">
                             <div class="col-6">
-                                <div class="card border-0 shadow-sm hover-shadow">
+                                <div class="card soft-card">
                                     <div class="card-body">
                                         <h6 class="card-title fw-bold mb-3">
                                             <i class="bi bi-building fs-4 text-primary me-2"></i>Business Information
@@ -766,10 +767,10 @@
                                               .business_permit || "N/A"
                                             }</p>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="text-muted small">Status</label>
+                                        <div class="">
+                                            <label class="text-muted small">Business Status</label>
                                             <p class="mb-0">
-                                                <span class="badge bg-success rounded-pill">${
+                                                <span class="fw-semibold">${
                                                  inspection.business.status ||
                                                  "N/A"
                                                 }</span>
@@ -781,7 +782,7 @@
 
                             <!-- Owner Information -->
                             <div class="col-md-6">
-                                <div class="card border-0 shadow-sm hover-shadow">
+                                <div class="card soft-card">
                                     <div class="card-body">
                                         <h6 class="card-title fw-bold mb-3">
                                             <i class="bi bi-person fs-4 text-primary me-2"></i>Owner Information
@@ -818,37 +819,43 @@
                             </div>
 
                             <!-- Location Card -->
-                        <div class="card border-0 shadow-sm hover-shadow mb-4">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="bi bi-geo-alt-fill fs-4 text-danger me-2"></i>
-                                    <h6 class="card-title fw-bold mb-0">Business Location</h6>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-2">
-                                            <label class="text-muted small">Street Address</label>
-                                            <p class="fw-semibold mb-1">
-                                                ${
-                                                 address.street_address || "N/A"
-                                                }
-                                            </p>
-                                        </div>
+                        <div class="col-12">
+                            <div class="card soft-card mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="bi bi-geo-alt-fill fs-4 text-danger me-2"></i>
+                                        <h6 class="card-title fw-bold mb-0">Business Location</h6>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="mb-2">
-                                            <label class="text-muted small">City</label>
-                                            <p class="fw-semibold mb-1">
-                                                ${address.city || "N/A"}
-                                            </p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <label class="text-muted small">Street Address</label>
+                                                <p class="fw-semibold mb-1">
+                                                    ${
+                                                     address.street_address ||
+                                                     "N/A"
+                                                    }
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="mb-2">
-                                            <label class="text-muted small">Postal Code</label>
-                                            <p class="fw-semibold mb-1">
-                                                ${address.postal_code || "N/A"}
-                                            </p>
+                                        <div class="col-md-3">
+                                            <div class="mb-2">
+                                                <label class="text-muted small">City</label>
+                                                <p class="fw-semibold mb-1">
+                                                    ${address.city || "N/A"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="mb-2">
+                                                <label class="text-muted small">Postal Code</label>
+                                                <p class="fw-semibold mb-1">
+                                                    ${
+                                                     address.postal_code ||
+                                                     "N/A"
+                                                    }
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -857,7 +864,7 @@
 
                             <!-- Inspection Details -->
                             <div class="col-12">
-                                <div class="card border-0 shadow-sm hover-shadow">
+                                <div class="card soft-card">
                                     <div class="card-body">
                                         <h6 class="card-title fw-bold mb-3">
                                             <i class="bi bi-clipboard-data fs-4 text-primary me-2"></i>Inspection Details
@@ -892,7 +899,7 @@
 
                             <!-- Violation Information -->
                             <div class="col-12">
-                                <div class="card border-0 shadow-sm hover-shadow">
+                                <div class="card soft-card">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center mb-4">
                                             <div class="d-flex align-items-center">
@@ -1079,7 +1086,6 @@
       window.open(imageUrl, "_blank");
      });
     } catch (error) {
-     console.error("Error showing violation details:", error);
      showAlert("error", "Failed to load violation details");
     }
    };

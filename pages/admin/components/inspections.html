@@ -105,6 +105,26 @@
     background-color: rgba(0, 0, 0, 0.05) !important;
     cursor: pointer;
    }
+   body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+   }
+   .modal {
+    overflow-y: hidden !important;
+   }
+   .modal-dialog {
+    height: calc(100vh - 60px);
+    margin: 30px auto;
+   }
+   .modal-content {
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+   }
+   .modal-body {
+    overflow-y: auto;
+    flex: 1;
+   }
   </style>
  </head>
  <body id="violations">
@@ -379,10 +399,6 @@
       }
      );
 
-     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-     }
-
      const data = await response.json();
 
      inspectionsData = data.inspections.data || [];
@@ -392,7 +408,6 @@
 
      renderTable();
     } catch (error) {
-     console.error("Error fetching inspections:", error);
      const inspectionsTbody = document.getElementById("inspections-tbody");
      inspectionsTbody.innerHTML = `
             <tr>
@@ -414,10 +429,6 @@
       },
      });
 
-     if (!response.ok) {
-      throw new Error("Failed to fetch inspectors");
-     }
-
      const data = await response.json();
      const inspectorSelect = document.getElementById("inspector");
 
@@ -430,7 +441,8 @@
       inspectorSelect.appendChild(option);
      });
     } catch (error) {
-     console.error("Error fetching inspectors:", error);
+     //  console.error("Error fetching inspectors:", error);
+     console.log(error);
     }
    };
 
@@ -468,24 +480,23 @@
    };
 
    const showInspectionDetails = async (inspection) => {
-    try {
-     // Clean up any existing modals and backdrops
-     let modalElement = document.getElementById("inspectionDetailModal");
-     if (modalElement) {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-       modalInstance.dispose();
-      }
-      modalElement.remove();
+    // Clean up any existing modals and backdrops
+    let modalElement = document.getElementById("inspectionDetailModal");
+    if (modalElement) {
+     const modalInstance = bootstrap.Modal.getInstance(modalElement);
+     if (modalInstance) {
+      modalInstance.dispose();
      }
-     // Remove any lingering backdrops
-     const backdrops = document.getElementsByClassName("modal-backdrop");
-     while (backdrops.length > 0) {
-      backdrops[0].remove();
-     }
+     modalElement.remove();
+    }
+    // Remove any lingering backdrops
+    const backdrops = document.getElementsByClassName("modal-backdrop");
+    while (backdrops.length > 0) {
+     backdrops[0].remove();
+    }
 
-     // Show loading state first
-     const loadingModal = `
+    // Show loading state first
+    const loadingModal = `
             <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content">
@@ -499,67 +510,57 @@
                 </div>
             </div>
         `;
-     document.body.insertAdjacentHTML("beforeend", loadingModal);
-     const modal = new bootstrap.Modal(
-      document.getElementById("inspectionDetailModal")
-     );
-     modal.show();
+    document.body.insertAdjacentHTML("beforeend", loadingModal);
+    const modal = new bootstrap.Modal(
+     document.getElementById("inspectionDetailModal")
+    );
+    modal.show();
 
-     // Fetch inspection details
-     const response = await fetch(
-      `${apiUrl}/inspection/inspections/${inspection.inspection_id}`,
-      {
-       headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-       },
-      }
-     );
-
-     if (!response.ok) {
-      throw new Error(`Failed to fetch inspection details: ${response.status}`);
+    // Fetch inspection details
+    const response = await fetch(
+     `${apiUrl}/inspection/inspections/${inspection.inspection_id}`,
+     {
+      headers: {
+       Accept: "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
      }
+    );
 
-     const data = await response.json();
-     const inspectionDetails = data.inspection;
+    const data = await response.json();
+    const inspectionDetails = data.inspection;
 
-     // Create the detailed modal content with the new structure
-     const detailedModalContent = `
-    <div class="modal fade" id="inspectionDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
+    // Create the detailed modal content with the new structure
+    const detailedModalContent = `
+    <div class="modal fade" id="inspectionDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-sm">
                 <div class="modal-header border-bottom-0 bg-primary bg-gradient text-white">
-                    <h5 class="modal-title fw-bold">
+                    <h5 class="modal-title fw-bold" id="inspectionDetailModalLabel">
                         <i class="bi bi-clipboard2-check me-2"></i>Inspection Details
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+                <div class="modal-body p-4">
                     <!-- Business Image Section -->
                     <div class="text-center mb-4">
-                        ${
-                         inspectionDetails.image_url
-                          ? `<div class="position-relative d-inline-block">
-                                <img src="${CONFIG.APP_URL}/storage/${inspectionDetails.image_url}" 
-                                    alt="Business Image" 
-                                    class="rounded-3 shadow-sm" 
-                                    style="max-height: 200px; width: auto; object-fit: cover"
-                                    onerror="this.onerror=null; this.src='/assets/images/no-image.png';">
-                                <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
-                                    <small>${inspectionDetails.business.business_name}</small>
-                                </div>
-                            </div>`
-                          : `<div class="text-center p-4 bg-light rounded-3">
-                                <i class="bi bi-building-x display-1 text-muted"></i>
-                                <p class="text-muted mt-2">No business image available</p>
-                            </div>`
-                        }
+                        <div class="position-relative d-inline-block">
+                            <img src="${CONFIG.APP_URL}/storage/${
+     inspectionDetails.image_url
+    }" alt="Business Image" class="rounded-3 shadow-sm img-fluid" style="max-height: 200px; width: auto; object-fit: cover" onerror="this.src='/assets/images/no-image.png';">
+                            <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
+                                <small>${
+                                 inspectionDetails.business?.business_name ||
+                                 "N/A"
+                                }</small>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row g-4">
                         <!-- Business Information -->
                         <div class="col-6">
-                            <div class="card border-0 shadow-sm hover-shadow">
+                            <div class="card soft-card">
                                 <div class="card-body">
                                     <h6 class="card-title fw-bold mb-3">
                                         <i class="bi bi-building fs-4 text-primary me-2"></i>Business Information
@@ -578,24 +579,22 @@
                                           ?.business_permit || "N/A"
                                         }</p>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="text-muted small">Status</label>
+                                    <div class="">
+                                        <label class="text-muted small">Business Status</label>
                                         <p class="mb-0">
-                                            <span class="badge bg-success rounded-pill">${
+                                            <span class="fw-semibold">${
                                              inspectionDetails.business
                                               ?.status || "N/A"
                                             }</span>
                                         </p>
                                     </div>
-                        
-                                
                                 </div>
                             </div>
                         </div>
 
                         <!-- Owner Information -->
                         <div class="col-md-6">
-                            <div class="card border-0 shadow-sm hover-shadow">
+                            <div class="card soft-card">
                                 <div class="card-body">
                                     <h6 class="card-title fw-bold mb-3">
                                         <i class="bi bi-person fs-4 text-primary me-2"></i>Owner Information
@@ -604,10 +603,10 @@
                                         <label class="text-muted small">Owner Name</label>
                                         <p class="fw-semibold mb-2">${
                                          inspectionDetails.business?.owner
-                                          ?.first_name
+                                          ?.first_name || ""
                                         } ${
-      inspectionDetails.business?.owner?.last_name
-     }</p>
+     inspectionDetails.business?.owner?.last_name || "N/A"
+    }</p>
                                     </div>
                                     <div class="mb-3">
                                         <label class="text-muted small">
@@ -631,34 +630,43 @@
                             </div>
                         </div>
 
-                        <!-- Business Location -->
+                        <!-- Location Card -->
                         <div class="col-12">
-                            <div class="card border-0 shadow-sm hover-shadow">
+                            <div class="card soft-card mb-4">
                                 <div class="card-body">
-                                    <h6 class="card-title fw-bold mb-3">
-                                        <i class="bi bi-geo-alt-fill fs-4 text-primary me-2"></i>Business Location
-                                    </h6>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="bi bi-geo-alt-fill fs-4 text-danger me-2"></i>
+                                        <h6 class="card-title fw-bold mb-0">Business Location</h6>
+                                    </div>
                                     <div class="row">
-                                        <div class="col-md-4 mb-3">
-                                            <label class="text-muted small">Street Address</label>
-                                            <p class="fw-semibold mb-0">${
-                                             inspectionDetails.business?.address
-                                              ?.street_address || "N/A"
-                                            }</p>
+                                        <div class="col-md-6">
+                                            <div class="mb-2">
+                                                <label class="text-muted small">Street Address</label>
+                                                <p class="fw-semibold mb-1">${
+                                                 inspectionDetails.business
+                                                  ?.address?.street_address ||
+                                                 "N/A"
+                                                }</p>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="text-muted small">City</label>
-                                            <p class="fw-semibold mb-0">${
-                                             inspectionDetails.business?.address
-                                              ?.city || "N/A"
-                                            }</p>
+                                        <div class="col-md-3">
+                                            <div class="mb-2">
+                                                <label class="text-muted small">City</label>
+                                                <p class="fw-semibold mb-1">${
+                                                 inspectionDetails.business
+                                                  ?.address?.city || "N/A"
+                                                }</p>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="text-muted small">Postal Code</label>
-                                            <p class="fw-semibold mb-0">${
-                                             inspectionDetails.business?.address
-                                              ?.postal_code || "N/A"
-                                            }</p>
+                                        <div class="col-md-3">
+                                            <div class="mb-2">
+                                                <label class="text-muted small">Postal Code</label>
+                                                <p class="fw-semibold mb-1">${
+                                                 inspectionDetails.business
+                                                  ?.address?.postal_code ||
+                                                 "N/A"
+                                                }</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -667,7 +675,7 @@
 
                         <!-- Inspection Details -->
                         <div class="col-12">
-                            <div class="card border-0 shadow-sm hover-shadow">
+                            <div class="card soft-card">
                                 <div class="card-body">
                                     <h6 class="card-title fw-bold mb-3">
                                         <i class="bi bi-clipboard-data fs-4 text-primary me-2"></i>Inspection Details
@@ -682,17 +690,18 @@
                                         <div class="col-md-4 mb-3">
                                             <label class="text-muted small">Type of Inspection</label>
                                             <p class="fw-semibold mb-0">${
-                                             inspectionDetails.type_of_inspection
+                                             inspectionDetails.type_of_inspection ||
+                                             "N/A"
                                             }</p>
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <label class="text-muted small">Inspector</label>
                                             <p class="fw-semibold mb-0">${
                                              inspectionDetails.inspector
-                                              ?.first_name
+                                              ?.first_name || ""
                                             } ${
-      inspectionDetails.inspector?.last_name
-     }</p>
+     inspectionDetails.inspector?.last_name || "N/A"
+    }</p>
                                         </div>
                                     </div>
                                 </div>
@@ -700,132 +709,200 @@
                         </div>
 
                         <!-- Violations Section -->
-                        <div class="col-12">
-                            <div class="violations-section mt-4">
-                                <h6 class="fw-bold mb-3">
-                                    <i class="bi bi-clipboard-x fs-4 text-danger me-2"></i>Violations Found
-                                </h6>
-                                ${
-                                 inspectionDetails.violations.length > 0
-                                  ? `<div class="list-group">
-                                        ${inspectionDetails.violations
-                                         .map(
-                                          (violation, index) => `
-                                            <div class="list-group-item list-group-item-action border-0 mb-2 rounded-3 shadow-sm hover-shadow">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <div class="violation-main flex-grow-1">
-                                                        <div class="d-flex align-items-center mb-2">
-                                                            <div class="violations-list">
-                                                                <h6 class="fw-bold text-danger mb-2">Nature of Violations:</h6>
-                                                                <ul class="list-unstyled mb-0">
+                        ${
+                         Array.isArray(inspectionDetails.violations)
+                          ? inspectionDetails.violations
+                             .map(
+                              (violation) => `
+                                <div class="col-12">
+                                    <div class="card soft-card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-clipboard-x fs-4 ${
+                                                     violation.status?.toLowerCase() ===
+                                                     "resolved"
+                                                      ? "text-success"
+                                                      : "text-danger"
+                                                    } me-2"></i>
+                                                    <h6 class="card-title fw-bold mb-0">Violation Information</h6>
+                                                </div>
+                                                <span class="badge ${
+                                                 violation.status?.toLowerCase() ===
+                                                 "pending"
+                                                  ? "bg-warning"
+                                                  : violation.status?.toLowerCase() ===
+                                                    "resolved"
+                                                  ? "bg-success"
+                                                  : violation.status?.toLowerCase() ===
+                                                    "overdue"
+                                                  ? "bg-danger"
+                                                  : "bg-secondary"
+                                                } rounded-pill px-3 py-2">
+                                                    ${
+                                                     violation.status?.toUpperCase() ||
+                                                     "N/A"
+                                                    }
+                                                </span>
+                                            </div>
+
+                                            <div class="row g-4">
+                                                <!-- Key Information -->
+                                                <div class="col-12">
+                                                    <div class="p-3 bg-light rounded-3 border-start ${
+                                                     violation.status?.toLowerCase() ===
+                                                     "resolved"
+                                                      ? "border-success"
+                                                      : "border-danger"
+                                                    } border-4">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-3">
+                                                                <div class="detail-item">
+                                                                    <label class="text-muted small d-block">Receipt No.</label>
+                                                                    <span class="fw-semibold">${
+                                                                     violation.violation_receipt_no ||
+                                                                     "N/A"
+                                                                    }</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="detail-item">
+                                                                    <label class="text-muted small d-block">Violation Date</label>
+                                                                    <span class="fw-semibold">${formatDate(
+                                                                     violation.violation_date
+                                                                    )}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="detail-item">
+                                                                    <label class="text-muted small d-block">Due Date</label>
+                                                                    <span class="fw-semibold">${formatDate(
+                                                                     violation.due_date
+                                                                    )}</span>
+                                                                </div>
+                                                            </div>
+                                                                    ${
+                                                                     violation.days_overdue &&
+                                                                     violation.status?.toLowerCase() !==
+                                                                      "resolved"
+                                                                      ? `<div class="col-md-3">
+                                                                            <div class="detail-item">
+                                                                                <label class="text-muted small d-block">Days Overdue</label>
+                                                                                <span class="fw-semibold text-danger">
+                                                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                                                                    ${violation.days_overdue} days
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>`
+                                                                      : ""
+                                                                    }
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Nature of Violations -->
+                                                <div class="col-12">
+                                                    <div class="violations-list p-3 ${
+                                                     violation.status?.toLowerCase() ===
+                                                     "resolved"
+                                                      ? "bg-success bg-opacity-10"
+                                                      : "bg-danger bg-opacity-10"
+                                                    } rounded-3">
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <i class="bi bi-exclamation-diamond-fill ${
+                                                             violation.status?.toLowerCase() ===
+                                                             "resolved"
+                                                              ? "text-success"
+                                                              : "text-danger"
+                                                            } me-2"></i>
+                                                            <h6 class="fw-bold mb-0">Nature of Violations</h6>
+                                                        </div>
+                                                        <div class="ps-4">
+                                                            ${
+                                                             Array.isArray(
+                                                              violation.nature_of_violation
+                                                             )
+                                                              ? `<div class="row g-2">
                                                                     ${violation.nature_of_violation
                                                                      .map(
                                                                       (
                                                                        nature
                                                                       ) => `
-                                                                        <li class="mb-1">
-                                                                            <i class="bi bi-dot text-danger"></i>
-                                                                            ${nature
-                                                                             .trim()
-                                                                             .toUpperCase()}
-                                                                        </li>
+                                                                        <div class="col-md-6">
+                                                                            <div class="d-flex align-items-start">
+                                                                                <i class="bi bi-dot ${
+                                                                                 violation.status?.toLowerCase() ===
+                                                                                 "resolved"
+                                                                                  ? "text-success"
+                                                                                  : "text-danger"
+                                                                                } mt-1 me-2"></i>
+                                                                                <span class="text-uppercase small">${nature.trim()}</span>
+                                                                            </div>
+                                                                        </div>
                                                                     `
                                                                      )
                                                                      .join("")}
-                                                                </ul>
-                                                            </div>
+                                                                </div>`
+                                                              : `<div class="text-muted">
+                                                                    <i class="bi bi-info-circle me-2"></i>No violations listed
+                                                                </div>`
+                                                            }
                                                         </div>
-                                                        <div class="violation-details mt-3">
-                                                            <div class="row g-3">
-                                                                <div class="col-md-4">
-                                                                    <div class="detail-item">
-                                                                        <small class="text-muted d-block">Receipt No.</small>
-                                                                        <span class="fw-semibold">${
-                                                                         violation.violation_receipt_no
-                                                                        }</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="detail-item">
-                                                                        <small class="text-muted d-block">Violation Date</small>
-                                                                        <span class="fw-semibold">${formatDate(
-                                                                         violation.violation_date
-                                                                        )}</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <div class="detail-item">
-                                                                        <small class="text-muted d-block">Due Date</small>
-                                                                        <span class="fw-semibold">${formatDate(
-                                                                         violation.due_date
-                                                                        )}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="ms-3">
-                                                        <span class="badge ${
-                                                         violation.status.toLowerCase() ===
-                                                         "pending"
-                                                          ? "bg-warning"
-                                                          : violation.status.toLowerCase() ===
-                                                            "paid"
-                                                          ? "bg-success"
-                                                          : violation.status.toLowerCase() ===
-                                                            "overdue"
-                                                          ? "bg-danger"
-                                                          : "bg-success"
-                                                        } rounded-pill px-3 py-2">
-                                                            ${violation.status.toUpperCase()}
-                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
-                                        `
-                                         )
-                                         .join("")}
-                                    </div>`
-                                  : `<div class="text-center p-4 bg-light rounded-3">
-                                        <i class="bi bi-check-circle text-success display-4"></i>
-                                        <p class="text-muted mt-2">No violations found</p>
-                                    </div>`
-                                }
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    `
+                             )
+                             .join("")
+                          : `<div class="col-12">
+                        <div class="card soft-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-clipboard-check fs-4 text-success me-2"></i>
+                                    <h6 class="card-title fw-bold mb-0">No Violations Found</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`
+                        }
                     </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
-    </div>`;
+    </div>
+`;
 
-     // Remove loading modal and show detailed modal
-     modalElement = document.getElementById("inspectionDetailModal");
-     if (modalElement) {
-      modalElement.remove();
-     }
-
-     document.body.insertAdjacentHTML("beforeend", detailedModalContent);
-     const detailedModal = new bootstrap.Modal(
-      document.getElementById("inspectionDetailModal")
-     );
-     detailedModal.show();
-
-     // Clean up modal and backdrop on close
-     detailedModal._element.addEventListener("hidden.bs.modal", function () {
-      this.remove();
-      const backdrops = document.getElementsByClassName("modal-backdrop");
-      while (backdrops.length > 0) {
-       backdrops[0].remove();
-      }
-      document.body.classList.remove("modal-open");
-      document.body.style.removeProperty("padding-right");
-      document.body.style.overflow = "";
-     });
-    } catch (error) {
-     console.error("Error showing inspection details:", error);
-     // Show error modal...
+    // Remove loading modal and show detailed modal
+    modalElement = document.getElementById("inspectionDetailModal");
+    if (modalElement) {
+     modalElement.remove();
     }
+
+    document.body.insertAdjacentHTML("beforeend", detailedModalContent);
+    const detailedModal = new bootstrap.Modal(
+     document.getElementById("inspectionDetailModal")
+    );
+    detailedModal.show();
+
+    // Clean up modal and backdrop on close
+    detailedModal._element.addEventListener("hidden.bs.modal", function () {
+     this.remove();
+     const backdrops = document.getElementsByClassName("modal-backdrop");
+     while (backdrops.length > 0) {
+      backdrops[0].remove();
+     }
+     document.body.classList.remove("modal-open");
+     document.body.style.removeProperty("padding-right");
+     document.body.style.overflow = "";
+    });
    };
 
    fetchInspectors();
