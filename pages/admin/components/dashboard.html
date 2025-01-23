@@ -596,13 +596,12 @@
              inspection.inspection_date
             )}</td>
             <td class="small" style="width: 12%">
-                ${formatDate(violation.due_date)}
                 ${
-                 diffDays > 0 && diffDays <= 3
-                  ? `<i class="bi bi-clock-fill text-warning ms-1" title="Due soon"></i>`
-                  : diffDays < 0
-                  ? `<i class="bi bi-exclamation-triangle-fill text-danger ms-1" title="Overdue"></i>`
-                  : ""
+                 shouldShowDueToday(violation.due_date, violation.status)
+                  ? `<span class="badge bg-warning text-dark">
+                        <i class="bi bi-clock-fill me-1"></i>Due Today
+                    </span>`
+                  : formatDate(violation.due_date)
                 }
             </td>
             <td class="small" style="width: 15%">${
@@ -707,20 +706,14 @@
    const showViolationDetails = async (inspection) => {
     try {
      const violation = inspection.violations[0];
+     const modalElement = document.getElementById("violationDetailModal");
+     const address = inspection.business?.address || {};
 
-     // First, ensure we have a modal container
-     let modalElement = document.getElementById("violationDetailModal");
-     if (!modalElement) {
-      modalElement = document.createElement("div");
-      modalElement.id = "violationDetailModal";
-      modalElement.className = "modal fade";
-      modalElement.setAttribute("tabindex", "-1");
-      modalElement.setAttribute("aria-labelledby", "violationDetailModalLabel");
-      modalElement.setAttribute("aria-hidden", "true");
-      document.body.appendChild(modalElement);
-     }
+     // Create the image URL using your storage path
+     const imageUrl = inspection.image_url
+      ? `${CONFIG.APP_URL}/storage/${inspection.image_url}`
+      : "/assets/images/no-image.png";
 
-     // Create the modal content
      modalElement.innerHTML = `
             <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-sm">
@@ -733,32 +726,26 @@
                     <div class="modal-body p-4">
                         <!-- Business Image Section -->
                         <div class="text-center mb-4">
-                            ${
-                             inspection.image_url
-                              ? `<div class="position-relative d-inline-block">
-                                    <img src="${CONFIG.APP_URL}/storage/${
-                                 inspection.image_url
-                                }" 
-                                        alt="Business Image" 
-                                        class="rounded-3 shadow-sm" 
-                                        style="max-height: 200px; width: auto; object-fit: cover"
-                                        onerror="this.onerror=null; this.src='/assets/images/no-image.png';">
-                                    <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
-                                        <small>${
-                                         inspection.business?.business_name ||
-                                         "N/A"
-                                        }</small>
-                                    </div>
-                                </div>`
-                              : `<div class="text-center p-4 bg-light rounded-3">
-                                    <i class="bi bi-building-x display-1 text-muted"></i>
-                                    <p class="text-muted mt-2">No business image available</p>
-                                </div>`
-                            }
+                            <div class="position-relative d-inline-block">
+                                <img 
+                                    src="${imageUrl}" 
+                                    alt="Business Image" 
+                                    class="rounded-3 shadow-sm img-fluid"
+                                    style="max-height: 200px; width: auto; object-fit: cover"
+                                    onerror="this.src='/assets/images/no-image.png';"
+                                />
+                                <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
+                                    <small>${
+                                     inspection.business?.business_name || "N/A"
+                                    }</small>
+                                </div>
+                            </div>
                         </div>
 
+                        
+
+                        <!-- Business Information -->
                         <div class="row g-4">
-                            <!-- Business Information -->
                             <div class="col-6">
                                 <div class="card border-0 shadow-sm hover-shadow">
                                     <div class="card-body">
@@ -830,6 +817,44 @@
                                 </div>
                             </div>
 
+                            <!-- Location Card -->
+                        <div class="card border-0 shadow-sm hover-shadow mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-geo-alt-fill fs-4 text-danger me-2"></i>
+                                    <h6 class="card-title fw-bold mb-0">Business Location</h6>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-2">
+                                            <label class="text-muted small">Street Address</label>
+                                            <p class="fw-semibold mb-1">
+                                                ${
+                                                 address.street_address || "N/A"
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-2">
+                                            <label class="text-muted small">City</label>
+                                            <p class="fw-semibold mb-1">
+                                                ${address.city || "N/A"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-2">
+                                            <label class="text-muted small">Postal Code</label>
+                                            <p class="fw-semibold mb-1">
+                                                ${address.postal_code || "N/A"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                             <!-- Inspection Details -->
                             <div class="col-12">
                                 <div class="card border-0 shadow-sm hover-shadow">
@@ -869,92 +894,158 @@
                             <div class="col-12">
                                 <div class="card border-0 shadow-sm hover-shadow">
                                     <div class="card-body">
-                                        <h6 class="card-title fw-bold mb-3">
-                                            <i class="bi bi-clipboard-x fs-4 text-danger me-2"></i>Violation Information
-                                        </h6>
-                                        <div class="row g-3">
-                                            <div class="col-md-4">
-                                                <div class="detail-item">
-                                                    <label class="text-muted small">Receipt No.</label>
-                                                    <p class="fw-semibold mb-0">${
-                                                     violation.violation_receipt_no ||
-                                                     "N/A"
-                                                    }</p>
-                                                </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-clipboard-x fs-4 ${
+                                                 violation.status?.toLowerCase() ===
+                                                 "resolved"
+                                                  ? "text-success"
+                                                  : "text-danger"
+                                                } me-2"></i>
+                                                <h6 class="card-title fw-bold mb-0">Violation Information</h6>
                                             </div>
-                                            <div class="col-md-4">
-                                                <div class="detail-item">
-                                                    <label class="text-muted small">Violation Date</label>
-                                                    <p class="fw-semibold mb-0">${formatDate(
-                                                     violation.violation_date
-                                                    )}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="detail-item">
-                                                    <label class="text-muted small">Due Date</label>
-                                                    <p class="fw-semibold mb-0">${formatDate(
-                                                     violation.due_date
-                                                    )}</p>
-                                                </div>
-                                            </div>
-                                            ${
-                                             violation.days_overdue
-                                              ? `<div class="col-md-4">
-                                                    <div class="detail-item">
-                                                        <label class="text-muted small">Days Overdue</label>
-                                                        <p class="fw-semibold mb-0 text-danger">${violation.days_overdue} days</p>
+                                            <span class="badge ${
+                                             violation.status?.toLowerCase() ===
+                                             "pending"
+                                              ? "bg-warning"
+                                              : violation.status?.toLowerCase() ===
+                                                "resolved"
+                                              ? "bg-success"
+                                              : violation.status?.toLowerCase() ===
+                                                "overdue"
+                                              ? "bg-danger"
+                                              : "bg-secondary"
+                                            } rounded-pill px-3 py-2">
+                                                ${
+                                                 violation.status?.toUpperCase() ||
+                                                 "N/A"
+                                                }
+                                            </span>
+                                        </div>
+
+                                        <div class="row g-4">
+                                            <!-- Key Information -->
+                                            <div class="col-12">
+                                                <div class="p-3 bg-light rounded-3 border-start ${
+                                                 violation.status?.toLowerCase() ===
+                                                 "resolved"
+                                                  ? "border-success"
+                                                  : "border-danger"
+                                                } border-4">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <label class="text-muted small d-block">Receipt No.</label>
+                                                                <span class="fw-semibold">${
+                                                                 violation.violation_receipt_no ||
+                                                                 "N/A"
+                                                                }</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <label class="text-muted small d-block">Violation Date</label>
+                                                                <span class="fw-semibold">${formatDate(
+                                                                 violation.violation_date
+                                                                )}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <label class="text-muted small d-block">Due Date</label>
+                                                                ${
+                                                                 shouldShowDueToday(
+                                                                  violation.due_date,
+                                                                  violation.status
+                                                                 )
+                                                                  ? `
+                                                                    <span class="fw-semibold">
+                                                                        <span class="badge bg-warning text-dark">
+                                                                            <i class="bi bi-clock-fill me-1"></i>Due Today
+                                                                        </span>
+                                                                    </span>
+                                                                `
+                                                                  : `
+                                                                    <span class="fw-semibold">${formatDate(
+                                                                     violation.due_date
+                                                                    )}</span>
+                                                                `
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        ${
+                                                         violation.days_overdue &&
+                                                         violation.status?.toLowerCase() !==
+                                                          "resolved"
+                                                          ? `
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <label class="text-muted small d-block">Days Overdue</label>
+                                                                <span class="fw-semibold text-danger">
+                                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                                                    ${violation.days_overdue} days
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        `
+                                                          : ""
+                                                        }
                                                     </div>
-                                                </div>`
-                                              : ""
-                                            }
-                                            <div class="col-12">
-                                                <div class="detail-item">
-                                                    <label class="text-muted small">Status</label>
-                                                    <p class="mb-0">
-                                                        <span class="badge ${
-                                                         violation.status?.toLowerCase() ===
-                                                         "pending"
-                                                          ? "bg-warning"
-                                                          : violation.status?.toLowerCase() ===
-                                                            "paid"
-                                                          ? "bg-success"
-                                                          : violation.status?.toLowerCase() ===
-                                                            "overdue"
-                                                          ? "bg-danger"
-                                                          : "bg-secondary"
-                                                        } rounded-pill px-3 py-2">
-                                                            ${
-                                                             violation.status?.toUpperCase() ||
-                                                             "N/A"
-                                                            }
-                                                        </span>
-                                                    </p>
                                                 </div>
                                             </div>
+
+                                            <!-- Nature of Violations -->
                                             <div class="col-12">
-                                                <div class="violations-list">
-                                                    <h6 class="fw-bold text-danger mb-2">Nature of Violations:</h6>
-                                                    <ul class="list-unstyled mb-0">
+                                                <div class="violations-list p-3 ${
+                                                 violation.status?.toLowerCase() ===
+                                                 "resolved"
+                                                  ? "bg-success bg-opacity-10"
+                                                  : "bg-danger bg-opacity-10"
+                                                } rounded-3">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <i class="bi bi-exclamation-diamond-fill ${
+                                                         violation.status?.toLowerCase() ===
+                                                         "resolved"
+                                                          ? "text-success"
+                                                          : "text-danger"
+                                                        } me-2"></i>
+                                                        <h6 class="fw-bold mb-0">Nature of Violations</h6>
+                                                    </div>
+                                                    <div class="ps-4">
                                                         ${
                                                          Array.isArray(
                                                           violation.nature_of_violation
                                                          )
-                                                          ? violation.nature_of_violation
-                                                             .map(
-                                                              (nature) => `
-                                                                    <li class="mb-1">
-                                                                        <i class="bi bi-dot text-danger"></i>
-                                                                        ${nature
-                                                                         .trim()
-                                                                         .toUpperCase()}
-                                                                    </li>
+                                                          ? `
+                                                            <div class="row g-2">
+                                                                ${violation.nature_of_violation
+                                                                 .map(
+                                                                  (nature) => `
+                                                                    <div class="col-md-6">
+                                                                        <div class="d-flex align-items-start">
+                                                                            <i class="bi bi-dot ${
+                                                                             violation.status?.toLowerCase() ===
+                                                                             "resolved"
+                                                                              ? "text-success"
+                                                                              : "text-danger"
+                                                                            } mt-1 me-2"></i>
+                                                                            <span class="text-uppercase small">
+                                                                                ${nature.trim()}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
                                                                 `
-                                                             )
-                                                             .join("")
-                                                          : '<li><i class="bi bi-dot"></i> No violations listed</li>'
+                                                                 )
+                                                                 .join("")}
+                                                            </div>
+                                                        `
+                                                          : `
+                                                            <div class="text-muted">
+                                                                <i class="bi bi-info-circle me-2"></i>No violations listed
+                                                            </div>
+                                                        `
                                                         }
-                                                    </ul>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -977,18 +1068,16 @@
             </div>
         `;
 
-     // Destroy any existing modal instance
-     const existingModal = bootstrap.Modal.getInstance(modalElement);
-     if (existingModal) {
-      existingModal.dispose();
-     }
-
-     // Create and show the new modal
-     const modal = new bootstrap.Modal(modalElement, {
-      backdrop: "static",
-      keyboard: false,
-     });
+     // Initialize and show modal
+     const modal = new bootstrap.Modal(modalElement);
      modal.show();
+
+     // Add click handler to make image viewable in full size
+     const imageElement = modalElement.querySelector("img");
+     imageElement.style.cursor = "pointer";
+     imageElement.addEventListener("click", () => {
+      window.open(imageUrl, "_blank");
+     });
     } catch (error) {
      console.error("Error showing violation details:", error);
      showAlert("error", "Failed to load violation details");
@@ -1011,6 +1100,14 @@
 
    // Make clearFilters globally available
    window.clearFilters = clearFilters;
+
+   // Update the helper function to check status
+   function shouldShowDueToday(dueDate, status) {
+    if (!dueDate || status?.toLowerCase() === "resolved") return false;
+    const today = new Date();
+    const due = new Date(dueDate);
+    return today.toDateString() === due.toDateString();
+   }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
  </body>
