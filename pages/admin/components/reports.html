@@ -22,14 +22,14 @@
     background: white;
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    padding: 20px;
+    padding: 40px;
     margin-bottom: 25px;
    }
    .chart-container.large {
-    height: 400px;
+    height: 500px;
    }
    .chart-container.medium {
-    height: 300px;
+    height: 400px;
    }
    .chart-title {
     color: #2c3e50;
@@ -80,6 +80,53 @@
     background: #4e73df;
     color: white;
    }
+   .kpi-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin-bottom: 25px;
+   }
+   .kpi-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+   }
+   .kpi-title {
+    color: #858796;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 5px;
+   }
+   .kpi-value {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+   }
+   .kpi-trend {
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+   }
+   .kpi-trend.positive {
+    color: #1cc88a;
+   }
+   .kpi-trend.negative {
+    color: #e74a3b;
+   }
+   @media (max-width: 1200px) {
+    .kpi-cards {
+     grid-template-columns: repeat(2, 1fr);
+    }
+   }
+   @media (max-width: 768px) {
+    .kpi-cards {
+     grid-template-columns: 1fr;
+    }
+   }
   </style>
  </head>
  <body>
@@ -91,9 +138,45 @@
       Manage business violation reports with data visualization
      </p>
     </div>
-    <button class="btn btn-primary">
+    <!-- <button class="btn btn-primary">
      <i class="fas fa-download fa-sm mr-2"></i>Download Report
-    </button>
+    </button> -->
+   </div>
+  </div>
+
+  <!-- Add KPI Cards -->
+  <div class="kpi-cards">
+   <div class="kpi-card">
+    <div class="kpi-title">Total Inspections</div>
+    <div class="kpi-value" id="total-inspections">-</div>
+    <div class="kpi-trend" id="inspections-trend">
+     <i class="fas fa-arrow-up"></i>
+     <span>vs last period</span>
+    </div>
+   </div>
+   <div class="kpi-card">
+    <div class="kpi-title">Violation Rate</div>
+    <div class="kpi-value" id="violation-rate">-</div>
+    <div class="kpi-trend" id="violation-trend">
+     <i class="fas fa-arrow-down"></i>
+     <span>vs last period</span>
+    </div>
+   </div>
+   <div class="kpi-card">
+    <div class="kpi-title">Resolution Rate</div>
+    <div class="kpi-value" id="resolution-rate">-</div>
+    <div class="kpi-trend" id="resolution-trend">
+     <i class="fas fa-arrow-up"></i>
+     <span>vs last period</span>
+    </div>
+   </div>
+   <div class="kpi-card">
+    <div class="kpi-title">Avg Resolution Time</div>
+    <div class="kpi-value" id="avg-resolution-time">-</div>
+    <div class="kpi-trend" id="resolution-time-trend">
+     <i class="fas fa-arrow-down"></i>
+     <span>vs last period</span>
+    </div>
    </div>
   </div>
 
@@ -131,9 +214,47 @@
    import CONFIG from "/scripts/config.js";
    const apiUrl = CONFIG.API_BASE_URL;
 
-   function getMonthName(monthNumber) {
-    const date = new Date(2024, monthNumber - 1, 1);
-    return date.toLocaleString("default", { month: "long" });
+   async function updateKPIs(period = "month") {
+    try {
+     const response = await fetch(`${apiUrl}/chart/kpi-data?period=${period}`, {
+      headers: {
+       "Content-Type": "application/json",
+       Accept: "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+     const data = await response.json();
+
+     // Update KPI values
+     document.getElementById("total-inspections").textContent =
+      data.totalInspections;
+     document.getElementById("violation-rate").textContent =
+      data.violationRate + "%";
+     document.getElementById("resolution-rate").textContent =
+      data.resolutionRate + "%";
+     document.getElementById("avg-resolution-time").textContent =
+      data.avgResolutionDays + " days";
+
+     // Update trends
+     updateTrend("inspections-trend", data.inspectionsTrend);
+     updateTrend("violation-trend", data.violationTrend);
+     updateTrend("resolution-trend", data.resolutionTrend);
+     updateTrend("resolution-time-trend", data.resolutionTimeTrend);
+    } catch (error) {
+     console.error("Error fetching KPI data:", error);
+    }
+   }
+
+   function updateTrend(elementId, trend) {
+    const element = document.getElementById(elementId);
+    const icon = element.querySelector("i");
+    const value = trend.value;
+
+    element.className = "kpi-trend " + (value >= 0 ? "positive" : "negative");
+    icon.className = "fas " + (value >= 0 ? "fa-arrow-up" : "fa-arrow-down");
+    element.querySelector("span").textContent = `${Math.abs(
+     value
+    )}% vs last period`;
    }
 
    async function loadCharts() {
@@ -159,9 +280,7 @@
       new Chart(document.getElementById("barChart"), {
        type: "bar",
        data: {
-        labels: data.barGraph.inspections.map((item) =>
-         getMonthName(item.month)
-        ),
+        labels: data.barGraph.inspections.map((item) => item.label),
         datasets: [
          {
           label: "Inspections",
@@ -261,9 +380,7 @@
          {
           type: "line",
           data: {
-           labels: data.lineGraph.withViolations.map((item) =>
-            getMonthName(item.month)
-           ),
+           labels: data.lineGraph.withViolations.map((item) => item.label),
            datasets: [
             {
              label: "With Violations",
@@ -324,11 +441,17 @@
         // Update chart
         const period = e.target.dataset.period;
         await updateLineChart(period);
+
+        // Update KPIs for the new period
+        await updateKPIs(period);
        });
       });
 
       // Initial load
       await updateLineChart("month");
+
+      // Initial KPI load
+      await updateKPIs("month");
      } catch (error) {
       console.error("Error fetching or rendering chart data:", error);
      }
