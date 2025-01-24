@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reports</title>
   <link rel="stylesheet" href="/css/admin/reports.css" />
+  <!-- Add Chart.js library with all plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
   <style>
    body {
     font-family: "Poppins", sans-serif !important;
@@ -210,6 +212,24 @@
      </div>
     </div>
     <div class="filter-group">
+     <label class="form-label">Month</label>
+     <select class="form-select" id="monthFilter">
+      <option value="">All Months</option>
+      <option value="1">January</option>
+      <option value="2">February</option>
+      <option value="3">March</option>
+      <option value="4">April</option>
+      <option value="5">May</option>
+      <option value="6">June</option>
+      <option value="7">July</option>
+      <option value="8">August</option>
+      <option value="9">September</option>
+      <option value="10">October</option>
+      <option value="11">November</option>
+      <option value="12">December</option>
+     </select>
+    </div>
+    <div class="filter-group">
      <label class="form-label">Status</label>
      <select class="form-select" id="statusFilter">
       <option value="all">All Status</option>
@@ -222,6 +242,20 @@
     </button>
     <button class="btn btn-outline-secondary" onclick="resetFilters()">
      Reset
+    </button>
+   </div>
+  </div>
+
+  <div class="card mb-4 d-inline-block">
+   <div class="btn-group">
+    <button class="btn btn-outline-primary btn-sm" data-period="day">
+     Daily
+    </button>
+    <button class="btn btn-outline-primary btn-sm" data-period="week">
+     Weekly
+    </button>
+    <button class="btn btn-outline-primary btn-sm active" data-period="month">
+     Monthly
     </button>
    </div>
   </div>
@@ -240,17 +274,6 @@
    <div class="chart-container large">
     <div class="d-flex justify-content-between align-items-center mb-3">
      <h5 class="chart-title mb-0">Inspection Trends Analysis</h5>
-     <div class="btn-group">
-      <button class="btn btn-outline-primary btn-sm" data-period="day">
-       Daily
-      </button>
-      <button class="btn btn-outline-primary btn-sm" data-period="week">
-       Weekly
-      </button>
-      <button class="btn btn-outline-primary btn-sm active" data-period="month">
-       Monthly
-      </button>
-     </div>
     </div>
     <canvas id="lineChart"></canvas>
    </div>
@@ -260,291 +283,286 @@
    import CONFIG from "/scripts/config.js";
    const apiUrl = CONFIG.API_BASE_URL;
    let currentPeriod = "month";
+   let lineChartInstance = null;
+   let barChartInstance = null;
+   let pieChartInstance = null;
 
+   // Add the updateTrendIndicator function
+   function updateTrendIndicator(elementId, value, status) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    element.classList.remove("positive", "negative");
+    element.classList.add(status === "increase" ? "positive" : "negative");
+
+    const icon = status === "increase" ? "up" : "down";
+    const prefix = value > 0 ? "+" : "";
+    element.innerHTML = `<i class="fas fa-arrow-${icon}"></i> ${prefix}${value}% vs last period`;
+   }
+
+   // Function to update period buttons
+   function updatePeriodButtons() {
+    document.querySelectorAll("[data-period]").forEach((button) => {
+     button.classList.remove("active");
+     if (button.dataset.period === currentPeriod) {
+      button.classList.add("active");
+     }
+    });
+   }
+
+   // Function to handle period button clicks
+   async function handlePeriodChange(e) {
+    const newPeriod = e.target.dataset.period;
+    if (newPeriod) {
+     currentPeriod = newPeriod;
+     updatePeriodButtons();
+
+     // Get current filter values
+     const startDate = document.getElementById("startDate").value;
+     const endDate = document.getElementById("endDate").value;
+     const status = document.getElementById("statusFilter").value;
+     const month = document.getElementById("monthFilter").value;
+
+     // Update charts with new period and current filters
+     await updateCharts(currentPeriod, { startDate, endDate, status, month });
+    }
+   }
+
+   // Add event listeners for period buttons
+   document.querySelectorAll("[data-period]").forEach((button) => {
+    button.addEventListener("click", handlePeriodChange);
+   });
+
+   // Update the updateCharts function
+   async function updateCharts(period = "month", filters = {}) {
+    try {
+     const params = new URLSearchParams({ period });
+     if (filters.startDate) params.append("startDate", filters.startDate);
+     if (filters.endDate) params.append("endDate", filters.endDate);
+     if (filters.status && filters.status !== "all")
+      params.append("status", filters.status);
+     if (filters.month) params.append("month", filters.month);
+
+     // Separate API call for KPI data
+     const kpiResponse = await fetch(`${apiUrl}/chart/kpi-data?${params}`, {
+      headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+     const kpiData = await kpiResponse.json();
+
+     // Update KPI Values
+     document.getElementById("total-inspections").textContent =
+      kpiData.totalInspections;
+     document.getElementById("violation-rate").textContent =
+      kpiData.violationRate + "%";
+     document.getElementById("resolution-rate").textContent =
+      kpiData.resolutionRate + "%";
+     document.getElementById("avg-resolution-time").textContent =
+      kpiData.avgResolutionDays + " days";
+
+     // Update KPI Trends
+     updateTrendIndicator(
+      "inspections-trend",
+      kpiData.inspectionsTrend.value,
+      kpiData.inspectionsTrend.status
+     );
+     updateTrendIndicator(
+      "violation-trend",
+      kpiData.violationTrend.value,
+      kpiData.violationTrend.status
+     );
+     updateTrendIndicator(
+      "resolution-trend",
+      kpiData.resolutionTrend.value,
+      kpiData.resolutionTrend.status
+     );
+     updateTrendIndicator(
+      "resolution-time-trend",
+      kpiData.resolutionTimeTrend.value,
+      kpiData.resolutionTimeTrend.status
+     );
+
+     // Existing chart data fetch
+     const chartResponse = await fetch(`${apiUrl}/chart/chart-data?${params}`, {
+      headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+     const chartData = await chartResponse.json();
+
+     // Update Bar Chart
+     if (barChartInstance) {
+      barChartInstance.destroy();
+     }
+     barChartInstance = new Chart(document.getElementById("barChart"), {
+      type: "bar",
+      data: {
+       labels: chartData.barGraph.inspections.map((item) => item.label),
+       datasets: [
+        {
+         label: "Inspections",
+         data: chartData.barGraph.inspections.map((item) => item.total),
+         backgroundColor: "rgba(78, 115, 223, 0.8)",
+         borderRadius: 6,
+        },
+        {
+         label: "Violations",
+         data: chartData.barGraph.violations.map((item) => item.total),
+         backgroundColor: "rgba(231, 74, 59, 0.8)",
+         borderRadius: 6,
+        },
+       ],
+      },
+      options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       plugins: {
+        legend: {
+         position: "top",
+        },
+       },
+       scales: {
+        y: {
+         beginAtZero: true,
+         grid: {
+          display: true,
+          drawBorder: false,
+         },
+        },
+        x: {
+         grid: {
+          display: false,
+         },
+        },
+       },
+      },
+     });
+
+     // Update Pie Chart
+     if (pieChartInstance) {
+      pieChartInstance.destroy();
+     }
+     pieChartInstance = new Chart(document.getElementById("pieChart"), {
+      type: "doughnut",
+      data: {
+       labels: ["Resolved", "Pending"],
+       datasets: [
+        {
+         data: [
+          chartData.pieGraph.resolved,
+          chartData.pieGraph.total - chartData.pieGraph.resolved,
+         ],
+         backgroundColor: [
+          "rgba(28, 200, 138, 0.8)",
+          "rgba(246, 194, 62, 0.8)",
+         ],
+         borderWidth: 0,
+        },
+       ],
+      },
+      options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       plugins: {
+        legend: {
+         position: "top",
+        },
+       },
+       cutout: "40%",
+      },
+     });
+
+     // Update Line Chart
+     if (lineChartInstance) {
+      lineChartInstance.destroy();
+     }
+     lineChartInstance = new Chart(document.getElementById("lineChart"), {
+      type: "line",
+      data: {
+       labels: chartData.lineGraph.withViolations.map((item) => item.label),
+       datasets: [
+        {
+         label: "With Violations",
+         data: chartData.lineGraph.withViolations.map((item) => item.total),
+         borderColor: "rgba(231, 74, 59, 0.8)",
+         tension: 0.4,
+         fill: true,
+         backgroundColor: "rgba(231, 74, 59, 0.1)",
+        },
+        {
+         label: "Without Violations",
+         data: chartData.lineGraph.withoutViolations.map((item) => item.total),
+         borderColor: "rgba(28, 200, 138, 0.8)",
+         tension: 0.4,
+         fill: true,
+         backgroundColor: "rgba(28, 200, 138, 0.1)",
+        },
+       ],
+      },
+      options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       plugins: {
+        legend: {
+         position: "top",
+        },
+       },
+       scales: {
+        y: {
+         beginAtZero: true,
+         grid: {
+          drawBorder: false,
+         },
+        },
+        x: {
+         grid: {
+          display: false,
+         },
+        },
+       },
+      },
+     });
+    } catch (error) {
+     console.error("Error updating charts:", error);
+    }
+   }
+
+   // Update the applyFilters function
    window.applyFilters = async function () {
     const startDate = document.getElementById("startDate").value;
     const endDate = document.getElementById("endDate").value;
     const status = document.getElementById("statusFilter").value;
+    const month = document.getElementById("monthFilter").value;
 
     try {
-     // Reload charts with filter parameters
-     await updateKPIs(currentPeriod, { startDate, endDate, status });
-     await updateLineChart(currentPeriod, { startDate, endDate, status });
+     await updateCharts(currentPeriod, { startDate, endDate, status, month });
     } catch (error) {
      console.error("Error applying filters:", error);
     }
    };
 
+   // Update the resetFilters function
    window.resetFilters = async function () {
     document.getElementById("startDate").value = "";
     document.getElementById("endDate").value = "";
     document.getElementById("statusFilter").value = "all";
+    document.getElementById("monthFilter").value = "";
+    currentPeriod = "month";
+    updatePeriodButtons();
 
     try {
-     // Reload charts with default parameters
-     await updateKPIs(currentPeriod);
-     await updateLineChart(currentPeriod);
+     await updateCharts(currentPeriod);
     } catch (error) {
      console.error("Error resetting filters:", error);
     }
    };
 
-   async function updateKPIs(period = "month", filters = {}) {
-    try {
-     // Build query parameters
-     const params = new URLSearchParams({ period });
-     if (filters.startDate) params.append("startDate", filters.startDate);
-     if (filters.endDate) params.append("endDate", filters.endDate);
-     if (filters.status) params.append("status", filters.status);
-
-     const response = await fetch(`${apiUrl}/chart/kpi-data?${params}`, {
-      headers: {
-       "Content-Type": "application/json",
-       Accept: "application/json",
-       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-     });
-     const data = await response.json();
-
-     // Update KPI values
-     document.getElementById("total-inspections").textContent =
-      data.totalInspections;
-     document.getElementById("violation-rate").textContent =
-      data.violationRate + "%";
-     document.getElementById("resolution-rate").textContent =
-      data.resolutionRate + "%";
-     document.getElementById("avg-resolution-time").textContent =
-      data.avgResolutionDays + " days";
-
-     // Update trends
-     updateTrend("inspections-trend", data.inspectionsTrend);
-     updateTrend("violation-trend", data.violationTrend);
-     updateTrend("resolution-trend", data.resolutionTrend);
-     updateTrend("resolution-time-trend", data.resolutionTimeTrend);
-    } catch (error) {
-     console.error("Error fetching KPI data:", error);
-    }
-   }
-
-   function updateTrend(elementId, trend) {
-    const element = document.getElementById(elementId);
-    const icon = element.querySelector("i");
-    const value = trend.value;
-
-    element.className = "kpi-trend " + (value >= 0 ? "positive" : "negative");
-    icon.className = "fas " + (value >= 0 ? "fa-arrow-up" : "fa-arrow-down");
-    element.querySelector("span").textContent = `${Math.abs(
-     value
-    )}% vs last period`;
-   }
-
-   async function loadCharts() {
-    const chartScript = document.createElement("script");
-    chartScript.src =
-     "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
-
-    chartScript.onload = async function () {
-     try {
-      const response = await fetch(apiUrl + "/chart/chart-data", {
-       method: "GET",
-       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-       },
-      });
-      const data = await response.json();
-
-      console.log(data);
-
-      // Bar Chart
-      new Chart(document.getElementById("barChart"), {
-       type: "bar",
-       data: {
-        labels: data.barGraph.inspections.map((item) => item.label),
-        datasets: [
-         {
-          label: "Inspections",
-          data: data.barGraph.inspections.map((item) => item.total),
-          backgroundColor: "rgba(78, 115, 223, 0.8)",
-          borderRadius: 6,
-         },
-         {
-          label: "Violations",
-          data: data.barGraph.violations.map((item) => item.total),
-          backgroundColor: "rgba(231, 74, 59, 0.8)",
-          borderRadius: 6,
-         },
-        ],
-       },
-       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-         legend: {
-          position: "top",
-         },
-        },
-        scales: {
-         y: {
-          beginAtZero: true,
-          grid: {
-           display: true,
-           drawBorder: false,
-          },
-         },
-         x: {
-          grid: {
-           display: false,
-          },
-         },
-        },
-       },
-      });
-
-      // Pie Chart with adjusted size
-      new Chart(document.getElementById("pieChart"), {
-       type: "doughnut",
-       data: {
-        labels: ["Resolved", "Pending"],
-        datasets: [
-         {
-          data: [
-           data.pieGraph.resolved,
-           data.pieGraph.total - data.pieGraph.resolved,
-          ],
-          backgroundColor: [
-           "rgba(28, 200, 138, 0.8)",
-           "rgba(246, 194, 62, 0.8)",
-          ],
-          borderWidth: 0,
-         },
-        ],
-       },
-       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-         legend: {
-          position: "top",
-         },
-        },
-        layout: {
-         padding: 20,
-        },
-        cutout: "40%",
-       },
-      });
-
-      let currentPeriod = "month";
-      const lineChartInstance = { current: null };
-
-      async function updateLineChart(period, filters = {}) {
-       try {
-        // Build query parameters
-        const params = new URLSearchParams({ period });
-        if (filters.startDate) params.append("startDate", filters.startDate);
-        if (filters.endDate) params.append("endDate", filters.endDate);
-        if (filters.status) params.append("status", filters.status);
-
-        const response = await fetch(`${apiUrl}/chart/chart-data?${params}`, {
-         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-         },
-        });
-        const data = await response.json();
-
-        if (lineChartInstance.current) {
-         lineChartInstance.current.destroy();
-        }
-
-        lineChartInstance.current = new Chart(
-         document.getElementById("lineChart"),
-         {
-          type: "line",
-          data: {
-           labels: data.lineGraph.withViolations.map((item) => item.label),
-           datasets: [
-            {
-             label: "With Violations",
-             data: data.lineGraph.withViolations.map((item) => item.total),
-             borderColor: "rgba(231, 74, 59, 0.8)",
-             tension: 0.4,
-             fill: true,
-             backgroundColor: "rgba(231, 74, 59, 0.1)",
-            },
-            {
-             label: "Without Violations",
-             data: data.lineGraph.withoutViolations.map((item) => item.total),
-             borderColor: "rgba(28, 200, 138, 0.8)",
-             tension: 0.4,
-             fill: true,
-             backgroundColor: "rgba(28, 200, 138, 0.1)",
-            },
-           ],
-          },
-          options: {
-           responsive: true,
-           maintainAspectRatio: false,
-           plugins: {
-            legend: {
-             position: "top",
-            },
-           },
-           scales: {
-            y: {
-             beginAtZero: true,
-             grid: {
-              drawBorder: false,
-             },
-            },
-            x: {
-             grid: {
-              display: false,
-             },
-            },
-           },
-          },
-         }
-        );
-       } catch (error) {
-        console.error("Error updating line chart:", error);
-       }
-      }
-
-      // Add event listeners for period buttons
-      document.querySelectorAll("[data-period]").forEach((button) => {
-       button.addEventListener("click", async (e) => {
-        // Update active state
-        document
-         .querySelectorAll("[data-period]")
-         .forEach((btn) => btn.classList.remove("active"));
-        e.target.classList.add("active");
-
-        // Update chart
-        const period = e.target.dataset.period;
-        await updateLineChart(period);
-
-        // Update KPIs for the new period
-        await updateKPIs(period);
-       });
-      });
-
-      // Initial load
-      await updateLineChart("month");
-
-      // Initial KPI load
-      await updateKPIs("month");
-     } catch (error) {
-      console.error("Error fetching or rendering chart data:", error);
-     }
-    };
-
-    document.body.appendChild(chartScript);
-   }
-
-   loadCharts();
+   // Initial load
+   updatePeriodButtons();
+   updateCharts(currentPeriod);
   </script>
  </body>
 </html>
