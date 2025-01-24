@@ -18,8 +18,9 @@
   />
   <style>
    body {
-    font-family: "Poppins", sans-serif;
+    font-family: "Poppins", sans-serif !important;
     background-color: #eff3fc;
+    padding-right: 0 !important;
    }
    .container {
     max-width: 800px;
@@ -89,6 +90,42 @@
    .table th,
    .table td {
     vertical-align: middle;
+   }
+   .modal {
+    padding-right: 0 !important;
+   }
+   .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+   }
+   .modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+   }
+   body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+   }
+   .modal {
+    overflow-y: hidden !important;
+   }
+   .modal-dialog {
+    overflow-y: initial !important;
+   }
+
+   .modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+   }
+   .modal-backdrop {
+    opacity: 0.2 !important;
+   }
+   .modal-backdrop.show {
+    opacity: 0.2 !important;
+   }
+   .modal-backdrop.fade {
+    opacity: 0.2 !important;
    }
   </style>
  </head>

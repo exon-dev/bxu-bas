@@ -7,11 +7,14 @@
   <link
    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
    rel="stylesheet"
+   type="text/css"
   />
   <link
    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
    rel="stylesheet"
+   type="text/css"
   />
+  <link href="/css/main.css" rel="stylesheet" type="text/css" />
   <style>
    .header {
     background-color: white;
@@ -47,6 +50,66 @@
    .datetime .time {
     margin-right: 15px;
    }
+
+   /* Add modal backdrop styles */
+   .modal {
+    padding-right: 0 !important;
+   }
+   .modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+    margin: 0 auto;
+   }
+   .modal-content {
+    margin: auto;
+   }
+   .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+   }
+   .modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+   }
+   body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+   }
+   .modal {
+    overflow-y: hidden !important;
+   }
+   .modal-dialog {
+    overflow-y: initial !important;
+   }
+   .modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+   }
+   .modal-backdrop {
+    opacity: 0.2 !important;
+   }
+   .modal-backdrop.show {
+    opacity: 0.2 !important;
+   }
+   .modal-backdrop.fade {
+    opacity: 0.2 !important;
+   }
+
+   .violation-item {
+    background-color: #fff;
+    transition: background-color 0.2s;
+   }
+
+   .violation-item:hover {
+    background-color: #f8f9fa;
+   }
+
+   .btn-outline-secondary {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+   }
   </style>
  </head>
  <body id="header">
@@ -58,10 +121,69 @@
    <div class="datetime">
     <span class="date" id="currentDate"></span>
     <span class="time" id="currentTime"></span>
-    <!-- <i class="bi bi-bell fs-4"></i> -->
+    <div class="position-relative d-inline-block">
+     <i
+      class="bi bi-bell fs-4"
+      data-bs-toggle="modal"
+      data-bs-target="#violationsModal"
+      style="cursor: pointer"
+     ></i>
+     <span
+      id="notificationDot"
+      class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none"
+     >
+      <span class="visually-hidden">New notifications</span>
+     </span>
+    </div>
    </div>
   </div>
-  <script>
+
+  <!-- Violations Modal -->
+  <div
+   class="modal fade"
+   id="violationsModal"
+   tabindex="-1"
+   aria-labelledby="violationsModalLabel"
+  >
+   <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="violationsModalLabel">
+       Violation Notification
+      </h5>
+      <button
+       type="button"
+       class="btn-close"
+       data-bs-dismiss="modal"
+       aria-label="Close"
+      ></button>
+     </div>
+     <div class="modal-body">
+      <div id="violationsContainer">
+       <!-- Violations will be populated here -->
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module">
+   import CONFIG from "/scripts/config.js";
+   const apiUrl = CONFIG.API_BASE_URL;
+
+   // Make copyReceipt function global
+   window.copyReceipt = function (receiptNo) {
+    navigator.clipboard
+     .writeText(receiptNo)
+     .then(() => {
+      alert("Receipt number copied to clipboard!");
+     })
+     .catch((err) => {
+      console.error("Failed to copy receipt number:", err);
+     });
+   };
+
    function updateDateTime() {
     const now = new Date();
     const dateOptions = { year: "numeric", month: "long", day: "numeric" };
@@ -77,6 +199,139 @@
    const lastName = localStorage.getItem("lastName") || "";
    const fullName = firstName + " " + lastName;
    document.getElementById("profileName").textContent = fullName.trim();
+
+   // Function to fetch and display violations
+   async function loadViolations() {
+    try {
+     const response = await fetch(apiUrl + "/dashboard/bell-notif-details", {
+      method: "GET",
+      headers: {
+       "Content-Type": "application/json",
+       Accept: "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+
+     if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+     }
+
+     const data = await response.json();
+     const container = document.getElementById("violationsContainer");
+     container.innerHTML = "";
+
+     if (data && data.notifications && Array.isArray(data.notifications)) {
+      data.notifications.forEach((notification) => {
+       const violationsList = notification.violations
+        .map((violation) => {
+         const details = violation.details.join(", ");
+         return `
+           <div class="violation-item border-bottom py-2">
+             <div class="d-flex justify-content-between align-items-center">
+               <div>
+                 <strong>Receipt #: ${violation.receipt_no}</strong>
+                 <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copyReceipt('${
+                  violation.receipt_no
+                 }')">
+                   <i class="bi bi-clipboard"></i>
+                 </button>
+               </div>
+               <small class="text-muted">${new Date(
+                notification.inspection_date
+               ).toLocaleDateString()}</small>
+             </div>
+             <div class="mt-1">
+               <small class="text-muted">Inspector: ${
+                notification.inspector_name
+               }</small>
+             </div>
+             <div class="mt-1">
+               <small>${details}</small>
+             </div>
+           </div>
+         `;
+        })
+        .join("");
+
+       container.innerHTML += violationsList;
+      });
+     } else {
+      container.innerHTML = '<div class="p-3">No violations found</div>';
+     }
+    } catch (error) {
+     console.error("Error loading violations:", error);
+     const container = document.getElementById("violationsContainer");
+     container.innerHTML =
+      '<div class="p-3 text-danger">Failed to load violations. Please try again later.</div>';
+    }
+   }
+
+   // Initialize Bootstrap modal with proper event handlers
+   const violationsModal = document.getElementById("violationsModal");
+   const modal = new bootstrap.Modal(violationsModal);
+
+   // Function to check notifications and update the dot
+   async function checkNotifications() {
+    try {
+     const response = await fetch(apiUrl + "/dashboard/bell-notif-details", {
+      method: "GET",
+      headers: {
+       "Content-Type": "application/json",
+       Accept: "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+     });
+
+     if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+     }
+
+     const data = await response.json();
+     const notificationDot = document.getElementById("notificationDot");
+     const lastReadTime = localStorage.getItem("lastNotificationRead");
+
+     // Show dot only if there are new notifications since last read
+     if (data && data.notifications && data.notifications.length > 0) {
+      const latestNotificationTime = Math.max(
+       ...data.notifications.map((n) => new Date(n.inspection_date).getTime())
+      );
+
+      if (!lastReadTime || latestNotificationTime > parseInt(lastReadTime)) {
+       notificationDot.classList.remove("d-none");
+      } else {
+       notificationDot.classList.add("d-none");
+      }
+     } else {
+      notificationDot.classList.add("d-none");
+     }
+    } catch (error) {
+     console.error("Error checking notifications:", error);
+    }
+   }
+
+   // Check notifications on page load
+   checkNotifications();
+
+   // Check notifications periodically (every 5 minutes)
+   setInterval(checkNotifications, 300000);
+
+   // Hide notification dot when modal is opened and update last read time
+   violationsModal.addEventListener("show.bs.modal", () => {
+    document.getElementById("notificationDot").classList.add("d-none");
+    localStorage.setItem("lastNotificationRead", Date.now().toString());
+    violationsModal.removeAttribute("inert");
+    loadViolations();
+   });
+
+   // Handle modal events
+   violationsModal.addEventListener("hidden.bs.modal", () => {
+    violationsModal.setAttribute("inert", "");
+   });
+
+   // Add close button functionality
+   document.querySelector(".btn-close").addEventListener("click", () => {
+    modal.hide();
+   });
   </script>
  </body>
 </html>
