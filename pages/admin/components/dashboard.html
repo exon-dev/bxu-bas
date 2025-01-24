@@ -355,7 +355,6 @@
 
      // Check if the response is ok
 
-
      // Parse the response
      const data = await response.json();
 
@@ -439,7 +438,6 @@
       },
      });
 
-
      const data = await res.json();
      document.getElementById("total_inspectors").textContent =
       data.total_inspectors === undefined ? 0 : data.total_inspectors;
@@ -497,11 +495,10 @@
       }
      );
 
-
      const data = await response.json();
 
      if (data.status === 200) {
-      renderInspectionsTable(data.inspections.data || []);
+      renderInspectionsTable(data.inspections.data || [], page);
 
       if (data.inspections.data?.length > 0 && data.inspections.last_page > 1) {
        renderInspectionsPagination(
@@ -512,8 +509,8 @@
        document.getElementById("inspections-pagination").innerHTML = "";
       }
      } else {
-    //   throw new Error("Invalid response from server");
-    console.log("Invalid response from server")
+      //   throw new Error("Invalid response from server");
+      console.log("Invalid response from server");
      }
     } catch (error) {
      document.getElementById("inspections-tbody").innerHTML = `
@@ -527,7 +524,7 @@
     }
    };
 
-   const renderInspectionsTable = (inspections) => {
+   const renderInspectionsTable = (inspections, currentPage) => {
     const tbody = document.getElementById("inspections-tbody");
     tbody.innerHTML = "";
 
@@ -539,6 +536,10 @@
         `;
      return;
     }
+
+    // Update itemsPerPage to 20
+    const itemsPerPage = 20; // Changed from 10 to 20 items per page
+    const startingIndex = (currentPage - 1) * itemsPerPage;
 
     inspections.forEach((inspection, index) => {
      const violation = inspection.violations[0];
@@ -582,7 +583,9 @@
      const owner = business.owner;
 
      row.innerHTML = `
-            <td class="small" style="width: 5%">${index + 1}</td>
+            <td class="small" style="width: 5%">${
+             startingIndex + index + 1
+            }</td>
             <td class="small" style="width: 20%">
                 ${business.business_name || "N/A"}
                 ${indicator}

@@ -127,6 +127,25 @@
      grid-template-columns: 1fr;
     }
    }
+   .filter-group {
+    min-width: 200px;
+   }
+   .form-label {
+    font-size: 0.875rem;
+    color: #858796;
+    margin-bottom: 0.5rem;
+   }
+   .form-control,
+   .form-select {
+    border-radius: 6px;
+    border: 1px solid #e3e6f0;
+    padding: 0.375rem 0.75rem;
+   }
+   .form-control:focus,
+   .form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+   }
   </style>
  </head>
  <body>
@@ -180,6 +199,33 @@
    </div>
   </div>
 
+  <!-- Add Filter Section -->
+  <div class="card mb-4">
+   <div class="d-flex flex-wrap gap-3 align-items-end">
+    <div class="filter-group">
+     <label class="form-label">Date Range</label>
+     <div class="d-flex gap-2">
+      <input type="date" class="form-control" id="startDate" />
+      <input type="date" class="form-control" id="endDate" />
+     </div>
+    </div>
+    <div class="filter-group">
+     <label class="form-label">Status</label>
+     <select class="form-select" id="statusFilter">
+      <option value="all">All Status</option>
+      <option value="resolved">Resolved</option>
+      <option value="pending">Pending</option>
+     </select>
+    </div>
+    <button class="btn btn-primary" onclick="applyFilters()">
+     Apply Filters
+    </button>
+    <button class="btn btn-outline-secondary" onclick="resetFilters()">
+     Reset
+    </button>
+   </div>
+  </div>
+
   <div class="charts-grid">
    <div class="top-charts">
     <div class="chart-container medium">
@@ -213,10 +259,45 @@
   <script type="module">
    import CONFIG from "/scripts/config.js";
    const apiUrl = CONFIG.API_BASE_URL;
+   let currentPeriod = "month";
 
-   async function updateKPIs(period = "month") {
+   window.applyFilters = async function () {
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+    const status = document.getElementById("statusFilter").value;
+
     try {
-     const response = await fetch(`${apiUrl}/chart/kpi-data?period=${period}`, {
+     // Reload charts with filter parameters
+     await updateKPIs(currentPeriod, { startDate, endDate, status });
+     await updateLineChart(currentPeriod, { startDate, endDate, status });
+    } catch (error) {
+     console.error("Error applying filters:", error);
+    }
+   };
+
+   window.resetFilters = async function () {
+    document.getElementById("startDate").value = "";
+    document.getElementById("endDate").value = "";
+    document.getElementById("statusFilter").value = "all";
+
+    try {
+     // Reload charts with default parameters
+     await updateKPIs(currentPeriod);
+     await updateLineChart(currentPeriod);
+    } catch (error) {
+     console.error("Error resetting filters:", error);
+    }
+   };
+
+   async function updateKPIs(period = "month", filters = {}) {
+    try {
+     // Build query parameters
+     const params = new URLSearchParams({ period });
+     if (filters.startDate) params.append("startDate", filters.startDate);
+     if (filters.endDate) params.append("endDate", filters.endDate);
+     if (filters.status) params.append("status", filters.status);
+
+     const response = await fetch(`${apiUrl}/chart/kpi-data?${params}`, {
       headers: {
        "Content-Type": "application/json",
        Accept: "application/json",
@@ -358,17 +439,20 @@
       let currentPeriod = "month";
       const lineChartInstance = { current: null };
 
-      async function updateLineChart(period) {
+      async function updateLineChart(period, filters = {}) {
        try {
-        const response = await fetch(
-         `${apiUrl}/chart/chart-data?period=${period}`,
-         {
-          headers: {
-           "Content-Type": "application/json",
-           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-         }
-        );
+        // Build query parameters
+        const params = new URLSearchParams({ period });
+        if (filters.startDate) params.append("startDate", filters.startDate);
+        if (filters.endDate) params.append("endDate", filters.endDate);
+        if (filters.status) params.append("status", filters.status);
+
+        const response = await fetch(`${apiUrl}/chart/chart-data?${params}`, {
+         headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+         },
+        });
         const data = await response.json();
 
         if (lineChartInstance.current) {
