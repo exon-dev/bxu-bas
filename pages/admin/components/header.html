@@ -160,7 +160,7 @@
      </div>
      <div class="modal-body">
       <div id="violationsContainer">
-       <!-- Violations will be populated here -->
+       <!-- Empty state message will be shown here when no notifications -->
       </div>
      </div>
     </div>
@@ -220,7 +220,12 @@
      const container = document.getElementById("violationsContainer");
      container.innerHTML = "";
 
-     if (data && data.notifications && Array.isArray(data.notifications)) {
+     if (
+      data &&
+      data.notifications &&
+      Array.isArray(data.notifications) &&
+      data.notifications.length > 0
+     ) {
       data.notifications.forEach((notification) => {
        const violationsList = notification.violations
         .map((violation) => {
@@ -256,7 +261,13 @@
        container.innerHTML += violationsList;
       });
      } else {
-      container.innerHTML = '<div class="p-3">No violations found</div>';
+      container.innerHTML = `
+        <div class="text-center py-5">
+          <i class="bi bi-bell-slash fs-1 text-muted mb-3"></i>
+          <h5 class="text-muted">No New Notifications</h5>
+          <p class="text-muted mb-0">There are no new notifications for today.</p>
+        </div>
+      `;
      }
     } catch (error) {
      console.error("Error loading violations:", error);
