@@ -86,7 +86,9 @@
       // Execute the script if any exists in header
       executeScriptsInElement(document.getElementById("header"));
      })
-     .catch((error) => console.error("Error loading header:", error));
+     .catch((error) => {
+      // console.error("Error loading header:", error); // Removed debug statement
+     });
    }
 
    function loadSidebar() {
@@ -115,7 +117,9 @@
       // Load default content (dashboard)
       loadContent("dashboard.html", document.querySelector(".nav-links a"));
      })
-     .catch((error) => console.error("Error loading sidebar:", error));
+     .catch((error) => {
+      // console.error("Error loading sidebar:", error); // Removed debug statement
+     });
    }
 
    // Load the content dynamically and insert it into the #content div
@@ -142,8 +146,7 @@
       }
      })
      .catch((error) => {
-      document.getElementById("content").innerHTML =
-       "<h2>Error loading the page. Please try again.</h2>";
+      // console.error("Error loading content:", error); // Removed debug statement
      });
    }
 
@@ -162,10 +165,6 @@
      // Handle both inline and external scripts
      if (script.src) {
       newScript.src = script.src;
-      // Wait for external script to load
-      newScript.onload = () => {
-       console.log(`External script ${script.src} loaded`);
-      };
      } else {
       newScript.textContent = script.textContent;
      }

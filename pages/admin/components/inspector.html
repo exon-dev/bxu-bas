@@ -314,6 +314,37 @@
      </div>
     </div>
    </div>
+
+   <!-- Error Modal -->
+   <div
+    class="modal fade"
+    id="errorModal"
+    tabindex="-1"
+    aria-labelledby="errorModalLabel"
+    aria-hidden="true"
+   >
+    <div class="modal-dialog modal-dialog-centered">
+     <div class="modal-content">
+      <div class="modal-header">
+       <h5 class="modal-title" id="errorModalLabel">Error</h5>
+       <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="modal"
+        aria-label="Close"
+       ></button>
+      </div>
+      <div class="modal-body">
+       <p id="errorMessage"></p>
+      </div>
+      <div class="modal-footer">
+       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+        Close
+       </button>
+      </div>
+     </div>
+    </div>
+   </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -323,18 +354,27 @@
 
    const apiUrl = CONFIG.API_BASE_URL;
 
+   // Function to remove any lingering modal backdrops
+   function removeModalBackdrops() {
+    const backdrops = document.querySelectorAll(".modal-backdrop");
+    backdrops.forEach((backdrop) => backdrop.remove());
+   }
+
+   // Get modal elements
+   const addModalElement = document.getElementById("addInspectorModal");
+   const errorModalElement = document.getElementById("errorModal");
+
    // Add new inspector
    const addInspector = async (event) => {
     event.preventDefault();
 
     const submitButton = document.querySelector("#addInspectorBtn");
     const spinner = document.querySelector("#addSpinner");
-    const addModal = bootstrap.Modal.getInstance(
-     document.getElementById("addInspectorModal")
-    );
+    const addModal = bootstrap.Modal.getInstance(addModalElement);
     const successModal = new bootstrap.Modal(
      document.getElementById("addSuccessModal")
     );
+    const errorModal = new bootstrap.Modal(errorModalElement);
 
     // Get form inputs
     const firstName = document.querySelector("#firstName").value.trim();
@@ -369,8 +409,6 @@
 
      const data = await response.json();
      if (response.ok) {
-      console.log("Inspector added successfully:", data);
-
       // Close the add inspector modal
       addModal.hide();
 
@@ -383,20 +421,60 @@
       // Refresh the list after 2 seconds
       setTimeout(() => {
        successModal.hide();
-       fetchInspectors();
+       window.location.reload();
       }, 2000);
      } else {
-      throw new Error(data.message || "Failed to add inspector");
+      // Close the add inspector modal
+      addModal.hide();
+
+      // Show error modal after the add modal is fully hidden
+      addModalElement.addEventListener(
+       "hidden.bs.modal",
+       () => {
+        document.getElementById("errorMessage").textContent =
+         data.message || "An error occurred. Please try again.";
+        errorModal.show(); // Show the error modal
+       },
+       { once: true }
+      ); // Ensure the listener is removed after execution
      }
-    } catch (err) {
-     console.error("Error adding inspector:", err.message);
-     alert("Failed to add inspector. Please try again.");
+    } catch (error) {
+     console.error("Error adding inspector:", error);
+     // Close the add inspector modal
+     addModal.hide();
+
+     // Show error modal after the add modal is fully hidden
+     addModalElement.addEventListener(
+      "hidden.bs.modal",
+      () => {
+       document.getElementById("errorMessage").textContent =
+        "An unexpected error occurred. Please try again.";
+       errorModal.show(); // Show the error modal
+      },
+      { once: true }
+     ); // Ensure the listener is removed after execution
     } finally {
-     // Reset loading state
+     // Hide loading state
      submitButton.disabled = false;
      spinner.classList.add("d-none");
     }
    };
+
+   // Add event listeners to remove backdrops when modals are hidden
+   addModalElement.addEventListener("hidden.bs.modal", removeModalBackdrops);
+   errorModalElement.addEventListener("hidden.bs.modal", removeModalBackdrops);
+   document
+    .getElementById("deleteConfirmModal")
+    .addEventListener("hidden.bs.modal", removeModalBackdrops);
+   document
+    .getElementById("addSuccessModal")
+    .addEventListener("hidden.bs.modal", removeModalBackdrops);
+   document
+    .getElementById("deleteSuccessModal")
+    .addEventListener("hidden.bs.modal", removeModalBackdrops);
+   document
+    .getElementById("errorModal")
+    .addEventListener("hidden.bs.modal", removeModalBackdrops);
 
    // Make deleteInspector function available globally
    globalThis.deleteInspector = async (
