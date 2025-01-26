@@ -935,7 +935,8 @@
       document.getElementById("notificationMessage").innerHTML = `
         <i class="bi bi-info-circle-fill text-primary me-2"></i>
         ${
-         successData.notification_message || "SMS notification status unknown."
+         successData.notification_message ||
+         "SMS notification might be not sent"
         }
     `;
 

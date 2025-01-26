@@ -537,8 +537,7 @@
      return;
     }
 
-    // Update itemsPerPage to 20
-    const itemsPerPage = 20; // Changed from 10 to 20 items per page
+    const itemsPerPage = 20;
     const startingIndex = (currentPage - 1) * itemsPerPage;
 
     inspections.forEach((inspection, index) => {
@@ -548,6 +547,7 @@
      // Calculate days until due or days overdue
      const dueDate = new Date(violation.due_date);
      const today = new Date();
+     today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
      const diffTime = dueDate - today;
      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -556,7 +556,13 @@
      let indicator = "";
 
      if (violation.status.toLowerCase() === "pending") {
-      if (diffDays > 0 && diffDays <= 3) {
+      if (diffDays === 0) {
+       // Due today
+       rowClass = "table-warning";
+       indicator = `<span class="badge bg-warning text-dark rounded-pill ms-2">
+                 <i class="bi bi-clock-fill me-1"></i>Due Today
+             </span>`;
+      } else if (diffDays > 0 && diffDays <= 3) {
        // Upcoming dues (within 3 days)
        rowClass = "table-warning";
        indicator = `<span class="badge bg-warning text-dark rounded-pill ms-2">
@@ -588,7 +594,40 @@
             }</td>
             <td class="small" style="width: 20%">
                 ${business.business_name || "N/A"}
-                ${indicator}
+                ${(() => {
+                 const dueDate = new Date(violation.due_date);
+                 const today = new Date();
+                 today.setHours(0, 0, 0, 0);
+                 const diffTime = dueDate - today;
+                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                 if (violation.status?.toLowerCase() === "pending") {
+                  if (diffDays === 0) {
+                   return `<span class="badge bg-warning text-dark rounded-pill ms-2">
+                                <i class="bi bi-clock-fill me-1"></i>Due Today
+                            </span>`;
+                  } else if (diffDays === 1) {
+                   return `<span class="badge bg-warning text-dark rounded-pill ms-2">
+                                <i class="bi bi-clock-fill me-1"></i>Due Tomorrow
+                            </span>`;
+                  } else if (diffDays === 2) {
+                   return `<span class="badge bg-warning text-dark rounded-pill ms-2">
+                                <i class="bi bi-clock-fill me-1"></i>Due in 2 days
+                            </span>`;
+                  } else if (diffDays === 3) {
+                   return `<span class="badge bg-warning text-dark rounded-pill ms-2">
+                                <i class="bi bi-clock-fill me-1"></i>Due in 3 days
+                            </span>`;
+                  } else if (diffDays < 0) {
+                   return `<span class="badge bg-danger rounded-pill ms-2">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Overdue by ${Math.abs(
+                         diffDays
+                        )} day${Math.abs(diffDays) === 1 ? "" : "s"}
+                    </span>`;
+                  }
+                 }
+                 return "";
+                })()}
             </td>
             <td class="small" style="width: 15%">${owner.first_name || ""} ${
       owner.last_name || "N/A"
@@ -599,15 +638,9 @@
             <td class="small" style="width: 12%">${formatDate(
              inspection.inspection_date
             )}</td>
-            <td class="small" style="width: 12%">
-                ${
-                 shouldShowDueToday(violation.due_date, violation.status)
-                  ? `<span class="badge bg-warning text-dark">
-                        <i class="bi bi-clock-fill me-1"></i>Due Today
-                    </span>`
-                  : formatDate(violation.due_date)
-                }
-            </td>
+            <td class="small" style="width: 12%">${formatDate(
+             violation.due_date
+            )}</td>
             <td class="small" style="width: 15%">${
              inspection.type_of_inspection || "N/A"
             }</td>
