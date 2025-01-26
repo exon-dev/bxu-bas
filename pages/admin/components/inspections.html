@@ -377,6 +377,7 @@
      const violation = document.getElementById("violation").value;
      const inspector = document.getElementById("inspector").value;
      const sortOrder = document.getElementById("sort-order").value;
+     const receiptNo = document.getElementById("receipt-no").value;
 
      const params = new URLSearchParams({
       page: page,
@@ -384,6 +385,7 @@
       ...(inspectionDate && { inspection_date: inspectionDate }),
       ...(violation && { with_violations: violation }),
       ...(inspector && { inspector_id: inspector }),
+      ...(receiptNo && { violation_receipt_no: receiptNo }),
       sort_order: sortOrder === "latest" ? "desc" : "asc",
      });
 
@@ -453,6 +455,7 @@
      "violation",
      "inspector",
      "sort-order",
+     "receipt-no",
     ];
 
     filterElements.forEach((elementId) => {
