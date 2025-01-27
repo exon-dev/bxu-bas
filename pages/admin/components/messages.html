@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Message Notifications</title>
+  <link
+   href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+   rel="stylesheet"
+  />
+  <link
+   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+   rel="stylesheet"
+  />
+  <link
+   href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+   rel="stylesheet"
+  />
+ </head>
+ <style>
+  body {
+   font-family: "Poppins", Arial, sans-serif !important;
+   background-color: #eff3fc;
+   margin: 0;
+   padding: 0;
+  }
+
+  .card {
+   border-radius: 10px;
+   border: none;
+   margin-bottom: 20px;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .notification-card {
+   border-left: 4px solid transparent;
+   transition: all 0.3s ease;
+  }
+
+  .notification-card.pending {
+   border-left-color: #ffc107;
+  }
+
+  .notification-card.resolved {
+   border-left-color: #198754;
+  }
+
+  .status-badge {
+   padding: 6px 12px;
+   border-radius: 20px;
+   font-size: 0.75rem;
+   font-weight: 500;
+   text-transform: uppercase;
+  }
+
+  .status-badge.pending {
+   background-color: #fff3cd;
+   color: #856404;
+  }
+
+  .status-badge.resolved {
+   background-color: #d4edda;
+   color: #155724;
+  }
+
+  .violator-info {
+   font-size: 0.875rem;
+   color: #6c757d;
+  }
+
+  .receipt-number {
+   font-family: "Courier New", monospace;
+   background-color: #f8f9fa;
+   padding: 2px 6px;
+   border-radius: 4px;
+   font-size: 0.875rem;
+  }
+
+  .date-badge {
+   background-color: #e9ecef;
+   padding: 4px 8px;
+   border-radius: 4px;
+   font-size: 0.75rem;
+   color: #495057;
+  }
+
+  .empty-state {
+   text-align: center;
+   padding: 40px 20px;
+  }
+
+  .empty-state i {
+   font-size: 48px;
+   color: #dee2e6;
+   margin-bottom: 16px;
+  }
+ </style>
+ <body id="notifications">
+  <div class="">
+   <div class="card mb-4">
+    <div class="card-body">
+     <div class="d-flex justify-content-between align-items-center">
+      <div>
+       <h4 class="mb-1">Violator Notices</h4>
+       <p class="text-muted mb-0">Track all sent violation notices</p>
+       <div
+        class="alert alert-info d-flex align-items-center mt-2"
+        role="alert"
+       >
+        <i class="fas fa-info-circle me-2"></i>
+        <p class="mb-0">
+         Some inspection with violations may not have been sent with messages,
+         please review inspections.
+        </p>
+       </div>
+      </div>
+      <div class="d-flex gap-2">
+       <select class="form-select form-select-sm" id="sortOrder">
+        <option value="desc">Latest First</option>
+        <option value="asc">Oldest First</option>
+       </select>
+       <select class="form-select form-select-sm" id="statusFilter">
+        <option value="all">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="resolved">Resolved</option>
+       </select>
+       <input
+        type="text"
+        class="form-control form-control-sm"
+        placeholder="Search..."
+        id="searchInput"
+       />
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <div id="notificationsContainer">
+    <!-- Notifications will be dynamically inserted here -->
+   </div>
+
+   <div class="d-flex justify-content-between align-items-center mt-4">
+    <div class="text-muted small">
+     Showing <span id="itemsShowing">0</span> of
+     <span id="totalItems">0</span> items
+    </div>
+    <nav aria-label="Notifications pagination">
+     <ul class="pagination pagination-sm" id="paginationContainer"></ul>
+    </nav>
+   </div>
+  </div>
+
+  <script type="module">
+   import CONFIG from "/scripts/config.js";
+   const apiUrl = CONFIG.API_BASE_URL;
+   let currentPage = 1;
+   const ITEMS_PER_PAGE = 15;
+
+   // Function to format date
+   function formatDate(dateString) {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
+   }
+
+   // Function to render pagination
+   function renderPagination(paginationData) {
+    const { current_page, last_page, from, to, total } = paginationData;
+    const paginationContainer = document.getElementById("paginationContainer");
+    const itemsShowingElement = document.getElementById("itemsShowing");
+    const totalItemsElement = document.getElementById("totalItems");
+
+    // Update items showing text
+    itemsShowingElement.textContent = `${from || 0}-${to || 0}`;
+   totalItemsElement.textContent = total;
+
+    let paginationHTML = "";
+
+    // Previous button
+    paginationHTML += `
+     <li class="page-item ${current_page === 1 ? "disabled" : ""}">
+      <button class="page-link" data-page="${current_page - 1}" ${
+     current_page === 1 ? "disabled" : ""
+    }>
+       <i class="fas fa-chevron-left"></i>
+      </button>
+     </li>
+    `;
+
+    // Page numbers
+    for (let i = 1; i <= last_page; i++) {
+     if (
+      i === 1 ||
+      i === last_page ||
+      (i >= current_page - 2 && i <= current_page + 2)
+     ) {
+      paginationHTML += `
+       <li class="page-item ${i === current_page ? "active" : ""}">
+        <button class="page-link" data-page="${i}">${i}</button>
+       </li>
+      `;
+     } else if (i === current_page - 3 || i === current_page + 3) {
+      paginationHTML += `
+       <li class="page-item disabled">
+        <button class="page-link">...</button>
+       </li>
+      `;
+     }
+    }
+
+    // Next button
+    paginationHTML += `
+     <li class="page-item ${current_page === last_page ? "disabled" : ""}">
+      <button class="page-link" data-page="${current_page + 1}" ${
+     current_page === last_page ? "disabled" : ""
+    }>
+       <i class="fas fa-chevron-right"></i>
+      </button>
+     </li>
+    `;
+
+    paginationContainer.innerHTML = paginationHTML;
+
+    // Add click handlers
+    paginationContainer
+     .querySelectorAll(".page-link:not([disabled])")
+     .forEach((button) => {
+      button.addEventListener("click", (e) => {
+       const newPage = parseInt(e.target.closest(".page-link").dataset.page);
+       if (!isNaN(newPage) && newPage !== current_page) {
+        currentPage = newPage;
+        fetchNotifications();
+       }
+      });
+     });
+   }
+
+   // Function to render notifications
+   function renderNotifications(data, paginationData) {
+    const container = document.getElementById("notificationsContainer");
+
+    if (!data || data.length === 0) {
+     container.innerHTML = `
+      <div class="empty-state">
+       <i class="fas fa-inbox mb-3"></i>
+       <h5>No Messages Found</h5>
+       <p class="text-muted">There are no notification messages to display</p>
+      </div>
+     `;
+     renderPagination({
+      current_page: 1,
+      last_page: 1,
+      from: 0,
+      to: 0,
+      total: 0,
+     });
+     return;
+    }
+
+    container.innerHTML = data
+     .map(
+      (notification) => `
+     <div class="card notification-card ${notification.violation.status.toLowerCase()}">
+      <div class="card-body">
+       <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+         <h5 class="mb-1">${notification.title}</h5>
+         <p class="mb-2">${notification.content}</p>
+        </div>
+        <span class="status-badge ${notification.violation.status.toLowerCase()}">
+         ${notification.violation.status}
+        </span>
+       </div>
+       
+       <div class="row g-3">
+        <div class="col-md-4">
+         <div class="violator-info">
+          <i class="fas fa-user me-2"></i>
+          <strong>Violator:</strong> ${notification.violator.first_name} ${
+       notification.violator.last_name
+      }
+          ${
+           notification.violator.email
+            ? `<br><i class="fas fa-envelope me-2"></i>${notification.violator.email}`
+            : ""
+          }
+          <br><i class="fas fa-phone me-2"></i>${
+           notification.violator.phone_number
+          }
+         </div>
+        </div>
+        
+        <div class="col-md-4">
+         <div class="violator-info">
+          <i class="fas fa-file-alt me-2"></i>
+          <strong>Receipt:</strong> 
+          <span class="receipt-number">${
+           notification.violation.violation_receipt_no
+          }</span>
+          <br>
+          <i class="fas fa-clipboard-list me-2"></i>
+          <strong>Inspection Type:</strong> ${
+           notification.violation.type_of_inspection
+          }
+         </div>
+        </div>
+        
+        <div class="col-md-4">
+         <div class="violator-info">
+          <div class="mb-1">
+           <i class="fas fa-calendar me-2"></i>
+           <strong>Violation Date:</strong>
+           <span class="date-badge">${formatDate(
+            notification.violation.violation_date
+           )}</span>
+          </div>
+          <div>
+           <i class="fas fa-clock me-2"></i>
+           <strong>Due Date:</strong>
+           <span class="date-badge">${formatDate(
+            notification.violation.due_date
+           )}</span>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    `
+     )
+     .join("");
+
+    renderPagination(paginationData);
+   }
+
+   // Function to fetch notifications with filters
+   async function fetchNotifications() {
+    try {
+     const statusFilter = document.getElementById("statusFilter").value;
+     const searchTerm = document.getElementById("searchInput").value;
+     const sortOrder = document.getElementById("sortOrder").value;
+
+     // Build query parameters
+     const params = new URLSearchParams({
+      page: currentPage,
+      per_page: ITEMS_PER_PAGE,
+      sort_order: sortOrder,
+      ...(statusFilter !== "all" && { status: statusFilter }),
+      ...(searchTerm && { search: searchTerm }),
+     });
+
+     const response = await fetch(
+      `${apiUrl}/notification/sent-messages?${params}`,
+      {
+       method: "GET",
+       headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     const result = await response.json();
+
+     if (result.status === 200) {
+      renderNotifications(result.data, result.pagination);
+     } else {
+      throw new Error(result.message);
+     }
+    } catch (error) {
+     console.error("Error fetching notifications:", error);
+     document.getElementById("notificationsContainer").innerHTML = `
+      <div class="empty-state">
+       <i class="fas fa-exclamation-triangle text-warning"></i>
+       <h5>Error Loading Messages</h5>
+       <p class="text-muted">There was a problem loading the notifications. Please try again.</p>
+      </div>
+     `;
+     renderPagination({
+      current_page: 1,
+      last_page: 1,
+      from: 0,
+      to: 0,
+      total: 0,
+     });
+    }
+   }
+
+   // Debounce function for search input
+   function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+     const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+     };
+     clearTimeout(timeout);
+     timeout = setTimeout(later, wait);
+    };
+   }
+
+   // Add event listeners
+   document.getElementById("statusFilter").addEventListener("change", () => {
+    currentPage = 1; // Reset to first page
+    fetchNotifications();
+   });
+
+   document.getElementById("searchInput").addEventListener(
+    "input",
+    debounce(() => {
+     currentPage = 1; // Reset to first page
+     fetchNotifications();
+    }, 300)
+   );
+
+   document.getElementById("sortOrder").addEventListener("change", () => {
+    currentPage = 1; // Reset to first page
+    fetchNotifications();
+   });
+
+   // Initial load
+   fetchNotifications();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+ </body>
+</html>
