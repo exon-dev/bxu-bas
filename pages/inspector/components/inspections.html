@@ -911,65 +911,81 @@
       body: formData,
      });
 
+     const responseData = await response.json();
+
      if (!response.ok) {
-      const errorData = await response.json();
-      const errorMessage = errorData.error || "An unexpected error occurred.";
-      console.error("Error:", errorMessage);
-
-      // Show error modal with error message
-      const errorModal = new bootstrap.Modal(
-       document.getElementById("errorModal")
-      );
-      document.getElementById("errorMessage").innerText = errorMessage;
-      errorModal.show();
-     } else {
-      // Handle successful response
-      const successData = await response.json();
-
-      // Set success message based on operation type
-      document.getElementById("successMessage").innerText = currentlyEditing
-       ? "Inspection updated successfully!"
-       : "Inspection added successfully!";
-
-      // Set notification message for SMS status
-      document.getElementById("notificationMessage").innerHTML = `
-        <i class="bi bi-info-circle-fill text-primary me-2"></i>
-        ${
-         successData.notification_message ||
-         "SMS notification might be not sent"
-        }
-    `;
-
-      // Hide the form modal
-      const violatorModal = bootstrap.Modal.getInstance(
-       document.getElementById("violatorModal")
-      );
-      violatorModal.hide();
-
-      // Show success modal
-      const successModal = new bootstrap.Modal(
-       document.getElementById("successNotificationModal")
-      );
-      successModal.show();
-
-      // Reset form and refresh table
-      resetForm();
-      fetchInspections(currentPage);
+      throw new Error(responseData.message || "An unexpected error occurred.");
      }
-    } catch (error) {
-     console.error("Submission error:", error);
-     document.getElementById("successMessage").innerText = currentlyEditing
-      ? "Error updating inspection"
-      : "Error adding inspection";
-     document.getElementById("notificationMessage").innerText = currentlyEditing
-      ? "There was an error while updating the inspection. Please try again."
-      : "There was an error while adding the inspection. Please try again.";
 
-     // Show error modal
+     // Hide the form modal
+     const violatorModal = bootstrap.Modal.getInstance(
+      document.getElementById("violatorModal")
+     );
+     violatorModal.hide();
+
+     // Set success message with business details
+     const businessName =
+      responseData.inspection?.business?.business_name || "Business";
+     const ownerName = responseData.inspection?.business?.owner
+      ? `${responseData.inspection.business.owner.first_name} ${responseData.inspection.business.owner.last_name}`
+      : "Owner";
+
+     document.getElementById("successMessage").innerHTML = `
+            <div class="mb-3">
+                <strong>${responseData.message}</strong>
+                <div class="mt-2 text-muted">
+                    <small>
+                        <i class="bi bi-building me-1"></i>${businessName}<br>
+                        <i class="bi bi-person me-1"></i>${ownerName}
+                    </small>
+                </div>
+            </div>
+        `;
+
+     // Set SMS notification status
+     const smsStatusDiv = document.getElementById("notificationMessage");
+     if (responseData.sms_status === 200) {
+      smsStatusDiv.className = "text-success";
+      smsStatusDiv.style.backgroundColor = "#e8f5e9";
+      smsStatusDiv.innerHTML = `
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                ${responseData.sms_message}
+            `;
+     } else {
+      smsStatusDiv.className = "text-warning";
+      smsStatusDiv.style.backgroundColor = "#fff3e0";
+      smsStatusDiv.innerHTML = `
+                <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>
+                SMS notification could not be sent
+            `;
+     }
+
+     // Show success modal
      const successModal = new bootstrap.Modal(
       document.getElementById("successNotificationModal")
      );
      successModal.show();
+
+     // Reset form and refresh table
+     resetForm();
+     fetchInspections(currentPage);
+    } catch (error) {
+     console.error("Submission error:", error);
+
+     // Show error modal with detailed message
+     const errorModal = new bootstrap.Modal(
+      document.getElementById("errorModal")
+     );
+     document.getElementById("errorMessage").innerHTML = `
+            <div class="alert alert-danger mb-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                ${
+                 error.message ||
+                 "An unexpected error occurred while processing your request."
+                }
+            </div>
+        `;
+     errorModal.show();
     } finally {
      submitButton.disabled = false;
      submitButton.innerHTML = originalContent;
