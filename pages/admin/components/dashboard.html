@@ -22,7 +22,8 @@
    rel="stylesheet"
    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.3.0/css/all.min.css"
    integrity="sha512-UJqci0ZyYcQ0AOJkcIkUCxLS2L6eNcOr7ZiypuInvEhO9uqIDi349MEFrqBzoy1QlfcjfURHl+WTMjEdWcv67A=="
-   crossorigin="anonymous"1
+   crossorigin="anonymous"
+   1
    referrerpolicy="no-referrer"
   />
   <link rel="stylesheet" href="/css/admin/dashboard.css" />
@@ -562,7 +563,6 @@
 
      if (violation.status?.toLowerCase() === "pending") {
       if (diffDays < 0) {
-       // Overdue
        rowClass = "table-danger";
        statusIndicator = `<span class="badge bg-danger rounded-pill">
                     <i class="bi bi-exclamation-triangle-fill me-1"></i>
@@ -571,13 +571,11 @@
        }
                 </span>`;
       } else if (diffDays === 0) {
-       // Due today
        rowClass = "table-warning";
        statusIndicator = `<span class="badge bg-warning text-dark rounded-pill">
                     <i class="bi bi-clock-fill me-1"></i>Due Today
                 </span>`;
       } else if (diffDays <= 3) {
-       // Upcoming dues (within 3 days)
        rowClass = "table-warning";
        statusIndicator = `<span class="badge bg-warning text-dark rounded-pill">
                     <i class="bi bi-clock-fill me-1"></i>Due in ${diffDays} day${
@@ -737,9 +735,9 @@
                         <!-- Business Image Section -->
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block">
-                                <img 
-                                    src="${imageUrl}" 
-                                    alt="Business Image" 
+                                <img
+                                    src="${imageUrl}"
+                                    alt="Business Image"
                                     class="rounded-3 shadow-sm img-fluid"
                                     style="max-height: 200px; width: auto; object-fit: cover"
                                     onerror="this.src='/assets/images/no-image.png';"
@@ -752,10 +750,8 @@
                             </div>
                         </div>
 
-                        
-
-                        <!-- Business Information -->
                         <div class="row g-4">
+                            <!-- Business Information -->
                             <div class="col-6">
                                 <div class="card soft-card">
                                     <div class="card-body">
@@ -776,7 +772,7 @@
                                               .business_permit || "N/A"
                                             }</p>
                                         </div>
-                                        <div class="">
+                                        <div>
                                             <label class="text-muted small">Business Status</label>
                                             <p class="mb-0">
                                                 <span class="fw-semibold">${
@@ -828,48 +824,44 @@
                             </div>
 
                             <!-- Location Card -->
-                        <div class="col-12">
-                            <div class="card soft-card mb-4">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <i class="bi bi-geo-alt-fill fs-4 text-danger me-2"></i>
-                                        <h6 class="card-title fw-bold mb-0">Business Location</h6>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-2">
-                                                <label class="text-muted small">Street Address</label>
-                                                <p class="fw-semibold mb-1">
-                                                    ${
+                            <div class="col-12">
+                                <div class="card soft-card mb-4">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-geo-alt-fill fs-4 text-danger me-2"></i>
+                                            <h6 class="card-title fw-bold mb-0">Business Location</h6>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="text-muted small">Street Address</label>
+                                                    <p class="fw-semibold mb-1">${
                                                      address.street_address ||
                                                      "N/A"
-                                                    }
-                                                </p>
+                                                    }</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="mb-2">
-                                                <label class="text-muted small">City</label>
-                                                <p class="fw-semibold mb-1">
-                                                    ${address.city || "N/A"}
-                                                </p>
+                                            <div class="col-md-3">
+                                                <div class="mb-2">
+                                                    <label class="text-muted small">City</label>
+                                                    <p class="fw-semibold mb-1">${
+                                                     address.city || "N/A"
+                                                    }</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="mb-2">
-                                                <label class="text-muted small">Postal Code</label>
-                                                <p class="fw-semibold mb-1">
-                                                    ${
+                                            <div class="col-md-3">
+                                                <div class="mb-2">
+                                                    <label class="text-muted small">Postal Code</label>
+                                                    <p class="fw-semibold mb-1">${
                                                      address.postal_code ||
                                                      "N/A"
-                                                    }
-                                                </p>
+                                                    }</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
                             <!-- Inspection Details -->
                             <div class="col-12">
@@ -939,6 +931,35 @@
                                             </span>
                                         </div>
 
+                                        <!-- Notification Status Alert -->
+                                        ${
+                                         violation.notification_status
+                                          ? `
+                                            <div class="alert ${
+                                             violation.notification_status
+                                              .toLowerCase()
+                                              .includes("not")
+                                              ? "alert-warning"
+                                              : "alert-success"
+                                            } d-flex align-items-center mb-4">
+                                                <i class="bi ${
+                                                 violation.notification_status
+                                                  .toLowerCase()
+                                                  .includes("not")
+                                                  ? "bi-exclamation-triangle-fill"
+                                                  : "bi-check-circle-fill"
+                                                } fs-5 me-2"></i>
+                                                <div>
+                                                    ${
+                                                     violation.notification_status
+                                                    }
+                                                </div>
+                                            </div>
+                                        `
+                                          : ""
+                                        }
+
+                                        <!-- Rest of violation information -->
                                         <div class="row g-4">
                                             <!-- Key Information -->
                                             <div class="col-12">
@@ -1081,19 +1102,11 @@
                         }
                     </div>
                 </div>
-            </div>
-        `;
+            </div>`;
 
-     // Initialize and show modal
+     // Initialize the modal
      const modal = new bootstrap.Modal(modalElement);
      modal.show();
-
-     // Add click handler to make image viewable in full size
-     const imageElement = modalElement.querySelector("img");
-     imageElement.style.cursor = "pointer";
-     imageElement.addEventListener("click", () => {
-      window.open(imageUrl, "_blank");
-     });
     } catch (error) {
      showAlert("error", "Failed to load violation details");
     }

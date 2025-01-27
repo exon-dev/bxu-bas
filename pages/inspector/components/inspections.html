@@ -1512,6 +1512,32 @@
                                                         </span>
                                                     </div>
 
+                                                    <!-- SMS Notification Status -->
+                                                    ${
+                                                     violation.notification_status
+                                                      ? `<div class="alert ${
+                                                         violation.notification_status.includes(
+                                                          "not sent"
+                                                         )
+                                                          ? "alert-warning"
+                                                          : "alert-success"
+                                                        } d-flex align-items-center mb-3">
+                                                            <i class="bi ${
+                                                             violation.notification_status.includes(
+                                                              "not sent"
+                                                             )
+                                                              ? "bi-exclamation-triangle-fill"
+                                                              : "bi-check-circle-fill"
+                                                            } me-2"></i>
+                                                            <div>
+                                                                ${
+                                                                 violation.notification_status
+                                                                }
+                                                            </div>
+                                                        </div>`
+                                                      : ""
+                                                    }
+
                                                     <div class="row g-4">
                                                         <!-- Key Information -->
                                                         <div class="col-12">
