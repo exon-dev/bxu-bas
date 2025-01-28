@@ -173,7 +173,7 @@
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: 24px;
-    padding: 0 12px;
+    /* padding: 0 12px; */
    }
 
    .modal {
@@ -366,6 +366,7 @@
   <script type="module">
    import CONFIG from "/scripts/config.js";
    const apiUrl = CONFIG.API_BASE_URL;
+   const app_url = CONFIG.APP_URL;
    const passwordModal = new bootstrap.Modal(
     document.getElementById("passwordModal")
    );
@@ -541,56 +542,125 @@
     }
    };
 
-   window.handleImageUpload = function (event) {
+   window.handleImageUpload = async function (event) {
     const file = event.target.files[0];
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const email = localStorage.getItem("email");
+
     if (file) {
+     // Validate file type
      if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
+      document.getElementById("errorMessage").textContent =
+       "Please upload an image file";
+      errorModal.show();
       return;
      }
 
-     if (file.size > 5 * 1024 * 1024) {
-      alert("Please upload an image smaller than 5MB");
+     // Validate file size (2MB = 2 * 1024 * 1024 bytes)
+     if (file.size > 2 * 1024 * 1024) {
+      document.getElementById("errorMessage").textContent =
+       "Please upload an image smaller than 2MB";
+      errorModal.show();
       return;
      }
 
-     const reader = new FileReader();
-     reader.onload = function (e) {
-      localStorage.setItem("profile_image", e.target.result);
-      document.getElementById("profileImage").src = e.target.result;
-     };
-     reader.readAsDataURL(file);
+     try {
+      loadingOverlay.style.display = "block";
+
+      const formData = new FormData();
+      formData.append("profile_picture", file);
+      formData.append("email", email);
+
+      const response = await fetch(`${apiUrl}/auth/update-profile-picture`, {
+       method: "POST",
+       headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+       body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+       // Update the profile image with the new URL from the server
+       document.getElementById(
+        "profileImage"
+       ).src = `${app_url}${data.data.image_url}`;
+       localStorage.setItem("profile_image", data.data.image_url);
+       document.getElementById("successMessage").textContent =
+        "Profile picture updated successfully.";
+       successModal.show();
+      } else {
+       document.getElementById("errorMessage").textContent =
+        data.message || "Failed to upload image";
+       errorModal.show();
+      }
+     } catch (error) {
+      console.error("Error:", error);
+      document.getElementById("errorMessage").textContent =
+       "Network error. Please try again.";
+      errorModal.show();
+     } finally {
+      loadingOverlay.style.display = "none";
+      // Reset the file input
+      event.target.value = "";
+     }
     }
    };
 
-   // Fetch data from local storage
-   const email = localStorage.getItem("email");
-   const first_name = localStorage.getItem("firstName");
-   const last_name = localStorage.getItem("lastName");
-   const profileImageUrl = localStorage.getItem("profile_image");
+   // Fetch profile data immediately when script loads
+   async function fetchUserProfile() {
+    try {
+     const email = localStorage.getItem("email");
+     const response = await fetch(`${apiUrl}/auth/get-user-profile`, {
+      method: "POST",
+      headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: JSON.stringify({ email }),
+     });
 
-   // Populate the fields
-   document.getElementById("profileEmail").textContent = email || "N/A";
-   document.getElementById("personalEmail").textContent = email || "N/A";
-   document.getElementById("personalFirstName").textContent =
-    first_name || "N/A";
-   document.getElementById("personalLastName").textContent = last_name || "N/A";
-   document.getElementById("profileImage").src = profileImageUrl || "";
+     const data = await response.json();
 
-   // Add this to your existing window load or document ready handler
-   // Load profile image if exists
-   const savedImage = localStorage.getItem("profile_image");
-   if (savedImage) {
-    document.getElementById("profileImage").src = savedImage;
+     console.log(data)
+
+     if (response.ok && data.data) {
+      // Update profile image if it exists
+      if (data.data.image_url) {
+       document.getElementById(
+        "profileImage"
+       ).src = `${app_url}${data.data.image_url}`;
+      } else {
+       document.getElementById("profileImage").src =
+        "/assets/inspector_prof.png";
+      }
+
+      // Update other profile information
+      document.getElementById("profileEmail").textContent = data.data.email;
+      document.getElementById("personalEmail").textContent = data.data.email;
+      document.getElementById("personalFirstName").textContent =
+       data.data.first_name || "N/A";
+      document.getElementById("personalLastName").textContent =
+       data.data.last_name || "N/A";
+
+      // Store in localStorage for other uses
+      localStorage.setItem("firstName", data.data.first_name);
+      localStorage.setItem("lastName", data.data.last_name);
+      if (data.data.image_url) {
+       localStorage.setItem("profile_image", data.data.image_url);
+      }
+     }
+    } catch (error) {
+     console.error("Error fetching profile:", error);
+    }
    }
 
-   const userEmail = localStorage.getItem("email") || "user@example.com";
-   document.getElementById("profileEmail").textContent = userEmail;
-   document.getElementById("personalEmail").textContent = userEmail;
-   document.getElementById("personalFirstName").textContent =
-    localStorage.getItem("firstName") || "John";
-   document.getElementById("personalLastName").textContent =
-    localStorage.getItem("lastName") || "Doe";
+   // Call fetchUserProfile immediately
+   fetchUserProfile();
+
+   // Also call it when DOM is loaded (as a backup)
+   fetchUserProfile;
   </script>
 
   <!-- Password Change Modal -->
@@ -782,6 +852,34 @@
       </button>
      </div>
     </div>
+   </div>
+  </div>
+
+  <!-- Add Loading Spinner Overlay -->
+  <div
+   id="loadingOverlay"
+   style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+   "
+  >
+   <div
+    class="spinner-border text-light"
+    style="
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+    "
+    role="status"
+   >
+    <span class="visually-hidden">Loading...</span>
    </div>
   </div>
  </body>

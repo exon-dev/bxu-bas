@@ -23,8 +23,6 @@
    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.3.0/css/all.min.css"
    integrity="sha512-UJqci0ZyYcQ0AOJkcIkUCxLS2L6eNcOr7ZiypuInvEhO9uqIDi349MEFrqBzoy1QlfcjfURHl+WTMjEdWcv67A=="
    crossorigin="anonymous"
-   1
-   referrerpolicy="no-referrer"
   />
   <link rel="stylesheet" href="/css/admin/dashboard.css" />
   <style>
@@ -36,7 +34,6 @@
    .card {
     border: none;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
    }
    .order-card {
     color: #fff;
@@ -121,9 +118,12 @@
    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.min.css"
    rel="stylesheet"
   />
+  <!-- Add Bootstrap JS and Popper.js before the closing head tag -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
  </head>
  <body id="dashboard">
-  <div class="card mb-4">
+  <div class="card p-3 rounded-4">
    <div class="card-body">
     <h4>Dashboard</h4>
     <p>
@@ -304,37 +304,61 @@
 
    const getCardInfo = async () => {
     try {
-     console.log('Fetching card info...');
-     const res = await fetch(apiUrl + "/dashboard/card-info", {
-      method: "GET",
-      headers: {
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-     });
+     // Get inspector ID from localStorage
+     const inspectorId = localStorage.getItem("inspector_id");
 
-     
+     if (!inspectorId) {
+      throw new Error("Inspector ID not found");
+     }
 
-     console.log('Card info response status:', res.status);
-     const data = await res.json();
-     console.log('Card info data:', data);
+     const response = await fetch(
+      `${apiUrl}/dashboard/card-info-by-inspector`,
+      {
+       method: "POST",
+       headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+       body: JSON.stringify({
+        inspector_id: inspectorId,
+       }),
+      }
+     );
 
+     if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+     }
+
+     const data = await response.json();
+     console.log("Card info response:", data);
+
+     // Update card values directly from data
      document.getElementById("total_inspections").textContent =
-      data.total_inspections === undefined ? 0 : data.total_inspections;
+      data.total_inspections ?? 0;
      document.getElementById("total_resolved_inspections").textContent =
-      data.total_resolved_inspections === undefined
-       ? 0
-       : data.total_resolved_inspections;
+      data.total_resolved_inspections ?? 0;
      document.getElementById("total_violations").textContent =
-      data.total_violations === undefined ? 0 : data.total_violations;
+      data.total_violations ?? 0;
      document.getElementById("overdue_violations").textContent =
-      data.overdue_violations === undefined ? 0 : data.overdue_violations;
+      data.overdue_violations ?? 0;
     } catch (error) {
      console.error("Error fetching card info:", error);
-     document.getElementById("total_inspections").textContent = 0;
-     document.getElementById("total_resolved_inspections").textContent = 0;
-     document.getElementById("total_violations").textContent = 0;
-     document.getElementById("overdue_violations").textContent = 0;
+     // Set default values on error
+     document.getElementById("total_inspections").textContent = "0";
+     document.getElementById("total_resolved_inspections").textContent = "0";
+     document.getElementById("total_violations").textContent = "0";
+     document.getElementById("overdue_violations").textContent = "0";
+
+     // Show a toast notification
+     Toastify({
+      text: error.message || "Failed to load dashboard statistics",
+      duration: 3000,
+      gravity: "top",
+      position: "right",
+      style: {
+       background: "#dc3545",
+      },
+     }).showToast();
     }
    };
 
@@ -354,7 +378,12 @@
      const receiptSearch = document.getElementById("receiptInput").value;
 
      // Add debug log
-     console.log('Fetching with params:', { page, filterType, businessSearch, receiptSearch });
+     console.log("Fetching with params:", {
+      page,
+      filterType,
+      businessSearch,
+      receiptSearch,
+     });
 
      // Build query parameters
      const params = new URLSearchParams({
@@ -365,8 +394,11 @@
      });
 
      const response = await fetch(
-      `${CONFIG.API_BASE_URL}/inspection/filtered-violations?${params.toString()}`,
+      `${
+       CONFIG.API_BASE_URL
+      }/inspection/filtered-violation-inspector?${params.toString()}`,
       {
+       method: "GET",
        headers: {
         Accept: "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -375,11 +407,11 @@
      );
 
      // Add debug log
-     console.log('API Response:', response.status);
-     
+     console.log("API Response:", response.status);
+
      const data = await response.json();
      // Add debug log
-     console.log('API Data:', data);
+     console.log("API Data:", data);
 
      if (data.status === 200) {
       renderInspectionsTable(data.inspections.data || [], page);
@@ -397,7 +429,7 @@
       document.getElementById("inspections-tbody").innerHTML = `
         <tr>
             <td colspan="8" class="text-center text-danger">
-                Error: ${data.message || 'Invalid response from server'}
+                Error: ${data.message || "Invalid response from server"}
             </td>
         </tr>
       `;
@@ -985,4 +1017,33 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
-            </div>`
+            </div>`;
+
+     // Initialize and show the modal
+     const modal = new bootstrap.Modal(modalElement);
+     modal.show();
+    } catch (error) {
+     console.error("Error showing violation details:", error);
+     Toastify({
+      text: "Error showing violation details. Please try again.",
+      duration: 3000,
+      gravity: "top",
+      position: "right",
+      style: {
+       background: "#dc3545",
+      },
+     }).showToast();
+    }
+   };
+
+   const shouldShowDueToday = (dueDate, status) => {
+    const today = new Date();
+    const due = new Date(dueDate);
+    return (
+     due.toDateString() === today.toDateString() &&
+     status.toLowerCase() === "pending"
+    );
+   };
+  </script>
+ </body>
+</html>
