@@ -23,6 +23,7 @@
    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.3.0/css/all.min.css"
    integrity="sha512-UJqci0ZyYcQ0AOJkcIkUCxLS2L6eNcOr7ZiypuInvEhO9uqIDi349MEFrqBzoy1QlfcjfURHl+WTMjEdWcv67A=="
    crossorigin="anonymous"
+   1
    referrerpolicy="no-referrer"
   />
   <link rel="stylesheet" href="/css/admin/dashboard.css" />
@@ -30,6 +31,7 @@
    body {
     font-family: "Poppins", sans-serif !important;
     background-color: #eff3fc;
+    padding-right: 0 !important;
    }
    .card {
     border: none;
@@ -51,7 +53,74 @@
    .bg-c-yellow {
     background: #ffb64d;
    }
+   .modal {
+    padding-right: 0 !important;
+   }
+   .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+   }
+   .modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+   }
+   body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+   }
+   .modal {
+    overflow-y: hidden !important;
+   }
+   .modal-dialog {
+    overflow-y: initial !important;
+   }
+   .modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    overflow-x: hidden;
+   }
+   .hover-bg-light:hover {
+    background-color: rgba(0, 0, 0, 0.075) !important;
+   }
+
+   .table-warning {
+    --bs-table-bg: rgba(255, 193, 7, 0.1);
+   }
+
+   .table-danger {
+    --bs-table-bg: rgba(220, 53, 69, 0.1);
+   }
+
+   .soft-card {
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: none !important;
+   }
+
+   .soft-card:hover {
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    background-color: rgba(0, 0, 0, 0.01);
+    transition: all 0.2s ease-in-out;
+   }
   </style>
+  <!-- Add SweetAlert2 CSS and JS -->
+  <link
+   href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css"
+   rel="stylesheet"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link
+   rel="stylesheet"
+   type="text/css"
+   href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+  />
+  <script
+   type="text/javascript"
+   src="https://cdn.jsdelivr.net/npm/toastify-js"
+  ></script>
+  <link
+   href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.min.css"
+   rel="stylesheet"
+  />
  </head>
  <body id="dashboard">
   <div class="card mb-4">
@@ -63,9 +132,9 @@
     </p>
    </div>
   </div>
-  <div class="row">
-   <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-blue order-card">
+  <div class="row justify-content-between g-3">
+   <div class="col">
+    <div class="card bg-c-blue order-card h-100">
      <div class="card-body">
       <h6 class="mb-2">Total Inspections</h6>
       <div class="d-flex align-items-center gap-2">
@@ -75,36 +144,33 @@
      </div>
     </div>
    </div>
-   <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-green order-card">
+   <div class="col">
+    <div class="card bg-c-green order-card h-100">
      <div class="card-body">
-      <h6 class="mb-2">Total Resolved Violations</h6>
+      <h6 class="mb-2">Resolved Inspections</h6>
       <div class="d-flex align-items-center gap-2">
-       <i
-        class="fa fa-check-circle text-white"
-        aria-label="Violations Icon"
-       ></i>
-       <h2 id="total_resolve">0</h2>
+       <i class="fa fa-check-circle text-white" aria-label="Resolved Icon"></i>
+       <h2 id="total_resolved_inspections">0</h2>
       </div>
      </div>
     </div>
    </div>
-   <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-pink order-card">
+   <div class="col">
+    <div class="card bg-c-yellow order-card h-100">
      <div class="card-body">
       <h6 class="mb-2">Total Violations</h6>
       <div class="d-flex align-items-center gap-2">
        <i
-        class="fa fa-exclamation-triangle text-white"
-        aria-label="Overdue Icon"
+        class="fa fa-exclamation-circle text-white"
+        aria-label="Violations Icon"
        ></i>
        <h2 id="total_violations">0</h2>
       </div>
      </div>
     </div>
    </div>
-   <div class="col-md-4 col-xl-3">
-    <div class="card bg-c-yellow order-card">
+   <div class="col">
+    <div class="card bg-c-pink order-card h-100">
      <div class="card-body">
       <h6 class="mb-2">Overdue Violations</h6>
       <div class="d-flex align-items-center gap-2">
@@ -118,16 +184,127 @@
     </div>
    </div>
   </div>
+  <section class="mt-4">
+   <div class="card">
+    <div class="card-body p-3">
+     <h5 class="mb-1">List of Violators</h5>
+     <p class="text-secondary small mb-3">
+      Business establishments with violations
+     </p>
+
+     <div class="row align-items-end mb-2 g-2">
+      <!-- Filter Dropdown -->
+      <div class="col-md-3">
+       <label for="filterType" class="form-label small mb-1">Filter By:</label>
+       <select
+        id="filterType"
+        class="form-select form-select-sm"
+        onchange="window.fetchFilteredInspections(1)"
+       >
+        <option value="">All Violations</option>
+        <option value="upcoming_dues">Upcoming Dues</option>
+        <option value="overdue">Overdue</option>
+        <option value="resolved">Resolved</option>
+       </select>
+      </div>
+
+      <!-- Violation Receipt Search -->
+      <div class="col-md-3">
+       <label for="receiptInput" class="form-label small mb-1"
+        >Receipt No:</label
+       >
+       <input
+        type="text"
+        id="receiptInput"
+        class="form-control form-control-sm"
+        placeholder="Search receipt number..."
+        onkeyup="window.handleSearch(event)"
+       />
+      </div>
+
+      <!-- Business Search Input -->
+      <div class="col-md-3">
+       <label for="searchInput" class="form-label small mb-1"
+        >Search Business:</label
+       >
+       <input
+        type="text"
+        id="searchInput"
+        class="form-control form-control-sm"
+        placeholder="Search business name..."
+        onkeyup="window.handleSearch(event)"
+       />
+      </div>
+
+      <!-- Clear Filters Button -->
+      <div class="col-md-3">
+       <label class="form-label small mb-1 invisible">Clear:</label>
+       <button
+        class="btn btn-outline-secondary btn-sm w-100"
+        type="button"
+        onclick="window.clearFilters()"
+        title="Clear all filters"
+       >
+        <i class="bi bi-x-circle"></i> Clear Filters
+       </button>
+      </div>
+     </div>
+
+     <div class="table-responsive mt-3">
+      <table class="table table-sm table-hover align-middle">
+       <thead>
+        <tr class="table-light">
+         <th class="small" style="width: 5%">No.</th>
+         <th class="small" style="width: 20%">Business Name</th>
+         <th class="small" style="width: 15%">Owner</th>
+         <th class="small" style="width: 10%">Business Status</th>
+         <th class="small" style="width: 12%">Inspection Date</th>
+         <th class="small" style="width: 12%">Due Date</th>
+         <th class="small" style="width: 15%">Type of Inspection</th>
+         <th class="small" style="width: 11%">Status</th>
+        </tr>
+       </thead>
+       <tbody id="inspections-tbody" class="small"></tbody>
+      </table>
+     </div>
+
+     <!-- Centered Pagination -->
+     <div class="d-flex justify-content-center mt-3">
+      <nav aria-label="Inspections pagination">
+       <ul class="pagination pagination-sm" id="inspections-pagination"></ul>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- Violation Detail Modal -->
+  <div
+   class="modal fade"
+   id="violationDetailModal"
+   tabindex="-1"
+   aria-labelledby="violationDetailModalLabel"
+   aria-hidden="true"
+  ></div>
 
   <script type="module">
    import CONFIG from "/scripts/config.js";
 
    const apiUrl = CONFIG.API_BASE_URL;
 
-   console.log(apiUrl);
+   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const options = {
+     year: "numeric",
+     month: "long",
+     day: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString("en-US", options);
+   };
 
    const getCardInfo = async () => {
     try {
+     console.log('Fetching card info...');
      const res = await fetch(apiUrl + "/dashboard/card-info", {
       method: "GET",
       headers: {
@@ -136,25 +313,676 @@
       },
      });
 
-     if (!res.ok) {
-      throw new Error(`Error: ${res.status} - ${res.statusText}`);
-     }
+     
 
+     console.log('Card info response status:', res.status);
      const data = await res.json();
+     console.log('Card info data:', data);
+
      document.getElementById("total_inspections").textContent =
-      data.total_inspections || 0;
+      data.total_inspections === undefined ? 0 : data.total_inspections;
+     document.getElementById("total_resolved_inspections").textContent =
+      data.total_resolved_inspections === undefined
+       ? 0
+       : data.total_resolved_inspections;
      document.getElementById("total_violations").textContent =
-      data.total_violations || 0;
+      data.total_violations === undefined ? 0 : data.total_violations;
      document.getElementById("overdue_violations").textContent =
-      data.overdue_violations || 0;
+      data.overdue_violations === undefined ? 0 : data.overdue_violations;
     } catch (error) {
-     console.error(error.message);
+     console.error("Error fetching card info:", error);
+     document.getElementById("total_inspections").textContent = 0;
+     document.getElementById("total_resolved_inspections").textContent = 0;
+     document.getElementById("total_violations").textContent = 0;
+     document.getElementById("overdue_violations").textContent = 0;
     }
    };
 
-   // Fetch data on page load
+   // Update the handleSearch function to include receipt search
+   const handleSearch = (event) => {
+    clearTimeout(window.searchTimeout);
+    window.searchTimeout = setTimeout(() => {
+     fetchFilteredInspections(1);
+    }, 500);
+   };
+
+   // Update fetchFilteredInspections to include receipt search
+   const fetchFilteredInspections = async (page = 1) => {
+    try {
+     const filterType = document.getElementById("filterType").value;
+     const businessSearch = document.getElementById("searchInput").value;
+     const receiptSearch = document.getElementById("receiptInput").value;
+
+     // Add debug log
+     console.log('Fetching with params:', { page, filterType, businessSearch, receiptSearch });
+
+     // Build query parameters
+     const params = new URLSearchParams({
+      page,
+      filterType: filterType || "",
+      business_name: businessSearch || "",
+      receipt: receiptSearch || "",
+     });
+
+     const response = await fetch(
+      `${CONFIG.API_BASE_URL}/inspection/filtered-violations?${params.toString()}`,
+      {
+       headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      }
+     );
+
+     // Add debug log
+     console.log('API Response:', response.status);
+     
+     const data = await response.json();
+     // Add debug log
+     console.log('API Data:', data);
+
+     if (data.status === 200) {
+      renderInspectionsTable(data.inspections.data || [], page);
+
+      if (data.inspections.data?.length > 0 && data.inspections.last_page > 1) {
+       renderInspectionsPagination(
+        data.inspections.current_page,
+        data.inspections.last_page
+       );
+      } else {
+       document.getElementById("inspections-pagination").innerHTML = "";
+      }
+     } else {
+      console.log("Invalid response from server:", data);
+      document.getElementById("inspections-tbody").innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center text-danger">
+                Error: ${data.message || 'Invalid response from server'}
+            </td>
+        </tr>
+      `;
+     }
+    } catch (error) {
+     console.error("Error fetching inspections:", error);
+     document.getElementById("inspections-tbody").innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center text-danger">
+                Error loading inspections: ${error.message}. Please try again.
+            </td>
+        </tr>
+     `;
+     document.getElementById("inspections-pagination").innerHTML = "";
+    }
+   };
+
+   // Update the date calculation function to be consistent
+   const calculateDateDifference = (dueDate) => {
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffTime = due - today;
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+   };
+
+   const renderInspectionsTable = (inspections, currentPage) => {
+    const tbody = document.getElementById("inspections-tbody");
+    tbody.innerHTML = "";
+
+    if (!inspections || inspections.length === 0) {
+     tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center">No inspections found</td>
+            </tr>
+        `;
+     return;
+    }
+
+    const itemsPerPage = 20;
+    const startingIndex = (currentPage - 1) * itemsPerPage;
+
+    inspections.forEach((inspection, index) => {
+     const violation = inspection.violations[0];
+     if (!violation) return;
+
+     const diffDays = calculateDateDifference(violation.due_date);
+
+     // Determine row styling and indicator based on status and due date
+     let rowClass = "";
+     let statusIndicator = "";
+
+     if (violation.status?.toLowerCase() === "pending") {
+      if (diffDays < 0) {
+       rowClass = "table-danger";
+       statusIndicator = `<span class="badge bg-danger rounded-pill">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Overdue by ${Math.abs(diffDays)} day${
+        Math.abs(diffDays) === 1 ? "" : "s"
+       }
+                </span>`;
+      } else if (diffDays === 0) {
+       rowClass = "table-warning";
+       statusIndicator = `<span class="badge bg-warning text-dark rounded-pill">
+                    <i class="bi bi-clock-fill me-1"></i>Due Today
+                </span>`;
+      } else if (diffDays <= 3) {
+       rowClass = "table-warning";
+       statusIndicator = `<span class="badge bg-warning text-dark rounded-pill">
+                    <i class="bi bi-clock-fill me-1"></i>Due in ${diffDays} day${
+        diffDays === 1 ? "" : "s"
+       }
+                </span>`;
+      }
+     }
+
+     const row = document.createElement("tr");
+     row.className = `cursor-pointer hover-bg-light ${rowClass}`;
+     row.style.cursor = "pointer";
+
+     const business = inspection.business;
+     const owner = business.owner;
+
+     row.innerHTML = `
+            <td class="small" style="width: 5%">${
+             startingIndex + index + 1
+            }</td>
+            <td class="small" style="width: 20%">
+                ${business.business_name || "N/A"}
+                ${statusIndicator}
+            </td>
+            <td class="small" style="width: 15%">${owner.first_name || ""} ${
+      owner.last_name || "N/A"
+     }</td>
+            <td class="small" style="width: 10%">${
+             business.status || "N/A"
+            }</td>
+            <td class="small" style="width: 12%">${formatDate(
+             inspection.inspection_date
+            )}</td>
+            <td class="small" style="width: 12%">${formatDate(
+             violation.due_date
+            )}</td>
+            <td class="small" style="width: 15%">${
+             inspection.type_of_inspection || "N/A"
+            }</td>
+            <td class="small" style="width: 11%">
+                <span class="badge ${
+                 violation.status?.toLowerCase() === "pending"
+                  ? "bg-warning"
+                  : violation.status?.toLowerCase() === "resolved"
+                  ? "bg-success"
+                  : violation.status?.toLowerCase() === "overdue"
+                  ? "bg-danger"
+                  : "bg-secondary"
+                } rounded-pill">
+                    ${violation.status?.toUpperCase() || "N/A"}
+                </span>
+            </td>
+        `;
+
+     row.addEventListener("click", () => showViolationDetails(inspection));
+     tbody.appendChild(row);
+    });
+   };
+
+   // Update the createPaginationButton function
+   const createPaginationButton = (label, enabled = true, isActive = false) => {
+    const li = document.createElement("li");
+    li.className =
+     "page-item" + (enabled ? "" : " disabled") + (isActive ? " active" : "");
+
+    const button = document.createElement("button");
+    button.className = "page-link";
+    button.innerHTML = label;
+    button.type = "button";
+
+    if (enabled) {
+     button.style.cursor = "pointer";
+    }
+
+    li.appendChild(button);
+    return li;
+   };
+
+   // Update the renderInspectionsPagination function
+   const renderInspectionsPagination = (currentPage, totalPages) => {
+    const paginationElement = document.getElementById("inspections-pagination");
+    paginationElement.innerHTML = "";
+
+    if (totalPages <= 1) return;
+
+    // Previous button
+    const prevButton = createPaginationButton("Previous", currentPage > 1);
+    if (currentPage > 1) {
+     prevButton.querySelector("button").addEventListener("click", () => {
+      fetchFilteredInspections(currentPage - 1);
+     });
+    }
+    paginationElement.appendChild(prevButton);
+
+    // Page numbers
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    if (endPage - startPage < 4) {
+     startPage = Math.max(1, endPage - 4);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+     const numButton = createPaginationButton(
+      i.toString(),
+      true,
+      i === currentPage
+     );
+     numButton.querySelector("button").addEventListener("click", () => {
+      fetchFilteredInspections(i);
+     });
+     paginationElement.appendChild(numButton);
+    }
+
+    // Next button
+    const nextButton = createPaginationButton("Next", currentPage < totalPages);
+    if (currentPage < totalPages) {
+     nextButton.querySelector("button").addEventListener("click", () => {
+      fetchFilteredInspections(currentPage + 1);
+     });
+    }
+    paginationElement.appendChild(nextButton);
+   };
+
+   // Make functions globally available
+   window.handleSearch = handleSearch;
+   window.fetchFilteredInspections = fetchFilteredInspections;
+
+   // Initial fetch
+   fetchFilteredInspections(1);
+
+   // Make sure to keep the card info fetch
    getCardInfo();
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
- </body>
-</html>
+
+   // Add the showViolationDetails function
+   const showViolationDetails = async (inspection) => {
+    try {
+     const violation = inspection.violations[0];
+     const modalElement = document.getElementById("violationDetailModal");
+     const address = inspection.business?.address || {};
+
+     // Create the image URL using your storage path
+     const imageUrl = inspection.image_url
+      ? `${CONFIG.APP_URL}/storage/${inspection.image_url}`
+      : "/assets/images/no-image.png";
+
+     modalElement.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-sm">
+                    <div class="modal-header border-bottom-0 bg-primary bg-gradient text-white">
+                        <h5 class="modal-title fw-bold" id="violationDetailModalLabel">
+                            <i class="bi bi-clipboard2-check me-2"></i>Violation Details
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <!-- Business Image Section -->
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <img
+                                    src="${imageUrl}"
+                                    alt="Business Image"
+                                    class="rounded-3 shadow-sm img-fluid"
+                                    style="max-height: 200px; width: auto; object-fit: cover"
+                                    onerror="this.src='/assets/images/no-image.png';"
+                                />
+                                <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
+                                    <small>${
+                                     inspection.business?.business_name || "N/A"
+                                    }</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Business Information -->
+                            <div class="col-6">
+                                <div class="card soft-card">
+                                    <div class="card-body">
+                                        <h6 class="card-title fw-bold mb-3">
+                                            <i class="bi bi-building fs-4 text-primary me-2"></i>Business Information
+                                        </h6>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Business Name</label>
+                                            <p class="fw-semibold mb-2">${
+                                             inspection.business
+                                              .business_name || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Business Permit</label>
+                                            <p class="fw-semibold mb-2">${
+                                             inspection.business
+                                              .business_permit || "N/A"
+                                            }</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-muted small">Business Status</label>
+                                            <p class="mb-0">
+                                                <span class="fw-semibold">${
+                                                 inspection.business.status ||
+                                                 "N/A"
+                                                }</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Owner Information -->
+                            <div class="col-md-6">
+                                <div class="card soft-card">
+                                    <div class="card-body">
+                                        <h6 class="card-title fw-bold mb-3">
+                                            <i class="bi bi-person fs-4 text-primary me-2"></i>Owner Information
+                                        </h6>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Owner Name</label>
+                                            <p class="fw-semibold mb-2">${
+                                             inspection.business.owner
+                                              .first_name || ""
+                                            } ${
+      inspection.business.owner.last_name || "N/A"
+     }</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">
+                                                <i class="bi bi-envelope-fill me-1"></i>Email
+                                            </label>
+                                            <p class="fw-semibold mb-2">${
+                                             inspection.business.owner.email ||
+                                             "N/A"
+                                            }</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-muted small">
+                                                <i class="bi bi-telephone-fill me-1"></i>Phone
+                                            </label>
+                                            <p class="fw-semibold mb-0">${
+                                             inspection.business.owner
+                                              .phone_number || "N/A"
+                                            }</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Location Card -->
+                            <div class="col-12">
+                                <div class="card soft-card mb-4">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-geo-alt-fill fs-4 text-danger me-2"></i>
+                                            <h6 class="card-title fw-bold mb-0">Business Location</h6>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="text-muted small">Street Address</label>
+                                                    <p class="fw-semibold mb-1">${
+                                                     address.street_address ||
+                                                     "N/A"
+                                                    }</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-2">
+                                                    <label class="text-muted small">City</label>
+                                                    <p class="fw-semibold mb-1">${
+                                                     address.city || "N/A"
+                                                    }</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-2">
+                                                    <label class="text-muted small">Postal Code</label>
+                                                    <p class="fw-semibold mb-1">${
+                                                     address.postal_code ||
+                                                     "N/A"
+                                                    }</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Inspection Details -->
+                            <div class="col-12">
+                                <div class="card soft-card">
+                                    <div class="card-body">
+                                        <h6 class="card-title fw-bold mb-3">
+                                            <i class="bi bi-clipboard-data fs-4 text-primary me-2"></i>Inspection Details
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="text-muted small">Inspection Date</label>
+                                                <p class="fw-semibold mb-0">${formatDate(
+                                                 inspection.inspection_date
+                                                )}</p>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="text-muted small">Type of Inspection</label>
+                                                <p class="fw-semibold mb-0">${
+                                                 inspection.type_of_inspection ||
+                                                 "N/A"
+                                                }</p>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="text-muted small">Inspector</label>
+                                                <p class="fw-semibold mb-0">${
+                                                 inspection.inspector
+                                                  .first_name || ""
+                                                } ${
+      inspection.inspector.last_name || "N/A"
+     }</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Violation Information -->
+                            <div class="col-12">
+                                <div class="card soft-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-clipboard-x fs-4 ${
+                                                 violation.status?.toLowerCase() ===
+                                                 "resolved"
+                                                  ? "text-success"
+                                                  : "text-danger"
+                                                } me-2"></i>
+                                                <h6 class="card-title fw-bold mb-0">Violation Information</h6>
+                                            </div>
+                                            <span class="badge ${
+                                             violation.status?.toLowerCase() ===
+                                             "pending"
+                                              ? "bg-warning"
+                                              : violation.status?.toLowerCase() ===
+                                                "resolved"
+                                              ? "bg-success"
+                                              : violation.status?.toLowerCase() ===
+                                                "overdue"
+                                              ? "bg-danger"
+                                              : "bg-secondary"
+                                            } rounded-pill px-3 py-2">
+                                                ${
+                                                 violation.status?.toUpperCase() ||
+                                                 "N/A"
+                                                }
+                                            </span>
+                                        </div>
+
+                                        <!-- Notification Status Alert -->
+                                        ${
+                                         violation.notification_status
+                                          ? `
+                                            <div class="alert ${
+                                             violation.notification_status
+                                              .toLowerCase()
+                                              .includes("not")
+                                              ? "alert-warning"
+                                              : "alert-success"
+                                            } d-flex align-items-center mb-4">
+                                                <i class="bi ${
+                                                 violation.notification_status
+                                                  .toLowerCase()
+                                                  .includes("not")
+                                                  ? "bi-exclamation-triangle-fill"
+                                                  : "bi-check-circle-fill"
+                                                } fs-5 me-2"></i>
+                                                <div>
+                                                    ${
+                                                     violation.notification_status
+                                                    }
+                                                </div>
+                                            </div>
+                                        `
+                                          : ""
+                                        }
+
+                                        <!-- Rest of violation information -->
+                                        <div class="row g-4">
+                                            <!-- Key Information -->
+                                            <div class="col-12">
+                                                <div class="p-3 bg-light rounded-3 border-start ${
+                                                 violation.status?.toLowerCase() ===
+                                                 "resolved"
+                                                  ? "border-success"
+                                                  : "border-danger"
+                                                } border-4">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <label class="text-muted small d-block">Receipt No.</label>
+                                                                <span class="fw-semibold">${
+                                                                 violation.violation_receipt_no ||
+                                                                 "N/A"
+                                                                }</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <label class="text-muted small d-block">Violation Date</label>
+                                                                <span class="fw-semibold">${formatDate(
+                                                                 violation.violation_date
+                                                                )}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <label class="text-muted small d-block">Due Date</label>
+                                                                ${
+                                                                 shouldShowDueToday(
+                                                                  violation.due_date,
+                                                                  violation.status
+                                                                 )
+                                                                  ? `
+                                                                    <span class="fw-semibold">
+                                                                        <span class="badge bg-warning text-dark">
+                                                                            <i class="bi bi-clock-fill me-1"></i>Due Today
+                                                                        </span>
+                                                                    </span>
+                                                                `
+                                                                  : `
+                                                                    <span class="fw-semibold">${formatDate(
+                                                                     violation.due_date
+                                                                    )}</span>
+                                                                `
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        ${
+                                                         violation.days_overdue &&
+                                                         violation.status?.toLowerCase() !==
+                                                          "resolved"
+                                                          ? `
+                                                        <div class="col-md-3">
+                                                            <div class="detail-item">
+                                                                <label class="text-muted small d-block">Days Overdue</label>
+                                                                <span class="fw-semibold text-danger">
+                                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                                                    ${violation.days_overdue} days
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        `
+                                                          : ""
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Nature of Violations -->
+                                            <div class="col-12">
+                                                <div class="violations-list p-3 ${
+                                                 violation.status?.toLowerCase() ===
+                                                 "resolved"
+                                                  ? "bg-success bg-opacity-10"
+                                                  : "bg-danger bg-opacity-10"
+                                                } rounded-3">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <i class="bi bi-exclamation-diamond-fill ${
+                                                         violation.status?.toLowerCase() ===
+                                                         "resolved"
+                                                          ? "text-success"
+                                                          : "text-danger"
+                                                        } me-2"></i>
+                                                        <h6 class="fw-bold mb-0">Nature of Violations</h6>
+                                                    </div>
+                                                    <div class="ps-4">
+                                                        ${
+                                                         Array.isArray(
+                                                          violation.nature_of_violation
+                                                         )
+                                                          ? `
+                                                            <div class="row g-2">
+                                                                ${violation.nature_of_violation
+                                                                 .map(
+                                                                  (nature) => `
+                                                                    <div class="col-md-6">
+                                                                        <div class="d-flex align-items-start">
+                                                                            <i class="bi bi-dot ${
+                                                                             violation.status?.toLowerCase() ===
+                                                                             "resolved"
+                                                                              ? "text-success"
+                                                                              : "text-danger"
+                                                                            } mt-1 me-2"></i>
+                                                                            <span class="text-uppercase small">
+                                                                                ${nature.trim()}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                `
+                                                                 )
+                                                                 .join("")}
+                                                            </div>
+                                                        `
+                                                          : `
+                                                            <div class="text-muted">
+                                                                <i class="bi bi-info-circle me-2"></i>No violations listed
+                                                            </div>
+                                                        `
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>`

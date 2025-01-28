@@ -8,12 +8,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-   rel="stylesheet"1
+   rel="stylesheet"
+   1
   />
   <link
    rel="stylesheet"
    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
   />
+  <link
+   href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+   rel="stylesheet"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
    body {
     font-family: "Poppins", sans-serif !important;
@@ -59,6 +65,7 @@
    .profile-image-container {
     position: relative;
     margin: 20px 0;
+    text-align: center;
    }
 
    .circular-image {
@@ -69,10 +76,15 @@
     border: 4px solid white;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
+    display: block;
+    margin: 0 auto;
+    min-width: 120px;
+    min-height: 120px;
    }
 
    .circular-image:hover {
     transform: scale(1.05);
+    cursor: pointer;
    }
 
    .profile-info {
@@ -163,6 +175,124 @@
     gap: 24px;
     padding: 0 12px;
    }
+
+   .modal {
+    display: none;
+    position: fixed;
+    z-index: 1055 !important;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+   }
+
+   .modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 28px;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+   }
+
+   .close {
+    color: #64748b;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+   }
+
+   .close:hover {
+    color: #1e293b;
+   }
+
+   .form-group {
+    margin-bottom: 20px;
+   }
+
+   .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #1a237e;
+    font-weight: 500;
+   }
+
+   .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-family: "Poppins", sans-serif;
+    transition: all 0.2s ease;
+   }
+
+   .form-group input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+   }
+
+   .modal h2 {
+    color: #1a237e;
+    margin-bottom: 20px;
+    font-weight: 600;
+   }
+
+   .modal p {
+    color: #64748b;
+    margin-bottom: 20px;
+   }
+
+   .modal-backdrop {
+    z-index: 1050 !important;
+   }
+
+   .modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+   }
+
+   .modal-body {
+    padding: 1rem;
+   }
+
+   .btn {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+   }
+
+   .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+   }
+
+   .float-end {
+    float: right;
+   }
+
+   /* Add a hover effect to indicate it's clickable */
+   .profile-image-container::after {
+    content: "Click to change";
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: #64748b;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+   }
+
+   .profile-image-container:hover::after {
+    opacity: 1;
+   }
   </style>
  </head>
  <body id="profile">
@@ -179,10 +309,19 @@
     <div class="card-body">
      <div class="profile-image-container">
       <img
-       src=""
+       src="/assets/inspector_prof.png"
        alt="Profile Image"
-       class="circular-image bg-secondary"
+       class="circular-image"
        id="profileImage"
+       style="cursor: pointer; background-color: #e2e8f0"
+       onclick="document.getElementById('imageInput').click()"
+      />
+      <input
+       type="file"
+       id="imageInput"
+       accept="image/*"
+       style="display: none"
+       onchange="handleImageUpload(event)"
       />
      </div>
      <div class="profile-info">
@@ -203,9 +342,14 @@
    <!-- Information Card -->
    <div class="card">
     <div class="card-body info-section">
-     <h5>
-      <i class="bi bi-person-vcard-fill"></i>
-      Personal Information
+     <h5 class="d-flex justify-content-between align-items-center">
+      <span>
+       <i class="bi bi-person-vcard-fill"></i>
+       Personal Information
+      </span>
+      <button class="btn btn-success btn-sm" onclick="editPersonalInfo()">
+       <i class="bi bi-pencil-fill"></i> Edit
+      </button>
      </h5>
      <div class="personal-info">
       <p class="label">Email Address</p>
@@ -219,10 +363,148 @@
    </div>
   </div>
 
-  <script>
-   function changePassword() {
-    alert("Change password functionality not implemented yet.");
-   }
+  <script type="module">
+   import CONFIG from "/scripts/config.js";
+   const apiUrl = CONFIG.API_BASE_URL;
+   const passwordModal = new bootstrap.Modal(
+    document.getElementById("passwordModal")
+   );
+   const successModal = new bootstrap.Modal(
+    document.getElementById("successModal")
+   );
+   const errorModal = new bootstrap.Modal(
+    document.getElementById("errorModal")
+   );
+   const personalInfoModal = new bootstrap.Modal(
+    document.getElementById("personalInfoModal")
+   );
+
+   // Make functions globally available
+   window.changePassword = function () {
+    passwordModal.show();
+   };
+
+   window.handlePasswordChange = async function () {
+    const submitButton = document.querySelector(
+     '#passwordModal button[type="submit"]'
+    );
+    const originalButtonText = submitButton.innerHTML;
+
+    try {
+     // Show loading state
+     submitButton.disabled = true;
+     submitButton.innerHTML =
+      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+
+     const currentPassword = document.getElementById("currentPassword").value;
+     const newPassword = document.getElementById("newPassword").value;
+     const confirmPassword = document.getElementById("confirmPassword").value;
+     const email = document.getElementById("profileEmail").textContent;
+
+     const response = await fetch(apiUrl + "/auth/reset-logged-in-password", {
+      method: "POST",
+      headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: JSON.stringify({
+       email: email,
+       current_password: currentPassword,
+       new_password: newPassword,
+       confirm_password: confirmPassword,
+      }),
+     });
+
+     const data = await response.json();
+
+     if (response.ok) {
+      passwordModal.hide();
+      successModal.show();
+      document.getElementById("passwordForm").reset();
+     } else {
+      // Clear all password inputs
+      document.getElementById("currentPassword").value = "";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("confirmPassword").value = "";
+
+      passwordModal.hide();
+      let errorMsg;
+
+      if (response.status === 400) {
+       errorMsg = data.message;
+      } else if (data.errors) {
+       if (data.errors.confirm_password) {
+        errorMsg = data.errors.confirm_password[0];
+       } else if (data.errors.new_password) {
+        errorMsg = data.errors.new_password[0];
+       }
+      } else {
+       errorMsg = data.message || "An error occurred while updating password";
+      }
+
+      document.getElementById("errorMessage").textContent = errorMsg;
+      errorModal.show();
+     }
+    } catch (error) {
+     // Clear all password inputs
+     document.getElementById("currentPassword").value = "";
+     document.getElementById("newPassword").value = "";
+     document.getElementById("confirmPassword").value = "";
+
+     passwordModal.hide();
+     document.getElementById("errorMessage").textContent =
+      "Network error. Please check your connection and try again.";
+     errorModal.show();
+    } finally {
+     // Reset button state
+     submitButton.disabled = false;
+     submitButton.innerHTML = originalButtonText;
+    }
+   };
+
+   window.editPersonalInfo = function () {
+    document.getElementById("editFirstName").value =
+     localStorage.getItem("firstName") || "";
+    document.getElementById("editLastName").value =
+     localStorage.getItem("lastName") || "";
+    personalInfoModal.show();
+   };
+
+   window.handlePersonalInfoUpdate = function () {
+    const firstName = document.getElementById("editFirstName").value;
+    const lastName = document.getElementById("editLastName").value;
+
+    localStorage.setItem("firstName", firstName);
+    localStorage.setItem("lastName", lastName);
+
+    document.getElementById("personalFirstName").textContent = firstName;
+    document.getElementById("personalLastName").textContent = lastName;
+
+    personalInfoModal.hide();
+    successModal.show();
+   };
+
+   window.handleImageUpload = function (event) {
+    const file = event.target.files[0];
+    if (file) {
+     if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+     }
+
+     if (file.size > 5 * 1024 * 1024) {
+      alert("Please upload an image smaller than 5MB");
+      return;
+     }
+
+     const reader = new FileReader();
+     reader.onload = function (e) {
+      localStorage.setItem("profile_image", e.target.result);
+      document.getElementById("profileImage").src = e.target.result;
+     };
+     reader.readAsDataURL(file);
+    }
+   };
 
    // Fetch data from local storage
    const email = localStorage.getItem("email");
@@ -237,6 +519,203 @@
     first_name || "N/A";
    document.getElementById("personalLastName").textContent = last_name || "N/A";
    document.getElementById("profileImage").src = profileImageUrl || "";
+
+   // Add this to your existing window load or document ready handler
+   // Load profile image if exists
+   const savedImage = localStorage.getItem("profile_image");
+   if (savedImage) {
+    document.getElementById("profileImage").src = savedImage;
+   }
+
+   const userEmail = localStorage.getItem("email") || "user@example.com";
+   document.getElementById("profileEmail").textContent = userEmail;
+   document.getElementById("personalEmail").textContent = userEmail;
+   document.getElementById("personalFirstName").textContent =
+    localStorage.getItem("firstName") || "John";
+   document.getElementById("personalLastName").textContent =
+    localStorage.getItem("lastName") || "Doe";
   </script>
+
+  <!-- Password Change Modal -->
+  <div
+   class="modal fade"
+   id="passwordModal"
+   tabindex="-1"
+   aria-labelledby="passwordModalLabel"
+   aria-hidden="true"
+  >
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="passwordModalLabel">Change Password</h5>
+      <button
+       type="button"
+       class="btn-close"
+       data-bs-dismiss="modal"
+       aria-label="Close"
+      ></button>
+     </div>
+     <div class="modal-body">
+      <form
+       id="passwordForm"
+       onsubmit="event.preventDefault(); handlePasswordChange();"
+      >
+       <div class="mb-3">
+        <label for="currentPassword" class="form-label"
+         >Current Password:</label
+        >
+        <input
+         type="password"
+         class="form-control"
+         id="currentPassword"
+         required
+        />
+       </div>
+       <div class="mb-3">
+        <label for="newPassword" class="form-label">New Password:</label>
+        <input
+         type="password"
+         class="form-control"
+         id="newPassword"
+         required
+         minlength="8"
+        />
+        <div class="form-text">Password must be at least 8 characters long</div>
+       </div>
+       <div class="mb-4">
+        <label for="confirmPassword" class="form-label"
+         >Confirm Password:</label
+        >
+        <input
+         type="password"
+         class="form-control"
+         id="confirmPassword"
+         required
+         minlength="8"
+        />
+       </div>
+      </form>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+       Close
+      </button>
+      <button type="submit" class="btn btn-success" form="passwordForm">
+       Update Password
+      </button>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div
+   class="modal fade"
+   id="successModal"
+   tabindex="-1"
+   aria-labelledby="successModalLabel"
+   aria-hidden="true"
+  >
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="successModalLabel">Success!</h5>
+      <button
+       type="button"
+       class="btn-close"
+       data-bs-dismiss="modal"
+       aria-label="Close"
+      ></button>
+     </div>
+     <div class="modal-body">
+      <p>Your password has been successfully updated.</p>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+       OK
+      </button>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div
+   class="modal fade"
+   id="errorModal"
+   tabindex="-1"
+   aria-labelledby="errorModalLabel"
+   aria-hidden="true"
+  >
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="errorModalLabel">Error</h5>
+      <button
+       type="button"
+       class="btn-close"
+       data-bs-dismiss="modal"
+       aria-label="Close"
+      ></button>
+     </div>
+     <div class="modal-body">
+      <p id="errorMessage"></p>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+       OK
+      </button>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- Personal Info Edit Modal -->
+  <div
+   class="modal fade"
+   id="personalInfoModal"
+   tabindex="-1"
+   aria-labelledby="personalInfoModalLabel"
+   aria-hidden="true"
+  >
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h5 class="modal-title" id="personalInfoModalLabel">
+       Edit Personal Information
+      </h5>
+      <button
+       type="button"
+       class="btn-close"
+       data-bs-dismiss="modal"
+       aria-label="Close"
+      ></button>
+     </div>
+     <div class="modal-body">
+      <form
+       id="personalInfoForm"
+       onsubmit="event.preventDefault(); handlePersonalInfoUpdate();"
+      >
+       <div class="mb-3">
+        <label for="editFirstName" class="form-label">First Name:</label>
+        <input type="text" class="form-control" id="editFirstName" required />
+       </div>
+       <div class="mb-4">
+        <label for="editLastName" class="form-label">Last Name:</label>
+        <input type="text" class="form-control" id="editLastName" required />
+       </div>
+      </form>
+     </div>
+     <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+       Close
+      </button>
+      <button type="submit" class="btn btn-success" form="personalInfoForm">
+       Save Changes
+      </button>
+     </div>
+    </div>
+   </div>
+  </div>
  </body>
 </html>
