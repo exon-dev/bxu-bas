@@ -332,7 +332,12 @@
        Close
       </button>
       <button type="submit" class="btn btn-success" form="personalInfoForm">
-       Save Changes
+       <span
+        class="spinner-border spinner-border-sm d-none"
+        role="status"
+        aria-hidden="true"
+       ></span>
+       <span class="button-text">Save Changes</span>
       </button>
      </div>
     </div>
@@ -509,18 +514,69 @@
     personalInfoModal.show();
    };
 
-   window.handlePersonalInfoUpdate = function () {
-    const firstName = document.getElementById("editFirstName").value;
-    const lastName = document.getElementById("editLastName").value;
+   window.handlePersonalInfoUpdate = async function () {
+    // Get the submit button and its text element
+    const submitButton = document.querySelector(
+     '#personalInfoModal button[type="submit"]'
+    );
+    const spinner = submitButton.querySelector(".spinner-border");
+    const buttonText = submitButton.querySelector(".button-text");
 
-    localStorage.setItem("firstName", firstName);
-    localStorage.setItem("lastName", lastName);
+    try {
+     // Show loading state
+     submitButton.disabled = true;
+     spinner.classList.remove("d-none");
+     buttonText.textContent = "Saving...";
 
-    document.getElementById("personalFirstName").textContent = firstName;
-    document.getElementById("personalLastName").textContent = lastName;
+     const firstName = document.getElementById("editFirstName").value;
+     const lastName = document.getElementById("editLastName").value;
+     const email = document.getElementById("profileEmail").textContent;
 
-    personalInfoModal.hide();
-    successModal.show();
+     const response = await fetch(apiUrl + "/auth/update-personal-info", {
+      method: "POST",
+      headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: JSON.stringify({
+       email: email,
+       first_name: firstName,
+       last_name: lastName,
+      }),
+     });
+
+     const data = await response.json();
+
+     if (response.ok) {
+      // Update localStorage and UI with the returned data
+      localStorage.setItem("firstName", data.data.first_name);
+      localStorage.setItem("lastName", data.data.last_name);
+
+      document.getElementById("personalFirstName").textContent =
+       data.data.first_name;
+      document.getElementById("personalLastName").textContent =
+       data.data.last_name;
+
+      personalInfoModal.hide();
+      successModal.show();
+     } else {
+      personalInfoModal.hide();
+      document.getElementById("errorMessage").textContent =
+       data.message || "An error occurred while updating personal information";
+      errorModal.show();
+     }
+    } catch (error) {
+     console.error("Error:", error);
+     personalInfoModal.hide();
+     document.getElementById("errorMessage").textContent =
+      "Network error. Please check your connection and try again.";
+     errorModal.show();
+    } finally {
+     // Reset button state
+     submitButton.disabled = false;
+     spinner.classList.add("d-none");
+     buttonText.textContent = "Save Changes";
+    }
    };
 
    window.handleImageUpload = function (event) {
