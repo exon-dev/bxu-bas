@@ -127,8 +127,8 @@
    <div class="card-body">
     <h4>Dashboard</h4>
     <p>
-     Welcome to the BXU BAS Dashboard. Here you can monitor and manage all
-     activities related to violators and inspectors.
+     Welcome to the BXU BAS Dashboard. Here you can monitor your inspections and
+     business violators.
     </p>
    </div>
   </div>
@@ -834,56 +834,27 @@
                                                 } me-2"></i>
                                                 <h6 class="card-title fw-bold mb-0">Violation Information</h6>
                                             </div>
-                                            <span class="badge ${
-                                             violation.status?.toLowerCase() ===
-                                             "pending"
-                                              ? "bg-warning"
-                                              : violation.status?.toLowerCase() ===
-                                                "resolved"
-                                              ? "bg-success"
-                                              : violation.status?.toLowerCase() ===
-                                                "overdue"
-                                              ? "bg-danger"
-                                              : "bg-secondary"
-                                            } rounded-pill px-3 py-2">
-                                                ${
-                                                 violation.status?.toUpperCase() ||
-                                                 "N/A"
-                                                }
-                                            </span>
+                                                    <span class="badge ${
+                                                     violation.status?.toLowerCase() ===
+                                                     "pending"
+                                                      ? "bg-warning"
+                                                      : violation.status?.toLowerCase() ===
+                                                        "resolved"
+                                                      ? "bg-success"
+                                                      : violation.status?.toLowerCase() ===
+                                                        "overdue"
+                                                      ? "bg-danger"
+                                                      : "bg-secondary"
+                                                    } rounded-pill px-3 py-2">
+                                                        ${
+                                                         violation.status?.toUpperCase() ||
+                                                         "N/A"
+                                                        }
+                                                    </span>
                                         </div>
 
-                                        <!-- Notification Status Alert -->
-                                        ${
-                                         violation.notification_status
-                                          ? `
-                                            <div class="alert ${
-                                             violation.notification_status
-                                              .toLowerCase()
-                                              .includes("not")
-                                              ? "alert-warning"
-                                              : "alert-success"
-                                            } d-flex align-items-center mb-4">
-                                                <i class="bi ${
-                                                 violation.notification_status
-                                                  .toLowerCase()
-                                                  .includes("not")
-                                                  ? "bi-exclamation-triangle-fill"
-                                                  : "bi-check-circle-fill"
-                                                } fs-5 me-2"></i>
-                                                <div>
-                                                    ${
-                                                     violation.notification_status
-                                                    }
-                                                </div>
-                                            </div>
-                                        `
-                                          : ""
-                                        }
-
-                                        <!-- Rest of violation information -->
+                                        <!-- Key Information -->
                                         <div class="row g-4">
-                                            <!-- Key Information -->
                                             <div class="col-12">
                                                 <div class="p-3 bg-light rounded-3 border-start ${
                                                  violation.status?.toLowerCase() ===
@@ -1008,6 +979,32 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- SMS Notification Status -->
+                                        ${
+                                         violation.notifications
+                                          ? `
+                                            <small class="d-block text-muted mt-3" style="background-color: #f8f9fa; padding: 6px; border-radius: 4px; font-size: 0.85em;">
+                                                ${
+                                                 violation.notifications
+                                                  .initial_notice
+                                                  ? `
+                                                    <i class="bi bi-info-circle me-1"></i>Initial Notice: ${violation.notifications.initial_notice.message}
+                                                `
+                                                  : ""
+                                                }
+                                                ${
+                                                 violation.notifications
+                                                  .reminder
+                                                  ? `
+                                                    <br><i class="bi bi-info-circle me-1"></i>Reminder: ${violation.notifications.reminder.message}
+                                                `
+                                                  : ""
+                                                }
+                                            </small>
+                                        `
+                                          : ""
+                                        }
                                     </div>
                                 </div>
                             </div>
