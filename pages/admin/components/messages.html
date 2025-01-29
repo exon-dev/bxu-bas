@@ -105,11 +105,13 @@
   <div class="">
    <div class="card rounded-4">
     <div class="card-body rounded-4">
-     <div class="d-flex justify-content-between align-items-center p-3 rounded-4">
+     <div
+      class="d-flex justify-content-between align-items-center p-3 rounded-4"
+     >
       <div>
        <h4 class="mb-1">Violator Notices</h4>
        <p class="text-muted mb-0">Track all sent violation notices</p>
-       <div
+       <!-- <div
         class="alert alert-info d-flex align-items-center mt-2"
         role="alert"
        >
@@ -118,22 +120,33 @@
          Some inspection with violations may not have been sent with messages,
          please review inspections.
         </p>
-       </div>
+       </div> -->
       </div>
       <div class="d-flex gap-2">
        <select class="form-select form-select-sm" id="sortOrder">
         <option value="desc">Latest First</option>
         <option value="asc">Oldest First</option>
        </select>
-       <select class="form-select form-select-sm" id="statusFilter">
-        <option value="all">All Status</option>
+       <select class="form-select form-select-sm" id="violationStatusFilter">
+        <option value="all">All Violation Status</option>
         <option value="pending">Pending</option>
         <option value="resolved">Resolved</option>
+       </select>
+       <select class="form-select form-select-sm" id="notificationTypeFilter">
+        <option value="all">All Types</option>
+        <option value="initial">Initial Notice</option>
+        <option value="reminder">Reminder</option>
+       </select>
+       <select class="form-select form-select-sm" id="notificationStatusFilter">
+        <option value="all">All Notification Status</option>
+        <option value="pending">Pending</option>
+        <option value="sent">Sent</option>
+        <option value="failed">Failed</option>
        </select>
        <input
         type="text"
         class="form-control form-control-sm"
-        placeholder="Search..."
+        placeholder="Search by violation receipt number"
         id="searchInput"
        />
       </div>
@@ -177,7 +190,7 @@
 
     // Update items showing text
     itemsShowingElement.textContent = `${from || 0}-${to || 0}`;
-   totalItemsElement.textContent = total;
+    totalItemsElement.textContent = total;
 
     let paginationHTML = "";
 
@@ -269,10 +282,35 @@
       <div class="card-body">
        <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
-         <h5 class="mb-1">${notification.title}</h5>
-         <p class="mb-2">${notification.content}</p>
+         <div class="d-flex align-items-center gap-2 mb-1">
+          <h5 class="mb-0">${notification.title}</h5>
+         </div>
+         <div class="d-flex align-items-center gap-2">
+          <span class="badge ${getNotificationStatusBadgeClass(
+           notification.status
+          )} small">
+           <i class="fas ${getNotificationStatusIcon(
+            notification.status
+           )} me-1"></i>
+           ${notification.status}
+          </span>
+          ${
+           notification.error_message
+            ? `
+           <span class="text-danger small">
+            <i class="fas fa-exclamation-circle me-1"></i>
+            ${notification.error_message}
+           </span>
+          `
+            : ""
+          }
+         </div>
+         <div class="text-secondary small mt-1">
+          ${notification.content}
+         </div>
         </div>
-        <span class="status-badge ${notification.violation.status.toLowerCase()}">
+        <span class="badge bg-secondary bg-opacity-75 small">
+         <i class="fas fa-flag me-1"></i>
          ${notification.violation.status}
         </span>
        </div>
@@ -338,10 +376,45 @@
     renderPagination(paginationData);
    }
 
+   // Add these helper functions for notification status styling
+   function getNotificationStatusBadgeClass(status) {
+    switch (status.toLowerCase()) {
+     case "sent":
+      return "bg-success bg-opacity-75";
+     case "failed":
+      return "bg-danger bg-opacity-75";
+     case "pending":
+      return "bg-warning bg-opacity-75 text-dark";
+     default:
+      return "bg-secondary bg-opacity-75";
+    }
+   }
+
+   function getNotificationStatusIcon(status) {
+    switch (status.toLowerCase()) {
+     case "sent":
+      return "fa-check";
+     case "failed":
+      return "fa-times";
+     case "pending":
+      return "fa-clock";
+     default:
+      return "fa-question";
+    }
+   }
+
    // Function to fetch notifications with filters
    async function fetchNotifications() {
     try {
-     const statusFilter = document.getElementById("statusFilter").value;
+     const violationStatus = document.getElementById(
+      "violationStatusFilter"
+     ).value;
+     const notificationType = document.getElementById(
+      "notificationTypeFilter"
+     ).value;
+     const notificationStatus = document.getElementById(
+      "notificationStatusFilter"
+     ).value;
      const searchTerm = document.getElementById("searchInput").value;
      const sortOrder = document.getElementById("sortOrder").value;
 
@@ -350,7 +423,11 @@
       page: currentPage,
       per_page: ITEMS_PER_PAGE,
       sort_order: sortOrder,
-      ...(statusFilter !== "all" && { status: statusFilter }),
+      ...(violationStatus !== "all" && { violation_status: violationStatus }),
+      ...(notificationType !== "all" && { type: notificationType }),
+      ...(notificationStatus !== "all" && {
+       notification_status: notificationStatus,
+      }),
       ...(searchTerm && { search: searchTerm }),
      });
 
@@ -406,10 +483,26 @@
    }
 
    // Add event listeners
-   document.getElementById("statusFilter").addEventListener("change", () => {
-    currentPage = 1; // Reset to first page
-    fetchNotifications();
-   });
+   document
+    .getElementById("violationStatusFilter")
+    .addEventListener("change", () => {
+     currentPage = 1;
+     fetchNotifications();
+    });
+
+   document
+    .getElementById("notificationTypeFilter")
+    .addEventListener("change", () => {
+     currentPage = 1;
+     fetchNotifications();
+    });
+
+   document
+    .getElementById("notificationStatusFilter")
+    .addEventListener("change", () => {
+     currentPage = 1;
+     fetchNotifications();
+    });
 
    document.getElementById("searchInput").addEventListener(
     "input",

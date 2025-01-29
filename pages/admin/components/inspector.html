@@ -28,7 +28,7 @@
    }
    .card {
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); */
     border: none;
     overflow: hidden;
    }
@@ -238,6 +238,8 @@
    <div class="card mt-4">
     <div class="card-body">
      <h4 class="card-title">List of Inspectors</h4>
+
+
      <table class="table table-striped">
       <thead>
        <tr>
@@ -252,6 +254,13 @@
       </thead>
       <tbody id="inspectorList"></tbody>
      </table>
+     <!-- Add loading spinner container -->
+     <div id="loadingSpinner" class="text-center py-5" style="display: none">
+      <div class="spinner-border text-primary" role="status">
+       <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading inspectors...</p>
+     </div>
     </div>
    </div>
 
@@ -545,6 +554,10 @@
    // Fetch and display inspectors
    const fetchInspectors = async () => {
     try {
+     // Show loading spinner and hide table
+     document.querySelector(".table").style.display = "none";
+     document.getElementById("loadingSpinner").style.display = "block";
+
      const response = await fetch(`${apiUrl}/admin/inspectors`, {
       method: "GET",
       headers: {
@@ -618,6 +631,10 @@
                Error fetching inspectors: ${error.message}
              </div>
            `;
+    } finally {
+     // Hide loading spinner and show table
+     document.getElementById("loadingSpinner").style.display = "none";
+     document.querySelector(".table").style.display = "";
     }
    };
 
