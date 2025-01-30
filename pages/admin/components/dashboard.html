@@ -260,7 +260,6 @@
       </div>
      </div>
 
-
      <div class="table-responsive mt-3">
       <table class="table table-sm table-hover align-middle">
        <thead>
@@ -277,13 +276,13 @@
        </thead>
        <tbody id="inspections-tbody" class="small"></tbody>
       </table>
-     <!-- Add loading spinner container -->
-     <div id="loadingSpinner" class="text-center py-5" style="display: none">
-      <div class="spinner-border text-primary" role="status">
-       <span class="visually-hidden">Loading...</span>
+      <!-- Add loading spinner container -->
+      <div id="loadingSpinner" class="text-center py-5" style="display: none">
+       <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+       </div>
+       <p class="text-muted mt-2">Loading violations...</p>
       </div>
-      <p class="text-muted mt-2">Loading violations...</p>
-     </div>
      </div>
 
      <!-- Centered Pagination -->
@@ -733,6 +732,16 @@
    // Add the showViolationDetails function
    const showViolationDetails = async (inspection) => {
     try {
+     // Define helper function first
+     const shouldShowDueToday = (dueDate, status) => {
+      if (status?.toLowerCase() === "resolved") return false;
+      const due = new Date(dueDate);
+      due.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return due.getTime() === today.getTime();
+     };
+
      const violation = inspection.violations[0];
      const modalElement = document.getElementById("violationDetailModal");
      const address = inspection.business?.address || {};
@@ -755,13 +764,27 @@
                         <!-- Business Image Section -->
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block">
-                                <img
-                                    src="${imageUrl}"
-                                    alt="Business Image"
-                                    class="rounded-3 shadow-sm img-fluid"
-                                    style="max-height: 200px; width: auto; object-fit: cover"
-                                    onerror="this.src='/assets/images/no-image.png';"
-                                />
+                                ${
+                                 inspection.image_url
+                                  ? `
+                                        <img
+                                            src="${CONFIG.APP_URL}/storage/${inspection.image_url}"
+                                            alt="Business Image"
+                                            class="rounded-3 shadow-sm img-fluid"
+                                            style="max-height: 200px; width: auto; object-fit: cover"
+                                            onerror="this.onerror=null; this.src='/assets/images/no-image.png'; this.parentElement.innerHTML=this.outerHTML + '<div class=\'position-absolute top-50 start-50 translate-middle text-muted\'><i class=\'bi bi-image fs-1\'></i><br><small>No Image Available</small></div>';"
+                                        />
+                                    `
+                                  : `
+                                        <div class="rounded-3 shadow-sm d-flex align-items-center justify-content-center bg-light" style="height: 200px; width: 300px;">
+                                            <div class="text-muted">
+                                                <i class="bi bi-image fs-1"></i>
+                                                <br>
+                                                <small>No Image Available</small>
+                                            </div>
+                                        </div>
+                                    `
+                                }
                                 <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
                                     <small>${
                                      inspection.business?.business_name || "N/A"
@@ -1151,38 +1174,13 @@
                 </div>
             </div>`;
 
-     // Initialize the modal
+     // Show the modal
      const modal = new bootstrap.Modal(modalElement);
      modal.show();
     } catch (error) {
-     showAlert("error", "Failed to load violation details");
+     console.error("Error showing violation details:", error);
     }
    };
-
-   // Make showViolationDetails globally available
-   window.showViolationDetails = showViolationDetails;
-
-   // Add clearFilters function
-   const clearFilters = () => {
-    // Reset all inputs and select
-    document.getElementById("filterType").value = "";
-    document.getElementById("receiptInput").value = "";
-    document.getElementById("searchInput").value = "";
-
-    // Fetch fresh data
-    fetchFilteredInspections(1);
-   };
-
-   // Make clearFilters globally available
-   window.clearFilters = clearFilters;
-
-   // Update the shouldShowDueToday function to use the same calculation
-   function shouldShowDueToday(dueDate, status) {
-    if (!dueDate || status?.toLowerCase() === "resolved") return false;
-    const diffDays = calculateDateDifference(dueDate);
-    return diffDays === 0;
-   }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
  </body>
 </html>

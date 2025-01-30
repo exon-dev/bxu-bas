@@ -451,7 +451,6 @@
       throw new Error(result.message);
      }
     } catch (error) {
-     console.error("Error fetching notifications:", error);
      document.getElementById("notificationsContainer").innerHTML = `
       <div class="empty-state">
        <i class="fas fa-exclamation-triangle text-warning"></i>

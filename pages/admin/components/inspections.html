@@ -442,7 +442,7 @@
       inspectorSelect.appendChild(option);
      });
     } catch (error) {
-     console.log(error);
+     // Remove console.log
     }
    };
 
@@ -546,9 +546,24 @@
                     <!-- Business Image Section -->
                     <div class="text-center mb-4">
                         <div class="position-relative d-inline-block">
-                            <img src="${CONFIG.APP_URL}/storage/${
-     inspectionDetails.image_url
-    }" alt="Business Image" class="rounded-3 shadow-sm img-fluid" style="max-height: 200px; width: auto; object-fit: cover" onerror="this.src='/assets/images/no-image.png';">
+                            ${
+                             inspectionDetails.image_url
+                              ? `
+                                <img src="${CONFIG.APP_URL}/storage/${inspectionDetails.image_url}" 
+                                     alt="Business Image" 
+                                     class="rounded-3 shadow-sm img-fluid" 
+                                     style="max-height: 200px; width: auto; object-fit: cover">
+                            `
+                              : `
+                                <div class="rounded-3 shadow-sm d-flex align-items-center justify-content-center bg-light" 
+                                     style="height: 200px; width: 300px;">
+                                    <div class="text-center text-muted">
+                                        <i class="bi bi-image fs-1"></i>
+                                        <p class="mb-0 mt-2">No Image Available</p>
+                                    </div>
+                                </div>
+                            `
+                            }
                             <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
                                 <small>${
                                  inspectionDetails.business?.business_name ||

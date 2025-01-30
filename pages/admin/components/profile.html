@@ -432,6 +432,28 @@
    </div>
   </div>
 
+  <!-- Loading Modal -->
+  <div
+   class="modal fade"
+   id="loadingModal"
+   data-bs-backdrop="static"
+   data-bs-keyboard="false"
+   tabindex="-1"
+   aria-hidden="true"
+  >
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-body text-center p-4">
+      <div class="spinner-border text-success mb-3" role="status">
+       <span class="visually-hidden">Loading...</span>
+      </div>
+      <h5 class="mb-0">Updating Profile Picture...</h5>
+      <p class="text-muted mb-0">Please wait while we process your image.</p>
+     </div>
+    </div>
+   </div>
+  </div>
+
   <script type="module">
    import CONFIG from "/scripts/config.js";
    const apiUrl = CONFIG.API_BASE_URL;
@@ -608,8 +630,8 @@
 
    window.handleImageUpload = async function (event) {
     const file = event.target.files[0];
-    const loadingOverlay = document.getElementById("loadingOverlay");
     const email = localStorage.getItem("email");
+    let loadingModal;
 
     if (file) {
      // Validate file type
@@ -629,7 +651,11 @@
      }
 
      try {
-      loadingOverlay.style.display = "block";
+      // Show loading modal
+      loadingModal = new bootstrap.Modal(
+       document.getElementById("loadingModal")
+      );
+      loadingModal.show();
 
       const formData = new FormData();
       formData.append("profile_picture", file);
@@ -650,8 +676,6 @@
        document.getElementById(
         "profileImage"
        ).src = `${app_url}${data.data.image_url}`;
-       document.getElementById("successMessage").textContent =
-        "Profile picture updated successfully.";
        successModal.show();
       } else {
        document.getElementById("errorMessage").textContent =
@@ -659,13 +683,14 @@
        errorModal.show();
       }
      } catch (error) {
-      console.error("Error:", error);
       document.getElementById("errorMessage").textContent =
        "Network error. Please try again.";
       errorModal.show();
      } finally {
-      loadingOverlay.style.display = "none";
-      // Reset the file input
+      // Hide loading modal and reset file input
+      if (loadingModal) {
+       loadingModal.hide();
+      }
       event.target.value = "";
      }
     }
