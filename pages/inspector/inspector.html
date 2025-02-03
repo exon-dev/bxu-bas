@@ -82,7 +82,7 @@
       backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
      }).showToast();
      setTimeout(() => {
-      window.location.href = "../auth/index.html";
+      window.location.href = "/auth";
      }, 3000);
     } else {
      alert(data.message);
@@ -91,7 +91,7 @@
 
    // Load the header dynamically
    const loadHeader = () => {
-    fetch("components/header.html")
+    fetch("/pages/inspector/components/header.html")
      .then((res) => res.text())
      .then((data) => {
       document.getElementById("header").innerHTML = data;
@@ -102,7 +102,7 @@
 
    // Load the sidebar dynamically
    const loadSidebar = () => {
-    fetch("components/sidebar.html")
+    fetch("/pages/inspector/components/sidebar.html")
      .then((res) => res.text())
      .then((data) => {
       document.getElementById("sidebar").innerHTML = data;
@@ -133,7 +133,7 @@
 
    // Load the content dynamically
    const loadContent = (page, link = null) => {
-    const fullPath = `components/${page}`;
+    const fullPath = `/pages/inspector/components/${page}`;
 
     fetch(fullPath)
      .then((response) => response.text())
