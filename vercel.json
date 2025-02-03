@@ -6,6 +6,22 @@
    "use": "@vercel/static"
   },
   {
+   "src": "pages/auth/adminLogin.html",
+   "use": "@vercel/static"
+  },
+  {
+   "src": "pages/auth/inspectorLogin.html",
+   "use": "@vercel/static"
+  },
+  {
+   "src": "pages/auth/forgotPassword.html",
+   "use": "@vercel/static"
+  },
+  {
+   "src": "pages/auth/changePassword.html",
+   "use": "@vercel/static"
+  },
+  {
    "src": "pages/about/index.html",
    "use": "@vercel/static"
   },
@@ -15,6 +31,10 @@
   },
   {
    "src": "pages/admin/**/*",
+   "use": "@vercel/static"
+  },
+  {
+   "src": "pages/error/**/*",
    "use": "@vercel/static"
   },
   {
@@ -36,6 +56,22 @@
    "dest": "/pages/auth/index.html"
   },
   {
+   "src": "/admin-login",
+   "dest": "/pages/auth/adminLogin.html"
+  },
+  {
+   "src": "/inspector-login",
+   "dest": "/pages/auth/inspectorLogin.html"
+  },
+  {
+   "src": "/forgot-password",
+   "dest": "/pages/auth/forgotPassword.html"
+  },
+  {
+   "src": "/change-password",
+   "dest": "/pages/auth/changePassword.html"
+  },
+  {
    "src": "/about",
    "dest": "/pages/about/index.html"
   },
@@ -46,6 +82,10 @@
   {
    "src": "/admin",
    "dest": "/pages/admin/admin.html"
+  },
+  {
+   "src": "/unauthorized",
+   "dest": "/pages/error/unauthorized.html"
   },
   {
    "src": "/scripts/(.*)",
