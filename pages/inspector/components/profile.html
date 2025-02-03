@@ -544,7 +544,6 @@
 
    window.handleImageUpload = async function (event) {
     const file = event.target.files[0];
-    const loadingOverlay = document.getElementById("loadingOverlay");
     const email = localStorage.getItem("email");
 
     if (file) {
@@ -565,7 +564,13 @@
      }
 
      try {
-      loadingOverlay.style.display = "block";
+      // Initialize and show loading modal
+      const loadingModalElement = document.getElementById("loadingModal");
+      const loadingModal = new bootstrap.Modal(loadingModalElement, {
+        backdrop: 'static',
+        keyboard: false
+      });
+      loadingModal.show();
 
       const formData = new FormData();
       formData.append("profile_picture", file);
@@ -587,21 +592,55 @@
         "profileImage"
        ).src = `${app_url}${data.data.image_url}`;
        localStorage.setItem("profile_image", data.data.image_url);
-       document.getElementById("successMessage").textContent =
-        "Profile picture updated successfully.";
-       successModal.show();
+       
+       // Force close the loading modal
+       loadingModal.hide();
+       loadingModalElement.classList.remove('show');
+       loadingModalElement.setAttribute('aria-hidden', 'true');
+       loadingModalElement.style.display = 'none';
+       
+       // Remove all modal backdrops
+       document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+         backdrop.remove();
+       });
+       
+       // Remove modal-open class from body
+       document.body.classList.remove('modal-open');
+       document.body.style.overflow = '';
+       document.body.style.paddingRight = '';
+
+       // Short delay before showing success modal
+       setTimeout(() => {
+         successModal.show();
+       }, 100);
       } else {
+       // Force close loading modal
+       loadingModal.hide();
+       loadingModalElement.classList.remove('show');
+       document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+         backdrop.remove();
+       });
+       document.body.classList.remove('modal-open');
+       
        document.getElementById("errorMessage").textContent =
         data.message || "Failed to upload image";
        errorModal.show();
       }
      } catch (error) {
+      // Force close loading modal
+      const loadingModalElement = document.getElementById("loadingModal");
+      bootstrap.Modal.getInstance(loadingModalElement)?.hide();
+      loadingModalElement.classList.remove('show');
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.remove();
+      });
+      document.body.classList.remove('modal-open');
+      
       console.error("Error:", error);
       document.getElementById("errorMessage").textContent =
        "Network error. Please try again.";
       errorModal.show();
      } finally {
-      loadingOverlay.style.display = "none";
       // Reset the file input
       event.target.value = "";
      }
@@ -880,6 +919,28 @@
     role="status"
    >
     <span class="visually-hidden">Loading...</span>
+   </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div
+   class="modal fade"
+   id="loadingModal"
+   data-bs-backdrop="static"
+   data-bs-keyboard="false"
+   tabindex="-1"
+   aria-hidden="true"
+  >
+   <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+     <div class="modal-body text-center p-4">
+      <div class="spinner-border text-success mb-3" role="status">
+       <span class="visually-hidden">Loading...</span>
+      </div>
+      <h5 class="mb-0">Updating Profile Picture...</h5>
+      <p class="text-muted mb-0">Please wait while we process your image.</p>
+     </div>
+    </div>
    </div>
   </div>
  </body>

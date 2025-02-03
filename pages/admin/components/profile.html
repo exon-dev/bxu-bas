@@ -631,7 +631,6 @@
    window.handleImageUpload = async function (event) {
     const file = event.target.files[0];
     const email = localStorage.getItem("email");
-    let loadingModal;
 
     if (file) {
      // Validate file type
@@ -652,9 +651,8 @@
 
      try {
       // Show loading modal
-      loadingModal = new bootstrap.Modal(
-       document.getElementById("loadingModal")
-      );
+      const loadingModalElement = document.getElementById("loadingModal");
+      const loadingModal = new bootstrap.Modal(loadingModalElement);
       loadingModal.show();
 
       const formData = new FormData();
@@ -676,21 +674,55 @@
        document.getElementById(
         "profileImage"
        ).src = `${app_url}${data.data.image_url}`;
-       successModal.show();
+       
+       // Force close the loading modal
+       loadingModal.hide();
+       loadingModalElement.classList.remove('show');
+       loadingModalElement.setAttribute('aria-hidden', 'true');
+       loadingModalElement.style.display = 'none';
+       
+       // Remove all modal backdrops
+       document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+         backdrop.remove();
+       });
+       
+       // Remove modal-open class from body
+       document.body.classList.remove('modal-open');
+       document.body.style.overflow = '';
+       document.body.style.paddingRight = '';
+
+       // Short delay before showing success modal
+       setTimeout(() => {
+         successModal.show();
+       }, 100);
       } else {
+       // Force close loading modal
+       loadingModal.hide();
+       loadingModalElement.classList.remove('show');
+       document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+         backdrop.remove();
+       });
+       document.body.classList.remove('modal-open');
+       
        document.getElementById("errorMessage").textContent =
         data.message || "Failed to upload image";
        errorModal.show();
       }
      } catch (error) {
+      // Force close loading modal
+      const loadingModalElement = document.getElementById("loadingModal");
+      bootstrap.Modal.getInstance(loadingModalElement)?.hide();
+      loadingModalElement.classList.remove('show');
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.remove();
+      });
+      document.body.classList.remove('modal-open');
+      
       document.getElementById("errorMessage").textContent =
        "Network error. Please try again.";
       errorModal.show();
      } finally {
-      // Hide loading modal and reset file input
-      if (loadingModal) {
-       loadingModal.hide();
-      }
+      // Reset file input
       event.target.value = "";
      }
     }
