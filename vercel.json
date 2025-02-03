@@ -1,0 +1,15 @@
+{
+ "version": 2,
+ "builds": [
+  {
+   "src": "pages/auth/index.html",
+   "use": "@vercel/static"
+  }
+ ],
+ "routes": [
+  {
+   "src": "/auth",
+   "dest": "/pages/auth/index.html"
+  }
+ ]
+}
