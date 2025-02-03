@@ -88,6 +88,66 @@
    "dest": "/pages/error/unauthorized.html"
   },
   {
+   "src": "/pages/auth/adminLogin.html",
+   "dest": "/pages/auth/adminLogin.html"
+  },
+  {
+   "src": "/pages/auth/inspectorLogin.html",
+   "dest": "/pages/auth/inspectorLogin.html"
+  },
+  {
+   "src": "/pages/auth/forgotPassword.html",
+   "dest": "/pages/auth/forgotPassword.html"
+  },
+  {
+   "src": "/pages/auth/changePassword.html",
+   "dest": "/pages/auth/changePassword.html"
+  },
+  {
+   "src": "/pages/auth/index.html",
+   "dest": "/pages/auth/index.html"
+  },
+  {
+   "src": "/pages/admin/admin.html",
+   "dest": "/pages/admin/admin.html"
+  },
+  {
+   "src": "/pages/admin/components/sidebar.html",
+   "dest": "/pages/admin/components/sidebar.html"
+  },
+  {
+   "src": "/pages/admin/components/header.html",
+   "dest": "/pages/admin/components/header.html"
+  },
+  {
+   "src": "/pages/admin/components/dashboard.html",
+   "dest": "/pages/admin/components/dashboard.html"
+  },
+  {
+   "src": "/pages/admin/components/(.*)",
+   "dest": "/pages/admin/components/$1"
+  },
+  {
+   "src": "/pages/inspector/inspector.html",
+   "dest": "/pages/inspector/inspector.html"
+  },
+  {
+   "src": "/pages/inspector/components/sidebar.html",
+   "dest": "/pages/inspector/components/sidebar.html"
+  },
+  {
+   "src": "/pages/inspector/components/header.html",
+   "dest": "/pages/inspector/components/header.html"
+  },
+  {
+   "src": "/pages/inspector/components/dashboard.html",
+   "dest": "/pages/inspector/components/dashboard.html"
+  },
+  {
+   "src": "/pages/inspector/components/(.*)",
+   "dest": "/pages/inspector/components/$1"
+  },
+  {
    "src": "/scripts/(.*)",
    "dest": "/scripts/$1"
   },
