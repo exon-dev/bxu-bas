@@ -52,8 +52,20 @@
  ],
  "routes": [
   {
+   "src": "/",
+   "dest": "/pages/auth/index.html"
+  },
+  {
    "src": "/auth",
    "dest": "/pages/auth/index.html"
+  },
+  {
+   "src": "/adminLogin.html",
+   "dest": "/pages/auth/adminLogin.html"
+  },
+  {
+   "src": "/inspectorLogin.html",
+   "dest": "/pages/auth/inspectorLogin.html"
   },
   {
    "src": "/admin-login",
@@ -68,7 +80,15 @@
    "dest": "/pages/auth/forgotPassword.html"
   },
   {
+   "src": "/forgotPassword.html",
+   "dest": "/pages/auth/forgotPassword.html"
+  },
+  {
    "src": "/change-password",
+   "dest": "/pages/auth/changePassword.html"
+  },
+  {
+   "src": "/changePassword.html",
    "dest": "/pages/auth/changePassword.html"
   },
   {
