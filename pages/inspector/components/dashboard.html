@@ -657,17 +657,28 @@
                         <!-- Business Image Section -->
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block">
-                                <img
-                                    src="${imageUrl}"
-                                    alt="Business Image"
-                                    class="rounded-3 shadow-sm img-fluid"
-                                    style="max-height: 200px; width: auto; object-fit: cover"
-                                    onerror="this.src='/assets/images/no-image.png';"
-                                />
+                                ${inspection.image_url 
+                                    ? `
+                                        <img
+                                            src="${imageUrl}"
+                                            alt="Business Image"
+                                            class="rounded-3 shadow-sm img-fluid"
+                                            style="max-height: 200px; width: auto; object-fit: cover"
+                                            onerror="this.onerror=null; this.src='/assets/images/no-image.png'; this.parentElement.innerHTML=this.outerHTML + '<div class=\'position-absolute top-50 start-50 translate-middle text-muted\'><i class=\'bi bi-image fs-1\'></i><br><small>No Image Available</small></div>';"
+                                        />
+                                    `
+                                    : `
+                                        <div class="rounded-3 shadow-sm d-flex align-items-center justify-content-center bg-light" style="height: 200px; width: 300px;">
+                                            <div class="text-muted">
+                                                <i class="bi bi-image fs-1"></i>
+                                                <br>
+                                                <small>No Image Available</small>
+                                            </div>
+                                        </div>
+                                    `
+                                }
                                 <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
-                                    <small>${
-                                     inspection.business?.business_name || "N/A"
-                                    }</small>
+                                    <small>${inspection.business?.business_name || "N/A"}</small>
                                 </div>
                             </div>
                         </div>
