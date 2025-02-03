@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reports</title>
   <link rel="stylesheet" href="/css/admin/reports.css" />
-  <!-- Add Chart.js library with all plugins -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
-  <!-- Add html2pdf.js library after Chart.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
    body {
     font-family: "Poppins", sans-serif !important;
@@ -449,422 +445,456 @@
   </div>
 
   <script type="module">
+   // Add script loading at the start of the module
+   async function loadDependencies() {
+    // Load Chart.js
+    if (!window.Chart) {
+     await import(
+      "https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"
+     );
+    }
+
+    // Load html2pdf
+    if (!window.html2pdf) {
+     const html2pdfScript = document.createElement("script");
+     html2pdfScript.src =
+      "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+     await new Promise((resolve) => {
+      html2pdfScript.onload = resolve;
+      document.head.appendChild(html2pdfScript);
+     });
+    }
+   }
+
    import CONFIG from "/scripts/config.js";
-   const apiUrl = CONFIG.API_BASE_URL;
-   let currentPeriod = "month";
-   let lineChartInstance = null;
-   let barChartInstance = null;
-   let pieChartInstance = null;
+   // Initialize everything after dependencies are loaded
+   async function initialize() {
+    await loadDependencies();
 
-   // Add the updateTrendIndicator function
-   function updateTrendIndicator(elementId, value, status) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
+    const apiUrl = CONFIG.API_BASE_URL;
+    let currentPeriod = "month";
+    let lineChartInstance = null;
+    let barChartInstance = null;
+    let pieChartInstance = null;
 
-    element.classList.remove("positive", "negative");
-    element.classList.add(status === "increase" ? "positive" : "negative");
+    // Add the updateTrendIndicator function
+    function updateTrendIndicator(elementId, value, status) {
+     const element = document.getElementById(elementId);
+     if (!element) return;
 
-    const icon = status === "increase" ? "up" : "down";
-    const prefix = value > 0 ? "+" : "";
-    element.innerHTML = `<i class="fas fa-arrow-${icon}"></i> ${prefix}${value}% vs last period`;
-   }
+     element.classList.remove("positive", "negative");
+     element.classList.add(status === "increase" ? "positive" : "negative");
 
-   // Function to update period buttons
-   function updatePeriodButtons() {
-    document.querySelectorAll("[data-period]").forEach((button) => {
-     button.classList.remove("active");
-     if (button.dataset.period === currentPeriod) {
-      button.classList.add("active");
-     }
-    });
-   }
-
-   // Function to handle period button clicks
-   async function handlePeriodChange(e) {
-    const newPeriod = e.target.dataset.period;
-    if (newPeriod) {
-     currentPeriod = newPeriod;
-     updatePeriodButtons();
-
-     // Get current filter values
-     const startDate = document.getElementById("startDate").value;
-     const endDate = document.getElementById("endDate").value;
-     const month = document.getElementById("monthFilter").value;
-
-     // Update charts with new period and current filters
-     await updateCharts(currentPeriod, { startDate, endDate, month });
+     const icon = status === "increase" ? "up" : "down";
+     const prefix = value > 0 ? "+" : "";
+     element.innerHTML = `<i class="fas fa-arrow-${icon}"></i> ${prefix}${value}% vs last period`;
     }
-   }
 
-   // Add event listeners for period buttons
-   document.querySelectorAll("[data-period]").forEach((button) => {
-    button.addEventListener("click", handlePeriodChange);
-   });
-
-   // Update the updateCharts function
-   async function updateCharts(period = "month", filters = {}) {
-    try {
-     const params = new URLSearchParams({ period });
-     if (filters.startDate) params.append("startDate", filters.startDate);
-     if (filters.endDate) params.append("endDate", filters.endDate);
-     if (filters.month) params.append("month", filters.month);
-
-     // Separate API call for KPI data
-     const kpiResponse = await fetch(`${apiUrl}/chart/kpi-data?${params}`, {
-      headers: {
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
+    // Function to update period buttons
+    function updatePeriodButtons() {
+     document.querySelectorAll("[data-period]").forEach((button) => {
+      button.classList.remove("active");
+      if (button.dataset.period === currentPeriod) {
+       button.classList.add("active");
+      }
      });
-     const kpiData = await kpiResponse.json();
-
-     // Update KPI Values
-     document.getElementById("total-inspections").textContent =
-      kpiData.totalInspections;
-     document.getElementById("violation-rate").textContent =
-      kpiData.violationRate + "%";
-     document.getElementById("resolution-rate").textContent =
-      kpiData.resolutionRate + "%";
-     document.getElementById("avg-resolution-time").textContent =
-      kpiData.avgResolutionDays + " days";
-
-     // Update KPI Trends
-     updateTrendIndicator(
-      "inspections-trend",
-      kpiData.inspectionsTrend.value,
-      kpiData.inspectionsTrend.status
-     );
-     updateTrendIndicator(
-      "violation-trend",
-      kpiData.violationTrend.value,
-      kpiData.violationTrend.status
-     );
-     updateTrendIndicator(
-      "resolution-trend",
-      kpiData.resolutionTrend.value,
-      kpiData.resolutionTrend.status
-     );
-     updateTrendIndicator(
-      "resolution-time-trend",
-      kpiData.resolutionTimeTrend.value,
-      kpiData.resolutionTimeTrend.status
-     );
-
-     // Existing chart data fetch
-     const chartResponse = await fetch(`${apiUrl}/chart/chart-data?${params}`, {
-      headers: {
-       "Content-Type": "application/json",
-       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-     });
-     const chartData = await chartResponse.json();
-
-     // Destroy existing charts if they exist
-     if (barChartInstance) {
-      barChartInstance.destroy();
-     }
-     if (pieChartInstance) {
-      pieChartInstance.destroy();
-     }
-     if (lineChartInstance) {
-      lineChartInstance.destroy();
-     }
-
-     // Create new bar chart
-     const barCtx = document.getElementById("barChart").getContext("2d");
-     barChartInstance = new Chart(barCtx, {
-      type: "bar",
-      data: {
-       labels: chartData.barGraph.inspections.map((item) => item.label),
-       datasets: [
-        {
-         label: "Inspections",
-         data: chartData.barGraph.inspections.map((item) => item.total),
-         backgroundColor: "rgba(78, 115, 223, 0.8)",
-         borderRadius: 6,
-        },
-        {
-         label: "Violations",
-         data: chartData.barGraph.violations.map((item) => item.total),
-         backgroundColor: "rgba(231, 74, 59, 0.8)",
-         borderRadius: 6,
-        },
-       ],
-      },
-      options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       plugins: {
-        legend: {
-         position: "top",
-        },
-       },
-       scales: {
-        y: {
-         beginAtZero: true,
-         grid: {
-          display: true,
-          drawBorder: false,
-         },
-        },
-        x: {
-         grid: {
-          display: false,
-         },
-        },
-       },
-      },
-     });
-
-     // Create new pie chart
-     const pieCtx = document.getElementById("pieChart").getContext("2d");
-     pieChartInstance = new Chart(pieCtx, {
-      type: "doughnut",
-      data: {
-       labels: ["Resolved", "Pending"],
-       datasets: [
-        {
-         data: [
-          chartData.pieGraph.resolved,
-          chartData.pieGraph.total - chartData.pieGraph.resolved,
-         ],
-         backgroundColor: [
-          "rgba(28, 200, 138, 0.8)",
-          "rgba(246, 194, 62, 0.8)",
-         ],
-         borderWidth: 0,
-        },
-       ],
-      },
-      options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       plugins: {
-        legend: {
-         position: "top",
-        },
-       },
-       cutout: "40%",
-      },
-     });
-
-     // Create new line chart
-     const lineCtx = document.getElementById("lineChart").getContext("2d");
-     lineChartInstance = new Chart(lineCtx, {
-      type: "line",
-      data: {
-       labels: chartData.lineGraph.withViolations.map((item) => item.label),
-       datasets: [
-        {
-         label: "With Violations",
-         data: chartData.lineGraph.withViolations.map((item) => item.total),
-         borderColor: "rgba(231, 74, 59, 0.8)",
-         tension: 0.4,
-         fill: true,
-         backgroundColor: "rgba(231, 74, 59, 0.1)",
-        },
-        {
-         label: "Without Violations",
-         data: chartData.lineGraph.withoutViolations.map((item) => item.total),
-         borderColor: "rgba(28, 200, 138, 0.8)",
-         tension: 0.4,
-         fill: true,
-         backgroundColor: "rgba(28, 200, 138, 0.1)",
-        },
-       ],
-      },
-      options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       plugins: {
-        legend: {
-         position: "top",
-        },
-       },
-       scales: {
-        y: {
-         beginAtZero: true,
-         grid: {
-          drawBorder: false,
-         },
-        },
-        x: {
-         grid: {
-          display: false,
-         },
-        },
-       },
-      },
-     });
-    } catch (error) {
-     console.error("Error updating charts:", error);
     }
-   }
 
-   // Add event listeners for the filter buttons
-   document
-    .getElementById("applyFiltersBtn")
-    .addEventListener("click", async () => {
-     const startDate = document.getElementById("startDate").value;
-     const endDate = document.getElementById("endDate").value;
-     const month = document.getElementById("monthFilter").value;
+    // Function to handle period button clicks
+    async function handlePeriodChange(e) {
+     const newPeriod = e.target.dataset.period;
+     if (newPeriod) {
+      currentPeriod = newPeriod;
+      updatePeriodButtons();
 
-     try {
+      // Get current filter values
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+      const month = document.getElementById("monthFilter").value;
+
+      // Update charts with new period and current filters
       await updateCharts(currentPeriod, { startDate, endDate, month });
-     } catch (error) {
-      console.error("Error applying filters:", error);
      }
+    }
+
+    // Add event listeners for period buttons
+    document.querySelectorAll("[data-period]").forEach((button) => {
+     button.addEventListener("click", handlePeriodChange);
     });
 
-   document
-    .getElementById("resetFiltersBtn")
-    .addEventListener("click", async () => {
-     document.getElementById("startDate").value = "";
-     document.getElementById("endDate").value = "";
-     document.getElementById("monthFilter").value = "";
-     currentPeriod = "month";
-     updatePeriodButtons();
-
+    // Update the updateCharts function
+    async function updateCharts(period = "month", filters = {}) {
      try {
-      await updateCharts(currentPeriod);
+      const params = new URLSearchParams({ period });
+      if (filters.startDate) params.append("startDate", filters.startDate);
+      if (filters.endDate) params.append("endDate", filters.endDate);
+      if (filters.month) params.append("month", filters.month);
+
+      // Separate API call for KPI data
+      const kpiResponse = await fetch(`${apiUrl}/chart/kpi-data?${params}`, {
+       headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+       },
+      });
+      const kpiData = await kpiResponse.json();
+
+      // Update KPI Values
+      document.getElementById("total-inspections").textContent =
+       kpiData.totalInspections;
+      document.getElementById("violation-rate").textContent =
+       kpiData.violationRate + "%";
+      document.getElementById("resolution-rate").textContent =
+       kpiData.resolutionRate + "%";
+      document.getElementById("avg-resolution-time").textContent =
+       kpiData.avgResolutionDays + " days";
+
+      // Update KPI Trends
+      updateTrendIndicator(
+       "inspections-trend",
+       kpiData.inspectionsTrend.value,
+       kpiData.inspectionsTrend.status
+      );
+      updateTrendIndicator(
+       "violation-trend",
+       kpiData.violationTrend.value,
+       kpiData.violationTrend.status
+      );
+      updateTrendIndicator(
+       "resolution-trend",
+       kpiData.resolutionTrend.value,
+       kpiData.resolutionTrend.status
+      );
+      updateTrendIndicator(
+       "resolution-time-trend",
+       kpiData.resolutionTimeTrend.value,
+       kpiData.resolutionTimeTrend.status
+      );
+
+      // Existing chart data fetch
+      const chartResponse = await fetch(
+       `${apiUrl}/chart/chart-data?${params}`,
+       {
+        headers: {
+         "Content-Type": "application/json",
+         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+       }
+      );
+      const chartData = await chartResponse.json();
+
+      // Destroy existing charts if they exist
+      if (barChartInstance) {
+       barChartInstance.destroy();
+      }
+      if (pieChartInstance) {
+       pieChartInstance.destroy();
+      }
+      if (lineChartInstance) {
+       lineChartInstance.destroy();
+      }
+
+      // Create new bar chart
+      const barCtx = document.getElementById("barChart").getContext("2d");
+      barChartInstance = new Chart(barCtx, {
+       type: "bar",
+       data: {
+        labels: chartData.barGraph.inspections.map((item) => item.label),
+        datasets: [
+         {
+          label: "Inspections",
+          data: chartData.barGraph.inspections.map((item) => item.total),
+          backgroundColor: "rgba(78, 115, 223, 0.8)",
+          borderRadius: 6,
+         },
+         {
+          label: "Violations",
+          data: chartData.barGraph.violations.map((item) => item.total),
+          backgroundColor: "rgba(231, 74, 59, 0.8)",
+          borderRadius: 6,
+         },
+        ],
+       },
+       options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+         legend: {
+          position: "top",
+         },
+        },
+        scales: {
+         y: {
+          beginAtZero: true,
+          grid: {
+           display: true,
+           drawBorder: false,
+          },
+         },
+         x: {
+          grid: {
+           display: false,
+          },
+         },
+        },
+       },
+      });
+
+      // Create new pie chart
+      const pieCtx = document.getElementById("pieChart").getContext("2d");
+      pieChartInstance = new Chart(pieCtx, {
+       type: "doughnut",
+       data: {
+        labels: ["Resolved", "Pending"],
+        datasets: [
+         {
+          data: [
+           chartData.pieGraph.resolved,
+           chartData.pieGraph.total - chartData.pieGraph.resolved,
+          ],
+          backgroundColor: [
+           "rgba(28, 200, 138, 0.8)",
+           "rgba(246, 194, 62, 0.8)",
+          ],
+          borderWidth: 0,
+         },
+        ],
+       },
+       options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+         legend: {
+          position: "top",
+         },
+        },
+        cutout: "40%",
+       },
+      });
+
+      // Create new line chart
+      const lineCtx = document.getElementById("lineChart").getContext("2d");
+      lineChartInstance = new Chart(lineCtx, {
+       type: "line",
+       data: {
+        labels: chartData.lineGraph.withViolations.map((item) => item.label),
+        datasets: [
+         {
+          label: "With Violations",
+          data: chartData.lineGraph.withViolations.map((item) => item.total),
+          borderColor: "rgba(231, 74, 59, 0.8)",
+          tension: 0.4,
+          fill: true,
+          backgroundColor: "rgba(231, 74, 59, 0.1)",
+         },
+         {
+          label: "Without Violations",
+          data: chartData.lineGraph.withoutViolations.map((item) => item.total),
+          borderColor: "rgba(28, 200, 138, 0.8)",
+          tension: 0.4,
+          fill: true,
+          backgroundColor: "rgba(28, 200, 138, 0.1)",
+         },
+        ],
+       },
+       options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+         legend: {
+          position: "top",
+         },
+        },
+        scales: {
+         y: {
+          beginAtZero: true,
+          grid: {
+           drawBorder: false,
+          },
+         },
+         x: {
+          grid: {
+           display: false,
+          },
+         },
+        },
+       },
+      });
      } catch (error) {
-      console.error("Error resetting filters:", error);
+      console.error("Error updating charts:", error);
      }
-    });
+    }
 
-   // Update the generatePDF function
-   window.generatePDF = async function () {
-    // Update report metadata
-    const currentDate = new Date().toLocaleDateString();
-    document.getElementById("report-date").textContent = currentDate;
-    document.getElementById("report-period").textContent = `${
-     currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)
-    }ly Report`;
+    // Add event listeners for the filter buttons
+    document
+     .getElementById("applyFiltersBtn")
+     .addEventListener("click", async () => {
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+      const month = document.getElementById("monthFilter").value;
 
-    // Use different variable names to avoid conflicts
-    const reportTotalInspections =
-     document.getElementById("total-inspections").textContent;
-    const reportViolationRate =
-     document.getElementById("violation-rate").textContent;
-    const reportResolutionRate =
-     document.getElementById("resolution-rate").textContent;
-    const reportAvgResolutionTime = document.getElementById(
-     "avg-resolution-time"
-    ).textContent;
-
-    // Update KPI values and trends
-    document.getElementById("pdf-total-inspections").textContent =
-     reportTotalInspections;
-    document.getElementById("pdf-violation-rate").textContent =
-     reportViolationRate;
-    document.getElementById("pdf-resolution-rate").textContent =
-     reportResolutionRate;
-    document.getElementById("pdf-avg-resolution-time").textContent =
-     reportAvgResolutionTime;
-
-    document.getElementById("pdf-inspections-trend").textContent =
-     document.getElementById("inspections-trend").textContent;
-    document.getElementById("pdf-violation-trend").textContent =
-     document.getElementById("violation-trend").textContent;
-    document.getElementById("pdf-resolution-trend").textContent =
-     document.getElementById("resolution-trend").textContent;
-    document.getElementById("pdf-resolution-time-trend").textContent =
-     document.getElementById("resolution-time-trend").textContent;
-
-    // Extract chart data using different variable names
-    const reportBarData = barChartInstance.data;
-    const reportPieData = pieChartInstance.data;
-    const reportLineData = lineChartInstance.data;
-
-    // Update bar chart data table
-    const barTableBody = document.getElementById("pdf-bar-data");
-    barTableBody.innerHTML = "";
-    reportBarData.labels.forEach((label, index) => {
-     const row = document.createElement("tr");
-     row.innerHTML = `
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${label}</td>
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${reportBarData.datasets[0].data[index]}</td>
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${reportBarData.datasets[1].data[index]}</td>
-      `;
-     barTableBody.appendChild(row);
-    });
-
-    // Update pie chart data table
-    const pieTableBody = document.getElementById("pdf-pie-data");
-    pieTableBody.innerHTML = "";
-    const reportPieTotal = reportPieData.datasets[0].data.reduce(
-     (a, b) => a + b,
-     0
-    );
-    reportPieData.labels.forEach((label, index) => {
-     const value = reportPieData.datasets[0].data[index];
-     const percentage = ((value / reportPieTotal) * 100).toFixed(1);
-     const row = document.createElement("tr");
-     row.innerHTML = `
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${label}</td>
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${value}</td>
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${percentage}%</td>
-      `;
-     pieTableBody.appendChild(row);
-    });
-
-    // Update line chart data table with proper console logging
-    const lineTableBody = document.getElementById("pdf-line-data");
-    lineTableBody.innerHTML = "";
-
-    console.log("Line Chart Instance:", lineChartInstance);
-    console.log("Line Chart Data:", {
-     reportLineData,
-     labels: reportLineData.labels,
-     withViolations: reportLineData.datasets[0].data,
-     withoutViolations: reportLineData.datasets[1].data,
-    });
-
-    reportLineData.labels.forEach((label, index) => {
-     const withViolations = reportLineData.datasets[0].data[index];
-     const withoutViolations = reportLineData.datasets[1].data[index];
-
-     console.log(`Row ${index}:`, {
-      label,
-      withViolations: withViolations || 0,
-      withoutViolations: withoutViolations || 0,
+      try {
+       await updateCharts(currentPeriod, { startDate, endDate, month });
+      } catch (error) {
+       console.error("Error applying filters:", error);
+      }
      });
 
-     const row = document.createElement("tr");
-     row.innerHTML = `
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${label}</td>
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${
-         withViolations || 0
-        }</td>
-        <td style="padding: 12px; border: 1px solid #e3e6f0;">${
-         withoutViolations || 0
-        }</td>
-      `;
-     lineTableBody.appendChild(row);
-    });
+    document
+     .getElementById("resetFiltersBtn")
+     .addEventListener("click", async () => {
+      document.getElementById("startDate").value = "";
+      document.getElementById("endDate").value = "";
+      document.getElementById("monthFilter").value = "";
+      currentPeriod = "month";
+      updatePeriodButtons();
 
-    // PDF options
-    const opt = {
-     margin: 0.5,
-     filename: `violation-report-${new Date().toISOString().split("T")[0]}.pdf`,
-     image: { type: "jpeg", quality: 0.98 },
-     html2canvas: { scale: 2 },
-     jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+      try {
+       await updateCharts(currentPeriod);
+      } catch (error) {
+       console.error("Error resetting filters:", error);
+      }
+     });
+
+    // Update the generatePDF function
+    window.generatePDF = async function () {
+     // Update report metadata
+     const currentDate = new Date().toLocaleDateString();
+     document.getElementById("report-date").textContent = currentDate;
+     document.getElementById("report-period").textContent = `${
+      currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)
+     }ly Report`;
+
+     // Use different variable names to avoid conflicts
+     const reportTotalInspections =
+      document.getElementById("total-inspections").textContent;
+     const reportViolationRate =
+      document.getElementById("violation-rate").textContent;
+     const reportResolutionRate =
+      document.getElementById("resolution-rate").textContent;
+     const reportAvgResolutionTime = document.getElementById(
+      "avg-resolution-time"
+     ).textContent;
+
+     // Update KPI values and trends
+     document.getElementById("pdf-total-inspections").textContent =
+      reportTotalInspections;
+     document.getElementById("pdf-violation-rate").textContent =
+      reportViolationRate;
+     document.getElementById("pdf-resolution-rate").textContent =
+      reportResolutionRate;
+     document.getElementById("pdf-avg-resolution-time").textContent =
+      reportAvgResolutionTime;
+
+     document.getElementById("pdf-inspections-trend").textContent =
+      document.getElementById("inspections-trend").textContent;
+     document.getElementById("pdf-violation-trend").textContent =
+      document.getElementById("violation-trend").textContent;
+     document.getElementById("pdf-resolution-trend").textContent =
+      document.getElementById("resolution-trend").textContent;
+     document.getElementById("pdf-resolution-time-trend").textContent =
+      document.getElementById("resolution-time-trend").textContent;
+
+     // Extract chart data using different variable names
+     const reportBarData = barChartInstance.data;
+     const reportPieData = pieChartInstance.data;
+     const reportLineData = lineChartInstance.data;
+
+     // Update bar chart data table
+     const barTableBody = document.getElementById("pdf-bar-data");
+     barTableBody.innerHTML = "";
+     reportBarData.labels.forEach((label, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${label}</td>
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${reportBarData.datasets[0].data[index]}</td>
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${reportBarData.datasets[1].data[index]}</td>
+          `;
+      barTableBody.appendChild(row);
+     });
+
+     // Update pie chart data table
+     const pieTableBody = document.getElementById("pdf-pie-data");
+     pieTableBody.innerHTML = "";
+     const reportPieTotal = reportPieData.datasets[0].data.reduce(
+      (a, b) => a + b,
+      0
+     );
+     reportPieData.labels.forEach((label, index) => {
+      const value = reportPieData.datasets[0].data[index];
+      const percentage = ((value / reportPieTotal) * 100).toFixed(1);
+      const row = document.createElement("tr");
+      row.innerHTML = `
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${label}</td>
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${value}</td>
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${percentage}%</td>
+          `;
+      pieTableBody.appendChild(row);
+     });
+
+     // Update line chart data table with proper console logging
+     const lineTableBody = document.getElementById("pdf-line-data");
+     lineTableBody.innerHTML = "";
+
+     console.log("Line Chart Instance:", lineChartInstance);
+     console.log("Line Chart Data:", {
+      reportLineData,
+      labels: reportLineData.labels,
+      withViolations: reportLineData.datasets[0].data,
+      withoutViolations: reportLineData.datasets[1].data,
+     });
+
+     reportLineData.labels.forEach((label, index) => {
+      const withViolations = reportLineData.datasets[0].data[index];
+      const withoutViolations = reportLineData.datasets[1].data[index];
+
+      console.log(`Row ${index}:`, {
+       label,
+       withViolations: withViolations || 0,
+       withoutViolations: withoutViolations || 0,
+      });
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${label}</td>
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${
+             withViolations || 0
+            }</td>
+            <td style="padding: 12px; border: 1px solid #e3e6f0;">${
+             withoutViolations || 0
+            }</td>
+          `;
+      lineTableBody.appendChild(row);
+     });
+
+     // PDF options
+     const opt = {
+      margin: 0.5,
+      filename: `violation-report-${
+       new Date().toISOString().split("T")[0]
+      }.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+     };
+
+     // Generate PDF
+     const element = document.getElementById("pdf-content");
+     element.style.display = "block";
+     try {
+      await html2pdf().set(opt).from(element).save();
+     } finally {
+      element.style.display = "none";
+     }
     };
 
-    // Generate PDF
-    const element = document.getElementById("pdf-content");
-    element.style.display = "block";
-    try {
-     await html2pdf().set(opt).from(element).save();
-    } finally {
-     element.style.display = "none";
-    }
-   };
+    // Initial load
+    updatePeriodButtons();
+    updateCharts(currentPeriod);
+   }
 
-   // Initial load
-   updatePeriodButtons();
-   updateCharts(currentPeriod);
+   // Start initialization
+   initialize().catch(console.error);
   </script>
  </body>
 </html>
