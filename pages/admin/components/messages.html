@@ -309,7 +309,7 @@
           ${notification.content}
          </div>
         </div>
-        <span class="badge bg-secondary bg-opacity-75 small">
+        <span class="badge ${notification.violation.status.toLowerCase() === 'resolved' ? 'bg-success' : 'bg-secondary'} bg-opacity-75 small">
          <i class="fas fa-flag me-1"></i>
          ${notification.violation.status}
         </span>

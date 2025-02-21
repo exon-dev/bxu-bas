@@ -227,9 +227,11 @@
       }
 
       // Update name
-      const fullName = `${data.data.first_name || ""} ${
-       data.data.last_name || ""
-      }`;
+      // Update name
+      const fullName =
+       [data.data.first_name, data.data.last_name].filter(Boolean).join(" ") ||
+       "Inspector Deleted";
+
       document.getElementById("profileName").textContent = fullName.trim();
      }
     } catch (error) {

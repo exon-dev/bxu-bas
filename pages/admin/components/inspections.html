@@ -274,9 +274,9 @@
             <td>${actualIndex}</td>
             <td>${inspection.business?.business_name || "N/A"}</td>
             <td>${inspection.business?.status || "N/A"}</td>
-            <td>${inspection.inspector?.first_name || ""} ${
-      inspection.inspector?.last_name || "N/A"
-     }</td>
+            <td>${inspection.inspector && typeof inspection.inspector === 'object' 
+        ? `${inspection.inspector.first_name} ${inspection.inspector.last_name}` 
+        : "Inspector Deleted"}</td>
             <td>${formatDate(inspection.inspection_date)}</td>
             <td>${inspection.type_of_inspection || "N/A"}</td>
             <td class="align-middle">
