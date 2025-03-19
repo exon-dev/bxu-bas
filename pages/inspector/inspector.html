@@ -59,6 +59,13 @@
    import CONFIG from "/scripts/config.js";
    const apiUrl = CONFIG.API_BASE_URL;
 
+   // Redirect user if not authenticated
+    const authToken = localStorage.getItem("authToken");
+
+    if (!authToken) {
+      window.location.href = "/pages/auth/index.html"; // Redirect to login page
+    }
+
    // Define the handleLogout function
    const handleLogout = async () => {
     const response = await fetch(`${apiUrl}/inspector/inspector-logout`, {
@@ -82,7 +89,7 @@
       backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
      }).showToast();
      setTimeout(() => {
-      window.location.href = "/auth";
+      window.location.href = "/pages/auth/index.html";
      }, 3000);
     } else {
      alert(data.message);

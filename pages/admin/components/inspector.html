@@ -239,7 +239,6 @@
     <div class="card-body">
      <h4 class="card-title">List of Inspectors</h4>
 
-
      <table class="table table-striped">
       <thead>
        <tr>
@@ -441,7 +440,8 @@
        "hidden.bs.modal",
        () => {
         document.getElementById("errorMessage").textContent =
-         data.message || "An error occurred. Please try again.";
+         //  data.message || "An error occurred. Please try again.";
+         "An error occurred. Please try again or please check your phpmailer account";
         errorModal.show(); // Show the error modal
        },
        { once: true }

@@ -274,9 +274,11 @@
             <td>${actualIndex}</td>
             <td>${inspection.business?.business_name || "N/A"}</td>
             <td>${inspection.business?.status || "N/A"}</td>
-            <td>${inspection.inspector && typeof inspection.inspector === 'object' 
-        ? `${inspection.inspector.first_name} ${inspection.inspector.last_name}` 
-        : "Inspector Deleted"}</td>
+            <td>${
+             inspection.inspector && typeof inspection.inspector === "object"
+              ? `${inspection.inspector.first_name} ${inspection.inspector.last_name}`
+              : "Inspector Deleted"
+            }</td>
             <td>${formatDate(inspection.inspection_date)}</td>
             <td>${inspection.type_of_inspection || "N/A"}</td>
             <td class="align-middle">
@@ -401,6 +403,8 @@
      );
 
      const data = await response.json();
+
+     console.log(data);
 
      inspectionsData = data.inspections.data || [];
      totalPages = data.inspections.last_page || 1;
@@ -530,6 +534,25 @@
 
     const data = await response.json();
     const inspectionDetails = data.inspection;
+
+    // Convert violations to proper array if needed
+    let violationsArray = [];
+    if (inspectionDetails.with_violations) {
+     if (Array.isArray(inspectionDetails.violations)) {
+      violationsArray = inspectionDetails.violations;
+     } else if (
+      inspectionDetails.violations &&
+      typeof inspectionDetails.violations === "object"
+     ) {
+      // Convert object to array
+      violationsArray = Object.values(inspectionDetails.violations).filter(
+       (v) => v !== null && typeof v === "object"
+      );
+     }
+    }
+
+    // Replace the violations with our properly formatted array
+    inspectionDetails.violations = violationsArray;
 
     // Create the detailed modal content with the new structure
     const detailedModalContent = `
@@ -765,184 +788,206 @@
                                     </div>
                                 </div>
                             </div>`
-                          : inspectionDetails.violations
+                          : inspectionDetails.violations.length > 0
+                          ? inspectionDetails.violations
                              .map(
                               (violation) => `
-                                <div class="col-12">
-                                    <div class="card soft-card border">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-clipboard-x fs-4 ${
-                                                     violation.status ===
-                                                     "resolved"
-                                                      ? "text-success"
-                                                      : "text-danger"
-                                                    } me-2"></i>
-                                                    <h6 class="card-title fw-bold mb-0">Violation Information</h6>
-                                                </div>
-                                                <span class="badge ${
-                                                 violation.status === "pending"
-                                                  ? "bg-warning"
-                                                  : violation.status ===
-                                                    "resolved"
-                                                  ? "bg-success"
-                                                  : violation.status ===
-                                                    "overdue"
-                                                  ? "bg-danger"
-                                                  : "bg-secondary"
-                                                } rounded-pill px-3 py-2">
-                                                    ${
-                                                     violation.status?.toUpperCase() ||
-                                                     "N/A"
-                                                    }
-                                                </span>
-                                            </div>
-
-                                            <!-- Key Information -->
-                                            <div class="row g-4">
-                                                <div class="col-12">
-                                                    <div class="p-3 bg-light rounded-3 border-start ${
-                                                     violation.status?.toLowerCase() ===
-                                                     "resolved"
-                                                      ? "border-success"
-                                                      : "border-danger"
-                                                    } border-4">
-                                                        <div class="row g-3">
-                                                            <div class="col-md-3">
-                                                                <div class="detail-item">
-                                                                    <label class="text-muted small d-block">Receipt No.</label>
-                                                                    <span class="fw-semibold">${
-                                                                     violation.violation_receipt_no ||
-                                                                     "N/A"
-                                                                    }</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="detail-item">
-                                                                    <label class="text-muted small d-block">Violation Date</label>
-                                                                    <span class="fw-semibold">${formatDate(
-                                                                     violation.violation_date
-                                                                    )}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="detail-item">
-                                                                    <label class="text-muted small d-block">Due Date</label>
-                                                                    <span class="fw-semibold">${formatDate(
-                                                                     violation.due_date
-                                                                    )}</span>
-                                                                </div>
-                                                            </div>
-                                                            ${
-                                                             violation.days_overdue &&
-                                                             violation.status?.toLowerCase() !==
-                                                              "resolved"
-                                                              ? `
-                                                                <div class="col-md-3">
-                                                                    <div class="detail-item">
-                                                                        <label class="text-muted small d-block">Days Overdue</label>
-                                                                        <span class="fw-semibold text-danger">
-                                                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                                                            ${violation.days_overdue} days
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                `
-                                                              : ""
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Nature of Violations -->
-                                            <div class="col-12 mt-2">
-                                                <div class="violations-list p-3 ${
-                                                 violation.status?.toLowerCase() ===
-                                                 "resolved"
-                                                  ? "bg-success bg-opacity-10"
-                                                  : "bg-danger bg-opacity-10"
-                                                } rounded-3">
-                                                    <div class="d-flex align-items-center mb-3">
-                                                        <i class="bi bi-exclamation-diamond-fill ${
-                                                         violation.status?.toLowerCase() ===
+                                    <div class="col-12">
+                                        <div class="card soft-card border">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-clipboard-x fs-4 ${
+                                                         violation.status ===
                                                          "resolved"
                                                           ? "text-success"
                                                           : "text-danger"
                                                         } me-2"></i>
-                                                        <h6 class="fw-bold mb-0">Nature of Violations</h6>
+                                                        <h6 class="card-title fw-bold mb-0">Violation Information</h6>
                                                     </div>
-                                                    <div class="ps-4">
+                                                    <span class="badge ${
+                                                     violation.status ===
+                                                     "pending"
+                                                      ? "bg-warning"
+                                                      : violation.status ===
+                                                        "resolved"
+                                                      ? "bg-success"
+                                                      : violation.status ===
+                                                        "overdue"
+                                                      ? "bg-danger"
+                                                      : "bg-secondary"
+                                                    } rounded-pill px-3 py-2">
                                                         ${
-                                                         Array.isArray(
-                                                          violation.nature_of_violation
-                                                         )
-                                                          ? `
-                                                                <div class="row g-2">
-                                                                    ${violation.nature_of_violation
-                                                                     .map(
-                                                                      (
-                                                                       nature
-                                                                      ) => `
-                                                                                <div class="col-md-6">
-                                                                                    <div class="d-flex align-items-start">
-                                                                                        <i class="bi bi-dot ${
-                                                                                         violation.status?.toLowerCase() ===
-                                                                                         "resolved"
-                                                                                          ? "text-success"
-                                                                                          : "text-danger"
-                                                                                        } mt-1 me-2"></i>
-                                                                                        <span class="text-uppercase small">
-                                                                                            ${nature.trim()}
-                                                                                        </span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            `
-                                                                     )
-                                                                     .join("")}
-                                                                </div>
-                                                            `
-                                                          : `
-                                                                <div class="text-muted">
-                                                                    <i class="bi bi-info-circle me-2"></i>No violations listed
-                                                                </div>
-                                                            `
+                                                         violation.status?.toUpperCase() ||
+                                                         "N/A"
                                                         }
+                                                    </span>
+                                                </div>
+
+                                                <!-- Key Information -->
+                                                <div class="row g-4">
+                                                    <div class="col-12">
+                                                        <div class="p-3 bg-light rounded-3 border-start ${
+                                                         violation.status?.toLowerCase() ===
+                                                         "resolved"
+                                                          ? "border-success"
+                                                          : "border-danger"
+                                                        } border-4">
+                                                            <div class="row g-3">
+                                                                <div class="col-md-3">
+                                                                    <div class="detail-item">
+                                                                        <label class="text-muted small d-block">Receipt No.</label>
+                                                                        <span class="fw-semibold">${
+                                                                         violation.violation_receipt_no ||
+                                                                         "N/A"
+                                                                        }</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="detail-item">
+                                                                        <label class="text-muted small d-block">Violation Date</label>
+                                                                        <span class="fw-semibold">${formatDate(
+                                                                         violation.violation_date
+                                                                        )}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="detail-item">
+                                                                        <label class="text-muted small d-block">Due Date</label>
+                                                                        <span class="fw-semibold">${formatDate(
+                                                                         violation.due_date
+                                                                        )}</span>
+                                                                    </div>
+                                                                </div>
+                                                                ${
+                                                                 violation.days_overdue &&
+                                                                 violation.status?.toLowerCase() !==
+                                                                  "resolved"
+                                                                  ? `
+                                                                      <div class="col-md-3">
+                                                                          <div class="detail-item">
+                                                                              <label class="text-muted small d-block">Days Overdue</label>
+                                                                              <span class="fw-semibold text-danger">
+                                                                                  <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                                                                  ${violation.days_overdue} days
+                                                                              </span>
+                                                                          </div>
+                                                                      </div>
+                                                                    `
+                                                                  : ""
+                                                                }
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+
+                                                <!-- Nature of Violations -->
+                                                <div class="col-12 mt-2">
+                                                    <div class="violations-list p-3 ${
+                                                     violation.status?.toLowerCase() ===
+                                                     "resolved"
+                                                      ? "bg-success bg-opacity-10"
+                                                      : "bg-danger bg-opacity-10"
+                                                    } rounded-3">
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <i class="bi bi-exclamation-diamond-fill ${
+                                                             violation.status?.toLowerCase() ===
+                                                             "resolved"
+                                                              ? "text-success"
+                                                              : "text-danger"
+                                                            } me-2"></i>
+                                                            <h6 class="fw-bold mb-0">Nature of Violations</h6>
+                                                        </div>
+                                                        <div class="ps-4">
+                                                            ${
+                                                             Array.isArray(
+                                                              violation.nature_of_violation
+                                                             )
+                                                              ? `
+                                                                    <div class="row g-2">
+                                                                        ${violation.nature_of_violation
+                                                                         .map(
+                                                                          (
+                                                                           nature
+                                                                          ) => `
+                                                                                    <div class="col-md-6">
+                                                                                        <div class="d-flex align-items-start">
+                                                                                            <i class="bi bi-dot ${
+                                                                                             violation.status?.toLowerCase() ===
+                                                                                             "resolved"
+                                                                                              ? "text-success"
+                                                                                              : "text-danger"
+                                                                                            } mt-1 me-2"></i>
+                                                                                            <span class="text-uppercase small">
+                                                                                                ${nature.trim()}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                `
+                                                                         )
+                                                                         .join(
+                                                                          ""
+                                                                         )}
+                                                                    </div>
+                                                                `
+                                                              : `
+                                                                    <div class="text-muted">
+                                                                        <i class="bi bi-info-circle me-2"></i>No violations listed
+                                                                    </div>
+                                                                `
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
     <!-- SMS Notification Status - Moved above Nature of Violations -->
-                                            ${
-                                             violation.notifications
-                                              ? `
-                                                <small class="d-block text-muted mt-3" style="background-color: #f8f9fa; padding: 6px; border-radius: 4px; font-size: 0.85em;">
-                                                    ${
-                                                     violation.notifications
-                                                      .initial_notice
-                                                      ? `
-                                                        <i class="bi bi-info-circle me-1"></i>Initial Notice: ${violation.notifications.initial_notice.message}
-                                                    `
-                                                      : ""
-                                                    }
-                                                    ${
-                                                     violation.notifications
-                                                      .reminder
-                                                      ? `
-                                                        <br><i class="bi bi-info-circle me-1"></i>Reminder: ${violation.notifications.reminder.message}
-                                                    `
-                                                      : ""
-                                                    }
-                                                </small>
-                                            `
-                                              : ""
-                                            }
+                                                ${
+                                                 violation.notifications
+                                                  ? `
+                                                      <small class="d-block text-muted mt-3" style="background-color: #f8f9fa; padding: 6px; border-radius: 4px; font-size: 0.85em;">
+                                                          ${
+                                                           violation
+                                                            .notifications
+                                                            .initial_notice
+                                                            ? `
+                                                                <i class="bi bi-info-circle me-1"></i>Initial Notice: ${violation.notifications.initial_notice.message}
+                                                            `
+                                                            : ""
+                                                          }
+                                                          ${
+                                                           violation
+                                                            .notifications
+                                                            .reminder
+                                                            ? `
+                                                                <br><i class="bi bi-info-circle me-1"></i>Reminder: ${violation.notifications.reminder.message}
+                                                            `
+                                                            : ""
+                                                          }
+                                                      </small>
+                                                  `
+                                                  : ""
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            `
+                            </div>
+                        `
                              )
                              .join("")
+                          : `<div class="col-12">
+                                <div class="card soft-card border">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-triangle fs-4 text-warning me-2"></i>
+                                            <h6 class="card-title fw-bold mb-0">No Violation Details Available</h6>
+                                        </div>
+                                        <p class="text-muted mt-2 mb-0">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            This inspection has violations but no details were found.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>`
                         }
                     </div>
                 </div>
