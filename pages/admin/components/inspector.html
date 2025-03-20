@@ -200,6 +200,16 @@
           required
          />
         </div>
+        <div class="mb-3">
+         <label for="government_id" class="form-label">Government ID</label>
+         <input
+          type="text"
+          class="form-control"
+          id="government_id"
+          name="government_id"
+          required
+         />
+        </div>
         <div class="text-end">
          <button type="submit" class="btn btn-primary" id="addInspectorBtn">
           <span
@@ -245,6 +255,7 @@
         <th scope="col">No.</th>
         <th scope="col">Email</th>
         <th scope="col">Full Name</th>
+        <th scope="col">Government ID</th>
         <th scope="col">Date Created</th>
         <th scope="col">Date Updated</th>
         <th scope="col">No. of Inspections</th>
@@ -388,6 +399,7 @@
     const firstName = document.querySelector("#firstName").value.trim();
     const lastName = document.querySelector("#lastName").value.trim();
     const email = document.querySelector("#email").value.trim();
+    const government_id = document.querySelector("#government_id").value.trim()
 
     // Validate required fields
     if (!firstName || !lastName || !email) {
@@ -412,6 +424,7 @@
        first_name: firstName,
        last_name: lastName,
        email: email,
+       government_id: government_id
       }),
      });
 
@@ -597,6 +610,7 @@
            <td>${escapeHtml(inspector.first_name)} ${escapeHtml(
        inspector.last_name
       )}</td>
+      <td>${escapeHtml(inspector.government_id)}</td>
            <td>${new Date(inspector.created_at).toLocaleDateString()}</td>
            <td>${new Date(inspector.updated_at).toLocaleDateString()}</td>
            <td>${inspector.inspections_count}</td>

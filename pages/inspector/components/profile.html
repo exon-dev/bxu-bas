@@ -89,6 +89,7 @@
 
    .profile-info {
     text-align: center;
+    align-items: center;
     margin-top: 16px;
    }
 
@@ -107,6 +108,21 @@
     padding: 4px 12px;
     border-radius: 20px;
     display: inline-block;
+   }
+   .government_id {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 4px 0;
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+   }
+
+   .gov_label_id{
+    font-size: 16px;
+    color: #2c3e50;
+    margin: 0px;
    }
 
    .btn {
@@ -171,7 +187,7 @@
 
    .layout-grid {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 400px 1fr;
     gap: 24px;
     /* padding: 0 12px; */
    }
@@ -329,6 +345,9 @@
       <span class="profile-role" id="profileRole">
        <i class="bi bi-shield-check"></i> Inspector
       </span>
+     <div class="d-flex align-items-center justify-content-center gap-2 text-center mt-2">
+      <h1 class="gov_label_id"">Government ID:</h1> <h1 id="government_id" class="government_id"></h1>
+     </div>
      </div>
      <div style="text-align: center; margin-top: 24px">
       <button class="btn btn-success" onclick="changePassword()">
@@ -379,6 +398,10 @@
    const personalInfoModal = new bootstrap.Modal(
     document.getElementById("personalInfoModal")
    );
+
+   const government_id = localStorage.getItem("government_id");
+
+   document.getElementById("government_id").textContent = government_id;
 
    // Make functions globally available
    window.changePassword = function () {
@@ -567,8 +590,8 @@
       // Initialize and show loading modal
       const loadingModalElement = document.getElementById("loadingModal");
       const loadingModal = new bootstrap.Modal(loadingModalElement, {
-        backdrop: 'static',
-        keyboard: false
+       backdrop: "static",
+       keyboard: false,
       });
       loadingModal.show();
 
@@ -592,36 +615,36 @@
         "profileImage"
        ).src = `${app_url}${data.data.image_url}`;
        localStorage.setItem("profile_image", data.data.image_url);
-       
+
        // Force close the loading modal
        loadingModal.hide();
-       loadingModalElement.classList.remove('show');
-       loadingModalElement.setAttribute('aria-hidden', 'true');
-       loadingModalElement.style.display = 'none';
-       
+       loadingModalElement.classList.remove("show");
+       loadingModalElement.setAttribute("aria-hidden", "true");
+       loadingModalElement.style.display = "none";
+
        // Remove all modal backdrops
-       document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-         backdrop.remove();
+       document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+        backdrop.remove();
        });
-       
+
        // Remove modal-open class from body
-       document.body.classList.remove('modal-open');
-       document.body.style.overflow = '';
-       document.body.style.paddingRight = '';
+       document.body.classList.remove("modal-open");
+       document.body.style.overflow = "";
+       document.body.style.paddingRight = "";
 
        // Short delay before showing success modal
        setTimeout(() => {
-         successModal.show();
+        successModal.show();
        }, 100);
       } else {
        // Force close loading modal
        loadingModal.hide();
-       loadingModalElement.classList.remove('show');
-       document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-         backdrop.remove();
+       loadingModalElement.classList.remove("show");
+       document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+        backdrop.remove();
        });
-       document.body.classList.remove('modal-open');
-       
+       document.body.classList.remove("modal-open");
+
        document.getElementById("errorMessage").textContent =
         data.message || "Failed to upload image";
        errorModal.show();
@@ -630,12 +653,12 @@
       // Force close loading modal
       const loadingModalElement = document.getElementById("loadingModal");
       bootstrap.Modal.getInstance(loadingModalElement)?.hide();
-      loadingModalElement.classList.remove('show');
-      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-        backdrop.remove();
+      loadingModalElement.classList.remove("show");
+      document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+       backdrop.remove();
       });
-      document.body.classList.remove('modal-open');
-      
+      document.body.classList.remove("modal-open");
+
       console.error("Error:", error);
       document.getElementById("errorMessage").textContent =
        "Network error. Please try again.";
@@ -662,7 +685,7 @@
 
      const data = await response.json();
 
-     console.log(data)
+     console.log(data);
 
      if (response.ok && data.data) {
       // Update profile image if it exists
