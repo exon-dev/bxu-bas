@@ -100,8 +100,32 @@
    "dest": "/pages/inspector/inspector.html"
   },
   {
+   "src": "/inspector/inspector.html",
+   "dest": "/pages/inspector/inspector.html"
+  },
+  {
+   "src": "/inspector/(.*)",
+   "dest": "/pages/inspector/$1"
+  },
+  {
+   "src": "/pages/inspector/(.*)",
+   "dest": "/pages/inspector/$1"
+  },
+  {
    "src": "/admin",
    "dest": "/pages/admin/admin.html"
+  },
+  {
+   "src": "/admin/admin.html",
+   "dest": "/pages/admin/admin.html"
+  },
+  {
+   "src": "/admin/(.*)",
+   "dest": "/pages/admin/$1"
+  },
+  {
+   "src": "/pages/admin/(.*)",
+   "dest": "/pages/admin/$1"
   },
   {
    "src": "/unauthorized",
@@ -148,10 +172,6 @@
    "dest": "/pages/admin/components/$1"
   },
   {
-   "src": "/pages/inspector/inspector.html",
-   "dest": "/pages/inspector/inspector.html"
-  },
-  {
    "src": "/pages/inspector/components/sidebar.html",
    "dest": "/pages/inspector/components/sidebar.html"
   },
@@ -182,6 +202,10 @@
   {
    "src": "/pages/(.*)",
    "dest": "/pages/$1"
+  },
+  {
+   "src": "/pages/admin/(.*)",
+   "dest": "/pages/admin/$1"
   }
  ]
 }
