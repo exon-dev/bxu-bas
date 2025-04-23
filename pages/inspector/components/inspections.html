@@ -1,470 +1,543 @@
 <!DOCTYPE html>
 <html lang="en">
- <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inspections</title>
-  <link
-   rel="stylesheet"
-   href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-  />
-  <link
-   rel="stylesheet"
-   href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-  />
- </head>
- <style>
-  body {
-   font-family: "Poppins", Arial, sans-serif !important;
-   background-color: #eff3fc;
-   margin: 0;
-   padding: 0;
-  }
-  .card {
-   border-radius: 10px;
-   -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
-   box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
-   border: none;
-   margin-bottom: 30px;
-   -webkit-transition: all 0.3s ease-in-out;
-   transition: all 0.3s ease-in-out;
-  }
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Inspections</title>
+      <link
+         rel="stylesheet"
+         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      />
+      <link
+         rel="stylesheet"
+         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      />
+   </head>
+   <style>
+      body {
+         font-family: "Poppins", Arial, sans-serif !important;
+         background-color: #eff3fc;
+         margin: 0;
+         padding: 0;
+      }
+      .card {
+         border-radius: 10px;
+         -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+         box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+         border: none;
+         margin-bottom: 30px;
+         -webkit-transition: all 0.3s ease-in-out;
+         transition: all 0.3s ease-in-out;
+      }
 
-  .hover-shadow {
-   transition: all 0.3s ease;
-  }
+      .hover-shadow {
+         transition: all 0.3s ease;
+      }
 
-  .hover-shadow:hover {
-   transform: translateY(-2px);
-   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-  }
+      .hover-shadow:hover {
+         transform: translateY(-2px);
+         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+      }
 
-  .inspection-row {
-   cursor: pointer;
-   transition: background-color 0.2s ease;
-  }
+      .inspection-row {
+         cursor: pointer;
+         transition: background-color 0.2s ease;
+      }
 
-  .inspection-row:hover {
-   background-color: rgba(0, 0, 0, 0.05);
-  }
+      .inspection-row:hover {
+         background-color: rgba(0, 0, 0, 0.05);
+      }
 
-  .modal-content {
-   border-radius: 0.5rem;
-  }
+      .modal-content {
+         border-radius: 0.5rem;
+      }
 
-  .modal-header {
-   border-radius: 0.5rem 0.5rem 0 0;
-  }
+      .modal-header {
+         border-radius: 0.5rem 0.5rem 0 0;
+      }
 
-  .violation-item {
-   transition: transform 0.2s ease;
-  }
+      .violation-item {
+         transition: transform 0.2s ease;
+      }
 
-  .violation-item:hover {
-   transform: translateX(5px);
-  }
+      .violation-item:hover {
+         transform: translateX(5px);
+      }
 
-  .detail-item {
-   padding: 0.5rem;
-   background: white;
-   border-radius: 0.5rem;
-  }
+      .detail-item {
+         padding: 0.5rem;
+         background: white;
+         border-radius: 0.5rem;
+      }
 
-  .badge {
-   font-weight: 500;
-   letter-spacing: 0.5px;
-  }
+      .badge {
+         font-weight: 500;
+         letter-spacing: 0.5px;
+      }
 
-  .modal-body {
-   max-height: 70vh;
-   overflow-y: auto;
-  }
+      .modal-body {
+         max-height: 70vh;
+         overflow-y: auto;
+      }
 
-  .table-hover tbody tr:hover {
-   background-color: rgba(0, 0, 0, 0.05) !important;
-   cursor: pointer;
-  }
- </style>
- <body>
-  <div class="card p-3 rounded-4">
-   <div class="card-body d-flex justify-content-between align-items-center">
-    <div>
-     <h4>Business Inspection</h4>
-     <p>Inspect business and create violations for business violators</p>
-    </div>
-    <button
-     class="btn btn-primary py-2"
-     id="openModalBtn"
-     data-bs-toggle="modal"
-     data-bs-target="#violatorModal"
-    >
-     Add Inspection
-    </button>
-   </div>
-  </div>
-
-  <!-- Modal Structure -->
-  <div
-   class="modal fade"
-   id="violatorModal"
-   tabindex="-1"
-   aria-labelledby="violatorModalLabel"
-   aria-hidden="true"
-  >
-   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content rounded-3 shadow-lg">
-     <div class="modal-header border-0">
-      <h5 class="modal-title" id="violatorModalLabel">
-       <span id="modalActionText">Add</span> Business Inspection
-      </h5>
-      <button
-       type="button"
-       class="btn-close"
-       data-bs-dismiss="modal"
-       aria-label="Close"
-      ></button>
-     </div>
-     <div class="modal-body" style="max-height: 500px">
-      <form id="inspectionForm">
-       <input type="hidden" id="inspectionId" name="inspectionId" value="" />
-       <!-- Owner's Information -->
-       <div class="row mb-2">
-        <div class="col-md-6">
-         <label for="ownerFirstName" class="form-label"
-          >Owner's First Name:</label
-         >
-         <input
-          type="text"
-          class="form-control form-control-sm"
-          id="ownerFirstName"
-          name="ownerFirstName"
-          required
-         />
-        </div>
-        <div class="col-md-6">
-         <label for="ownerLastName" class="form-label"
-          >Owner's Last Name:</label
-         >
-         <input
-          type="text"
-          class="form-control form-control-sm"
-          id="ownerLastName"
-          name="ownerLastName"
-          required
-         />
-        </div>
-       </div>
-       <div class="row mb-2">
-        <div class="col-md-6">
-         <label for="ownerEmail" class="form-label">Owner's Email:</label>
-         <input
-          type="email"
-          class="form-control form-control-sm"
-          id="ownerEmail"
-          name="ownerEmail"
-         />
-        </div>
-        <div class="col-md-6">
-         <label for="ownerPhoneNumber" class="form-label"
-          >Owner's Phone Number:</label
-         >
-         <input
-          type="text"
-          class="form-control form-control-sm"
-          id="ownerPhoneNumber"
-          name="ownerPhoneNumber"
-          required
-         />
-        </div>
-       </div>
-
-       <!-- Business Information -->
-       <div class="row mb-2">
-        <div class="col-md-6">
-         <label for="businessName" class="form-label">Business Name:</label>
-         <input
-          type="text"
-          class="form-control form-control-sm"
-          id="businessName"
-          name="businessName"
-          required
-         />
-        </div>
-        <div class="col-md-6">
-         <label for="businessPermit" class="form-label">Business Permit:</label>
-         <input
-          type="text"
-          class="form-control form-control-sm"
-          id="businessPermit"
-          name="businessPermit"
-         />
-        </div>
-       </div>
-       <div class="row mb-2">
-        <div class="col-md-6">
-         <label for="businessStatus" class="form-label">Business Status:</label>
-         <select
-          class="form-select form-control-sm"
-          id="businessStatus"
-          name="businessStatus"
-          required
-         >
-          <option value="low_income">Low Income</option>
-          <option value="with_permit">With Permit</option>
-          <option value="without_permit">Without Permit</option>
-          <option value="already_closed">Already Closed</option>
-          <option value="already_closed_new_business">
-           Already Closed but New Business Operating
-          </option>
-          <option value="still_operating">Still Operating</option>
-         </select>
-        </div>
-       </div>
-
-       <!-- Address Information -->
-       <div class="row mb-2">
-        <div class="col-md-6">
-         <label for="street" class="form-label">Street:</label>
-         <input
-          type="text"
-          class="form-control form-control-sm"
-          id="street"
-          name="street"
-          required
-         />
-        </div>
-        <div class="col-md-6">
-         <label for="city" class="form-label">City:</label>
-         <input
-          type="text"
-          class="form-control form-control-sm"
-          id="city"
-          name="city"
-          required
-         />
-        </div>
-       </div>
-       <div class="row mb-2">
-        <div class="col-md-6">
-         <label for="zip" class="form-label">ZIP Code:</label>
-         <input
-          type="text"
-          class="form-control form-control-sm"
-          id="zip"
-          name="zip"
-          required
-         />
-        </div>
-       </div>
-
-       <!-- Inspection Details -->
-       <div class="row mb-2">
-        <div class="col-md-6">
-         <label for="typeOfInspection" class="form-label"
-          >Type of Inspection:</label
-         >
-         <select
-          class="form-select form-control-sm"
-          id="typeOfInspection"
-          name="typeOfInspection"
-          required
-         >
-          <option value="regular">Regular</option>
-          <option value="night">Night</option>
-          <option value="special_change_address">
-           Special (Change Address)
-          </option>
-          <option value="special_verification">Special (Verification)</option>
-          <option value="special_complaint">Special (Complaint)</option>
-          <option value="special_retirement">Special (Retirement)</option>
-          <option value="joint">Joint</option>
-         </select>
-        </div>
-        <div class="col-md-6">
-         <label for="withViolations" class="form-label">With Violations:</label>
-         <select
-          class="form-select form-control-sm"
-          id="withViolations"
-          name="withViolations"
-          required
-         >
-          <option value="true">Yes</option>
-          <option value="false" selected>No</option>
-         </select>
-        </div>
-       </div>
-
-       <div
-        class="row mb-3"
-        id="natureOfViolationContainer"
-        style="display: none"
-       >
-        <div class="col-md-12 mb-3">
-         <label class="form-label">Nature of Violation:</label>
+      .table-hover tbody tr:hover {
+         background-color: rgba(0, 0, 0, 0.05) !important;
+         cursor: pointer;
+      }
+   </style>
+   <body>
+      <div class="card p-3 rounded-4">
          <div
-          class="violation-checkboxes border rounded p-3"
-          style="max-height: 200px; overflow-y: auto"
+            class="card-body d-flex justify-content-between align-items-center"
          >
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="no mayors permit"
-            name="natureOfViolation[]"
-            id="violation1"
-           />
-           <label class="form-check-label" for="violation1">
-            NO MAYOR'S PERMIT
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="non display of mayors permit"
-            name="natureOfViolation[]"
-            id="violation2"
-           />
-           <label class="form-check-label" for="violation2">
-            NON-DISPLAY OF MAYOR'S PERMIT
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="displaying dilapidated mayors permit"
-            name="natureOfViolation[]"
-            id="violation3"
-           />
-           <label class="form-check-label" for="violation3">
-            DISPLAYING DILAPIDATED MAYOR'S PERMIT
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="displaying counterfeit mayors permit"
-            name="natureOfViolation[]"
-            id="violation4"
-           />
-           <label class="form-check-label" for="violation4">
-            DISPLAYING A COUNTERFEIT MAYOR'S PERMIT
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="understatement of gross sales"
-            name="natureOfViolation[]"
-            id="violation5"
-           />
-           <label class="form-check-label" for="violation5">
-            UNDERSTATEMENT AND/OR INCORRECT DECLARATION OF GROSS SALES OR
-            RECEIPTS
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="falsification of business permit"
-            name="natureOfViolation[]"
-            id="violation6"
-           />
-           <label class="form-check-label" for="violation6">
-            FALSIFICATION AND/OR ALTERATION OF BUSINESS PERMIT
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="sidewalk obstruction"
-            name="natureOfViolation[]"
-            id="violation7"
-           />
-           <label class="form-check-label" for="violation7">
-            SIDEWALK/STREET/SIDESTREET OBSTRUCTION
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="non posting of notice"
-            name="natureOfViolation[]"
-            id="violation8"
-           />
-           <label class="form-check-label" for="violation8">
-            NON-POSTING OF NOTICE
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="non declaration of business"
-            name="natureOfViolation[]"
-            id="violation9"
-           />
-           <label class="form-check-label" for="violation9">
-            NON-DECLARATION OF TYPE OR NATURE OF BUSINESS
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="drinking in public places"
-            name="natureOfViolation[]"
-            id="violation10"
-           />
-           <label class="form-check-label" for="violation10">
-            DRINKING IN PUBLIC PLACES
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="unauthorized serving of liquor"
-            name="natureOfViolation[]"
-            id="violation11"
-           />
-           <label class="form-check-label" for="violation11">
-            UNAUTHORIZED SERVING OF LIQUOR
-           </label>
-          </div>
-          <div class="form-check">
-           <input
-            class="form-check-input"
-            type="checkbox"
-            value="unauthorized selling of liquor"
-            name="natureOfViolation[]"
-            id="violation12"
-           />
-           <label class="form-check-label" for="violation12">
-            UNAUTHORIZED SELLING OF LIQUOR
-           </label>
-          </div>
+            <div>
+               <h4>Business Inspection</h4>
+               <p>
+                  Inspect business and create violations for business violators
+               </p>
+            </div>
+            <button
+               class="btn btn-primary py-2"
+               id="openModalBtn"
+               data-bs-toggle="modal"
+               data-bs-target="#violatorModal"
+            >
+               Add Inspection
+            </button>
          </div>
-        </div>
-        <div class="row mb-3">
-         <div class="col-md-6">
-          <label for="violationReceipt" class="form-label"
-           >Violation Receipt No.:</label
-          >
-          <input
-           type="text"
-           class="form-control form-control-sm"
-           id="violationReceipt"
-           name="violationReceipt"
-          />
-         </div>
-         <div class="col-md-6">
+      </div>
+
+      <!-- Modal Structure -->
+      <div
+         class="modal fade"
+         id="violatorModal"
+         tabindex="-1"
+         aria-labelledby="violatorModalLabel"
+         aria-hidden="true"
+      >
+         <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-3 shadow-lg">
+               <div class="modal-header border-0">
+                  <h5 class="modal-title" id="violatorModalLabel">
+                     <span id="modalActionText">Add</span> Business Inspection
+                  </h5>
+                  <button
+                     type="button"
+                     class="btn-close"
+                     data-bs-dismiss="modal"
+                     aria-label="Close"
+                  ></button>
+               </div>
+               <div class="modal-body" style="max-height: 500px">
+                  <form id="inspectionForm">
+                     <input
+                        type="hidden"
+                        id="inspectionId"
+                        name="inspectionId"
+                        value=""
+                     />
+                     <!-- Owner's Information -->
+                     <div class="row mb-2">
+                        <div class="col-md-6">
+                           <label for="ownerFirstName" class="form-label"
+                              >Owner's First Name:</label
+                           >
+                           <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              id="ownerFirstName"
+                              name="ownerFirstName"
+                              required
+                           />
+                        </div>
+                        <div class="col-md-6">
+                           <label for="ownerLastName" class="form-label"
+                              >Owner's Last Name:</label
+                           >
+                           <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              id="ownerLastName"
+                              name="ownerLastName"
+                              required
+                           />
+                        </div>
+                     </div>
+                     <div class="row mb-2">
+                        <div class="col-md-6">
+                           <label for="ownerEmail" class="form-label"
+                              >Owner's Email:</label
+                           >
+                           <input
+                              type="email"
+                              class="form-control form-control-sm"
+                              id="ownerEmail"
+                              name="ownerEmail"
+                           />
+                        </div>
+                        <div class="col-md-6">
+                           <label for="ownerPhoneNumber" class="form-label"
+                              >Owner's Phone Number:</label
+                           >
+                           <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              id="ownerPhoneNumber"
+                              name="ownerPhoneNumber"
+                              required
+                           />
+                        </div>
+                     </div>
+
+                     <!-- Business Information -->
+                     <div class="row mb-2">
+                        <div class="col-md-6">
+                           <label for="businessName" class="form-label"
+                              >Business Name:</label
+                           >
+                           <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              id="businessName"
+                              name="businessName"
+                              required
+                           />
+                        </div>
+                        <div class="col-md-6">
+                           <label for="businessPermit" class="form-label"
+                              >Business Permit:</label
+                           >
+                           <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              id="businessPermit"
+                              name="businessPermit"
+                           />
+                        </div>
+                     </div>
+                     <div class="row mb-2">
+                        <div class="col-md-6">
+                           <label for="businessStatus" class="form-label"
+                              >Business Status:</label
+                           >
+                           <select
+                              class="form-select form-control-sm"
+                              id="businessStatus"
+                              name="businessStatus"
+                              required
+                           >
+                              <option value="low_income">Low Income</option>
+                              <option value="with_permit">With Permit</option>
+                              <option value="without_permit">
+                                 Without Permit
+                              </option>
+                              <option value="already_closed">
+                                 Already Closed
+                              </option>
+                              <option value="already_closed_new_business">
+                                 Already Closed but New Business Operating
+                              </option>
+                              <option value="still_operating">
+                                 Still Operating
+                              </option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <!-- Address Information -->
+                     <div class="row mb-2">
+                        <div class="col-md-6">
+                           <label for="street" class="form-label"
+                              >Street:</label
+                           >
+                           <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              id="street"
+                              name="street"
+                              required
+                           />
+                        </div>
+                        <div class="col-md-6">
+                           <label for="city" class="form-label">City:</label>
+                           <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              id="city"
+                              name="city"
+                              required
+                           />
+                        </div>
+                     </div>
+                     <div class="row mb-2">
+                        <div class="col-md-6">
+                           <label for="zip" class="form-label">ZIP Code:</label>
+                           <input
+                              type="text"
+                              class="form-control form-control-sm"
+                              id="zip"
+                              name="zip"
+                              required
+                           />
+                        </div>
+                     </div>
+
+                     <!-- Inspection Details -->
+                     <div class="row mb-2">
+                        <div class="col-md-6">
+                           <label for="typeOfInspection" class="form-label"
+                              >Type of Inspection:</label
+                           >
+                           <select
+                              class="form-select form-control-sm"
+                              id="typeOfInspection"
+                              name="typeOfInspection"
+                              required
+                           >
+                              <option value="regular">Regular</option>
+                              <option value="night">Night</option>
+                              <option value="special_change_address">
+                                 Special (Change Address)
+                              </option>
+                              <option value="special_verification">
+                                 Special (Verification)
+                              </option>
+                              <option value="special_complaint">
+                                 Special (Complaint)
+                              </option>
+                              <option value="special_retirement">
+                                 Special (Retirement)
+                              </option>
+                              <option value="joint">Joint</option>
+                           </select>
+                        </div>
+                        <div class="col-md-6">
+                           <label for="withViolations" class="form-label"
+                              >With Violations:</label
+                           >
+                           <select
+                              class="form-select form-control-sm"
+                              id="withViolations"
+                              name="withViolations"
+                              required
+                           >
+                              <option value="true">Yes</option>
+                              <option value="false" selected>No</option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <div
+                        class="row mb-3"
+                        id="natureOfViolationContainer"
+                        style="display: none"
+                     >
+                        <div class="col-md-12 mb-3">
+                           <label class="form-label"
+                              >Nature of Violation:</label
+                           >
+                           <div
+                              class="violation-checkboxes border rounded p-3"
+                              style="max-height: 200px; overflow-y: auto"
+                           >
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="no mayors permit"
+                                    name="natureOfViolation[]"
+                                    id="violation1"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation1"
+                                 >
+                                    NO MAYOR'S PERMIT
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="non display of mayors permit"
+                                    name="natureOfViolation[]"
+                                    id="violation2"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation2"
+                                 >
+                                    NON-DISPLAY OF MAYOR'S PERMIT
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="displaying dilapidated mayors permit"
+                                    name="natureOfViolation[]"
+                                    id="violation3"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation3"
+                                 >
+                                    DISPLAYING DILAPIDATED MAYOR'S PERMIT
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="displaying counterfeit mayors permit"
+                                    name="natureOfViolation[]"
+                                    id="violation4"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation4"
+                                 >
+                                    DISPLAYING A COUNTERFEIT MAYOR'S PERMIT
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="understatement of gross sales"
+                                    name="natureOfViolation[]"
+                                    id="violation5"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation5"
+                                 >
+                                    UNDERSTATEMENT AND/OR INCORRECT DECLARATION
+                                    OF GROSS SALES OR RECEIPTS
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="falsification of business permit"
+                                    name="natureOfViolation[]"
+                                    id="violation6"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation6"
+                                 >
+                                    FALSIFICATION AND/OR ALTERATION OF BUSINESS
+                                    PERMIT
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="sidewalk obstruction"
+                                    name="natureOfViolation[]"
+                                    id="violation7"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation7"
+                                 >
+                                    SIDEWALK/STREET/SIDESTREET OBSTRUCTION
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="non posting of notice"
+                                    name="natureOfViolation[]"
+                                    id="violation8"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation8"
+                                 >
+                                    NON-POSTING OF NOTICE
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="non declaration of business"
+                                    name="natureOfViolation[]"
+                                    id="violation9"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation9"
+                                 >
+                                    NON-DECLARATION OF TYPE OR NATURE OF
+                                    BUSINESS
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="drinking in public places"
+                                    name="natureOfViolation[]"
+                                    id="violation10"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation10"
+                                 >
+                                    DRINKING IN PUBLIC PLACES
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="unauthorized serving of liquor"
+                                    name="natureOfViolation[]"
+                                    id="violation11"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation11"
+                                 >
+                                    UNAUTHORIZED SERVING OF LIQUOR
+                                 </label>
+                              </div>
+                              <div class="form-check">
+                                 <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    value="unauthorized selling of liquor"
+                                    name="natureOfViolation[]"
+                                    id="violation12"
+                                 />
+                                 <label
+                                    class="form-check-label"
+                                    for="violation12"
+                                 >
+                                    UNAUTHORIZED SELLING OF LIQUOR
+                                 </label>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row mb-3">
+                           <div class="col-md-6">
+                              <label for="violationReceipt" class="form-label"
+                                 >Violation Receipt No.:</label
+                              >
+                              <input
+                                 type="text"
+                                 class="form-control form-control-sm"
+                                 id="violationReceipt"
+                                 name="violationReceipt"
+                              />
+                           </div>
+                           <!-- <div class="col-md-6">
           <label for="dueDate" class="form-label">Due Date:</label>
           <input
            type="date"
@@ -472,472 +545,539 @@
            id="dueDate"
            name="dueDate"
           />
-         </div>
-        </div>
-       </div>
+         </div> -->
+                           <div class="col-md-6">
+                              <label for="violationFee" class="form-label"
+                                 >Violation Fee:
+                              </label>
+                              <input
+                                 type="number"
+                                 class="form-control form-control-sm"
+                                 id="violationFee"
+                                 name="violationFee"
+                                 min="0"
+                              />
+                           </div>
+                        </div>
+                     </div>
 
-       <div class="row mb-2">
-        <div class="col-md-12">
-         <label for="businessImage" class="form-label">Business Image:</label>
-         <input
-          type="file"
-          class="form-control form-control-sm"
-          id="businessImage"
-          name="businessImage"
-          accept="image/*"
-         />
-        </div>
-       </div>
-      </form>
-     </div>
-     <div class="modal-footer border-0 shadow-lg">
-      <button
-       type="submit"
-       class="btn btn-primary h6"
-       form="inspectionForm"
-       id="submitButton"
-      >
-       <span id="submitButtonText">Update</span>
-      </button>
-     </div>
-    </div>
-   </div>
-  </div>
-
-  <!-- Add Success Modal -->
-  <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
-   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-     <div class="modal-header">
-      <h5 class="modal-title">Success</h5>
-      <button
-       type="button"
-       class="btn-close"
-       data-bs-dismiss="modal"
-       aria-label="Close"
-      ></button>
-     </div>
-     <div class="modal-body">
-      <p>Inspection has been successfully saved!</p>
-     </div>
-     <div class="modal-footer">
-      <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-       Close
-      </button>
-     </div>
-    </div>
-   </div>
-  </div>
-
-  <div
-   class="modal fade"
-   id="inspectionDetailModal"
-   tabindex="-1"
-   aria-labelledby="inspectionDetailModalLabel"
-   aria-hidden="true"
-  >
-   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-     <div class="modal-header">
-      <h5 class="modal-title" id="inspectionDetailModalLabel">
-       Inspection Details
-      </h5>
-      <button
-       type="button"
-       class="btn-close"
-       data-bs-dismiss="modal"
-       aria-label="Close"
-      ></button>
-     </div>
-     <div class="modal-body" style="max-height: 70vh; overflow-y: auto">
-      <!-- Your modal content goes here -->
-     </div>
-     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-       Close
-      </button>
-     </div>
-    </div>
-   </div>
-  </div>
-
-  <!-- Error Modal Structure -->
-  <div
-   class="modal fade"
-   id="errorModal"
-   tabindex="-1"
-   aria-labelledby="errorModalLabel"
-   aria-hidden="true"
-  >
-   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-     <div class="modal-header">
-      <h5 class="modal-title" id="errorModalLabel">Error</h5>
-      <button
-       type="button"
-       class="btn-close"
-       data-bs-dismiss="modal"
-       aria-label="Close"
-      ></button>
-     </div>
-     <div class="modal-body">
-      <p id="errorMessage">An error occurred.</p>
-     </div>
-     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-       Close
-      </button>
-     </div>
-    </div>
-   </div>
-  </div>
-
-  <!-- Add Success Notification Modal -->
-  <div
-   class="modal fade"
-   id="successNotificationModal"
-   tabindex="-1"
-   aria-labelledby="successNotificationModalLabel"
-   aria-hidden="true"
-  >
-   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-     <div class="modal-header">
-      <h5 class="modal-title" id="successNotificationModalLabel">
-       <i class="bi bi-check-circle-fill text-success me-2"></i>Success
-      </h5>
-      <button
-       type="button"
-       class="btn-close"
-       data-bs-dismiss="modal"
-       aria-label="Close"
-      ></button>
-     </div>
-     <div class="modal-body">
-      <p id="successMessage" class="mb-2">Inspection added successfully!</p>
-      <small
-       id="notificationMessage"
-       class="d-block text-muted"
-       style="
-        background-color: #f8f9fa;
-        padding: 6px;
-        border-radius: 4px;
-        font-size: 0.85em;
-       "
-      >
-       <i class="bi bi-info-circle me-1"></i>SMS was not sent to business owner,
-       please check your SMS API.
-      </small>
-     </div>
-     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-       Close
-      </button>
-     </div>
-    </div>
-   </div>
-  </div>
-
-  <section class="card mt-3">
-   <div class="card-body">
-    <h4>Inspected Businesses</h4>
-    <section class="card mt-3">
-     <div class="card-body">
-      <h4 class="mb-4">Filter & Search</h4>
-      <div class="filters">
-       <form id="filters-form">
-        <div class="row g-3">
-         <div class="col-md-4">
-          <label for="search-name" class="form-label"
-           >Search Business Name</label
-          >
-          <input
-           type="text"
-           id="search-name"
-           class="form-control"
-           placeholder="Enter business name..."
-          />
+                     <div class="row mb-2">
+                        <div class="col-md-12">
+                           <label for="businessImage" class="form-label"
+                              >Business Image:</label
+                           >
+                           <input
+                              type="file"
+                              class="form-control form-control-sm"
+                              id="businessImage"
+                              name="businessImage"
+                              accept="image/*"
+                           />
+                        </div>
+                     </div>
+                  </form>
+               </div>
+               <div class="modal-footer border-0 shadow-lg">
+                  <button
+                     type="submit"
+                     class="btn btn-primary h6"
+                     form="inspectionForm"
+                     id="submitButton"
+                  >
+                     <span id="submitButtonText">Update</span>
+                  </button>
+               </div>
+            </div>
          </div>
-         <div class="col-md-4">
-          <label for="receipt-no" class="form-label">Receipt No:</label>
-          <input
-           type="text"
-           class="form-control"
-           id="receipt-no"
-           placeholder="Search by violation receipt no..."
-          />
-         </div>
-         <div class="col-md-4">
-          <label for="inspection-date" class="form-label"
-           >Filter by Inspection Date</label
-          >
-          <input type="date" id="inspection-date" class="form-control" />
-         </div>
-         <div class="col-md-4">
-          <label for="violation" class="form-label">Filter by Violation</label>
-          <select id="violation" class="form-select">
-           <option value="">Select Violation</option>
-           <option value="yes">Yes</option>
-           <option value="no">No</option>
-          </select>
-         </div>
-         <div class="col-md-4">
-          <label for="sort-order" class="form-label">Sort by Date</label>
-          <select id="sort-order" class="form-select">
-           <option value="latest">Latest to Oldest</option>
-           <option value="oldest">Oldest to Latest</option>
-          </select>
-         </div>
-        </div>
-       </form>
       </div>
-     </div>
-    </section>
-    <table class="table table-hover">
-     <thead>
-      <tr>
-       <th>No.</th>
-       <th>Business Name</th>
-       <th>Business Status</th>
-       <th>Inspection Date</th>
-       <th>Type of Inspection</th>
-       <th>With Violations</th>
-       <th></th>
-      </tr>
-     </thead>
-     <tbody id="inspections-tbody">
-      <!-- Rendered rows will be inserted here -->
-     </tbody>
-    </table>
-   </div>
-  </section>
 
-  <nav>
-   <ul class="pagination" id="pagination-controls"></ul>
-  </nav>
+      <!-- Add Success Modal -->
+      <div
+         class="modal fade"
+         id="successModal"
+         tabindex="-1"
+         aria-hidden="true"
+      >
+         <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title">Success</h5>
+                  <button
+                     type="button"
+                     class="btn-close"
+                     data-bs-dismiss="modal"
+                     aria-label="Close"
+                  ></button>
+               </div>
+               <div class="modal-body">
+                  <p>Inspection has been successfully saved!</p>
+               </div>
+               <div class="modal-footer">
+                  <button
+                     type="button"
+                     class="btn btn-primary"
+                     data-bs-dismiss="modal"
+                  >
+                     Close
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/js/bootstrap.min.js"></script>
-  <script type="module">
-   import CONFIG from "/scripts/config.js";
+      <div
+         class="modal fade"
+         id="inspectionDetailModal"
+         tabindex="-1"
+         aria-labelledby="inspectionDetailModalLabel"
+         aria-hidden="true"
+      >
+         <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="inspectionDetailModalLabel">
+                     Inspection Details
+                  </h5>
+                  <button
+                     type="button"
+                     class="btn-close"
+                     data-bs-dismiss="modal"
+                     aria-label="Close"
+                  ></button>
+               </div>
+               <div
+                  class="modal-body"
+                  style="max-height: 70vh; overflow-y: auto"
+               >
+                  <!-- Your modal content goes here -->
+               </div>
+               <div class="modal-footer">
+                  <button
+                     type="button"
+                     class="btn btn-secondary"
+                     data-bs-dismiss="modal"
+                  >
+                     Close
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
 
-   const apiUrl = CONFIG.API_BASE_URL;
+      <!-- Error Modal Structure -->
+      <div
+         class="modal fade"
+         id="errorModal"
+         tabindex="-1"
+         aria-labelledby="errorModalLabel"
+         aria-hidden="true"
+      >
+         <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                  <button
+                     type="button"
+                     class="btn-close"
+                     data-bs-dismiss="modal"
+                     aria-label="Close"
+                  ></button>
+               </div>
+               <div class="modal-body">
+                  <p id="errorMessage">An error occurred.</p>
+               </div>
+               <div class="modal-footer">
+                  <button
+                     type="button"
+                     class="btn btn-secondary"
+                     data-bs-dismiss="modal"
+                  >
+                     Close
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
 
-   // Add this debug log to verify the URL
+      <!-- Add Success Notification Modal -->
+      <div
+         class="modal fade"
+         id="successNotificationModal"
+         tabindex="-1"
+         aria-labelledby="successNotificationModalLabel"
+         aria-hidden="true"
+      >
+         <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="successNotificationModalLabel">
+                     <i class="bi bi-check-circle-fill text-success me-2"></i
+                     >Success
+                  </h5>
+                  <button
+                     type="button"
+                     class="btn-close"
+                     data-bs-dismiss="modal"
+                     aria-label="Close"
+                  ></button>
+               </div>
+               <div class="modal-body">
+                  <p id="successMessage" class="mb-2">
+                     Inspection added successfully!
+                  </p>
+                  <small
+                     id="notificationMessage"
+                     class="d-block text-muted"
+                     style="
+                        background-color: #f8f9fa;
+                        padding: 6px;
+                        border-radius: 4px;
+                        font-size: 0.85em;
+                     "
+                  >
+                     <i class="bi bi-info-circle me-1"></i>SMS was not sent to
+                     business owner, please check your SMS API.
+                  </small>
+               </div>
+               <div class="modal-footer">
+                  <button
+                     type="button"
+                     class="btn btn-secondary"
+                     data-bs-dismiss="modal"
+                  >
+                     Close
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
 
-   let recordsPerPage = 20; // Default value
-   let currentPage = 1; // Initialize currentPage to 1
-   let totalPages = 1;
-   let inspectionsData = [];
-   let timeoutId = null;
+      <section class="card mt-3">
+         <div class="card-body">
+            <h4>Inspected Businesses</h4>
+            <section class="card mt-3">
+               <div class="card-body">
+                  <h4 class="mb-4">Filter & Search</h4>
+                  <div class="filters">
+                     <form id="filters-form">
+                        <div class="row g-3">
+                           <div class="col-md-4">
+                              <label for="search-name" class="form-label"
+                                 >Search Business Name</label
+                              >
+                              <input
+                                 type="text"
+                                 id="search-name"
+                                 class="form-control"
+                                 placeholder="Enter business name..."
+                              />
+                           </div>
+                           <div class="col-md-4">
+                              <label for="receipt-no" class="form-label"
+                                 >Receipt No:</label
+                              >
+                              <input
+                                 type="text"
+                                 class="form-control"
+                                 id="receipt-no"
+                                 placeholder="Search by violation receipt no..."
+                              />
+                           </div>
+                           <div class="col-md-4">
+                              <label for="inspection-date" class="form-label"
+                                 >Filter by Inspection Date</label
+                              >
+                              <input
+                                 type="date"
+                                 id="inspection-date"
+                                 class="form-control"
+                              />
+                           </div>
+                           <div class="col-md-4">
+                              <label for="violation" class="form-label"
+                                 >Filter by Violation</label
+                              >
+                              <select id="violation" class="form-select">
+                                 <option value="">Select Violation</option>
+                                 <option value="yes">Yes</option>
+                                 <option value="no">No</option>
+                              </select>
+                           </div>
+                           <div class="col-md-4">
+                              <label for="sort-order" class="form-label"
+                                 >Sort by Date</label
+                              >
+                              <select id="sort-order" class="form-select">
+                                 <option value="latest">
+                                    Latest to Oldest
+                                 </option>
+                                 <option value="oldest">
+                                    Oldest to Latest
+                                 </option>
+                              </select>
+                           </div>
+                        </div>
+                     </form>
+                  </div>
+               </div>
+            </section>
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>No.</th>
+                     <th>Business Name</th>
+                     <th>Business Status</th>
+                     <th>Inspection Date</th>
+                     <th>Type of Inspection</th>
+                     <th>With Violations</th>
+                     <th></th>
+                  </tr>
+               </thead>
+               <tbody id="inspections-tbody">
+                  <!-- Rendered rows will be inserted here -->
+               </tbody>
+            </table>
+         </div>
+      </section>
 
-   const formatDate = (dateString) => {
-    if (!dateString) return "N/A"; // Return "N/A" if no date is provided
-    const date = new Date(dateString);
-    // Format the date as MM/DD/YYYY
-    const options = { year: "numeric", month: "2-digit", day: "2-digit" };
-    return date.toLocaleDateString(undefined, options);
-   };
+      <nav>
+         <ul class="pagination" id="pagination-controls"></ul>
+      </nav>
 
-   const violationStatus = document.getElementById("withViolations");
-   const natureOfViolationContainer = document.getElementById(
-    "natureOfViolationContainer"
-   );
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.3/js/bootstrap.min.js"></script>
+      <script type="module">
+         import CONFIG from "/scripts/config.js";
 
-   violationStatus.addEventListener("change", function () {
-    natureOfViolationContainer.style.display =
-     violationStatus.value === "true" ? "block" : "none";
-   });
+         const apiUrl = CONFIG.API_BASE_URL;
 
-   // Function to toggle required attributes based on the "With Violations" selection
-   const toggleViolationFields = () => {
+         // Add this debug log to verify the URL
+
+         let recordsPerPage = 20; // Default value
+         let currentPage = 1; // Initialize currentPage to 1
+         let totalPages = 1;
+         let inspectionsData = [];
+         let timeoutId = null;
+
+         const formatDate = (dateString) => {
+            if (!dateString) return "N/A"; // Return "N/A" if no date is provided
+            const date = new Date(dateString);
+            // Format the date as MM/DD/YYYY
+            const options = {
+               year: "numeric",
+               month: "2-digit",
+               day: "2-digit",
+            };
+            return date.toLocaleDateString(undefined, options);
+         };
+
+         const violationStatus = document.getElementById("withViolations");
+         const natureOfViolationContainer = document.getElementById(
+            "natureOfViolationContainer"
+         );
+
+         violationStatus.addEventListener("change", function () {
+            natureOfViolationContainer.style.display =
+               violationStatus.value === "true" ? "block" : "none";
+         });
+
+         // Function to toggle required attributes based on the "With Violations" selection
+const toggleViolationFields = () => {
     const withViolationsSelect = document.getElementById("withViolations");
     const violationReceiptInput = document.getElementById("violationReceipt");
-    const dueDateInput = document.getElementById("dueDate");
-    const violationCheckboxes = document.querySelectorAll(
-     'input[name="natureOfViolation[]"]'
-    );
+    // const dueDateInput = document.getElementById("dueDate");
+    const violationFeeInput = document.getElementById("violationFee");
+    const violationCheckboxes = document.querySelectorAll('input[name="natureOfViolation[]"]');
     const violationContainer = document.querySelector(".violation-checkboxes");
 
     const hasViolations = withViolationsSelect.value === "true";
 
     // Remove required from individual checkboxes but add custom validation
-    violationCheckboxes.forEach((checkbox) => (checkbox.required = false));
+    violationCheckboxes.forEach(checkbox => checkbox.required = false);
     violationReceiptInput.required = hasViolations;
-    dueDateInput.required = hasViolations;
+    // dueDateInput.required = hasViolations;
+    violationFeeInput.required = hasViolations;
 
     // Add custom validation on form submit
     const form = withViolationsSelect.closest("form");
     form.onsubmit = (e) => {
-     if (hasViolations) {
-      const checkedViolations = document.querySelectorAll(
-       'input[name="natureOfViolation[]"]:checked'
-      );
-      if (checkedViolations.length === 0) {
-       e.preventDefault();
-       alert("Please select at least one violation");
-       violationContainer.scrollIntoView({ behavior: "smooth" });
-       return false;
-      }
-     }
-     return true;
+        if (hasViolations) {
+            const checkedViolations = document.querySelectorAll('input[name="natureOfViolation[]"]:checked');
+            if (checkedViolations.length === 0) {
+                e.preventDefault();
+                alert("Please select at least one violation");
+                violationContainer.scrollIntoView({ behavior: "smooth" });
+                return false;
+            }
+        }
+        return true;
     };
-   };
+};
 
-   // Add event listener to the "With Violations" select element
-   document
-    .getElementById("withViolations")
-    .addEventListener("change", toggleViolationFields);
+         // Add event listener to the "With Violations" select element
+         document
+            .getElementById("withViolations")
+            .addEventListener("change", toggleViolationFields);
 
-   // Initial call to set the required attributes correctly on page load
-   toggleViolationFields();
+         // Initial call to set the required attributes correctly on page load
+         toggleViolationFields();
 
-   // Add cleanup modal function at the top level
-   const cleanupModal = () => {
-    // Remove modal element
-    const modalElement = document.getElementById("inspectionDetailModal");
-    if (modalElement) {
-     const modalInstance = bootstrap.Modal.getInstance(modalElement);
-     if (modalInstance) {
-      modalInstance.dispose();
-     }
-     modalElement.remove();
-    }
+         // Add cleanup modal function at the top level
+         const cleanupModal = () => {
+            // Remove modal element
+            const modalElement = document.getElementById(
+               "inspectionDetailModal"
+            );
+            if (modalElement) {
+               const modalInstance = bootstrap.Modal.getInstance(modalElement);
+               if (modalInstance) {
+                  modalInstance.dispose();
+               }
+               modalElement.remove();
+            }
 
-    // Remove modal backdrop
-    const backdrops = document.getElementsByClassName("modal-backdrop");
-    while (backdrops.length > 0) {
-     backdrops[0].remove();
-    }
+            // Remove modal backdrop
+            const backdrops = document.getElementsByClassName("modal-backdrop");
+            while (backdrops.length > 0) {
+               backdrops[0].remove();
+            }
 
-    // Reset body styles
-    document.body.classList.remove("modal-open");
-    document.body.style.overflow = "";
-    document.body.style.paddingRight = "";
-   };
+            // Reset body styles
+            document.body.classList.remove("modal-open");
+            document.body.style.overflow = "";
+            document.body.style.paddingRight = "";
+         };
 
-   // Update the form submission handler
-   inspectionForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
+         // Update the form submission handler
+         inspectionForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
 
-    const submitButton = document.getElementById("submitButton");
-    const originalContent = submitButton.innerHTML;
-    const currentlyEditing = isEditing;
+            const submitButton = document.getElementById("submitButton");
+            const originalContent = submitButton.innerHTML;
+            const currentlyEditing = isEditing;
 
-    try {
-     submitButton.disabled = true;
-     submitButton.innerHTML = `
+            try {
+               submitButton.disabled = true;
+               submitButton.innerHTML = `
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             ${currentlyEditing ? "Updating..." : "Submitting..."}
         `;
 
-     const formData = new FormData();
+               const formData = new FormData();
 
-     // Map form fields to backend expected names
-     formData.append(
-      "owner_first_name",
-      document.getElementById("ownerFirstName").value
-     );
-     formData.append(
-      "owner_last_name",
-      document.getElementById("ownerLastName").value
-     );
-     formData.append(
-      "owner_email",
-      document.getElementById("ownerEmail").value
-     );
-     formData.append(
-      "owner_phone_number",
-      document.getElementById("ownerPhoneNumber").value
-     );
-     formData.append(
-      "business_name",
-      document.getElementById("businessName").value
-     );
-     formData.append(
-      "business_permit",
-      document.getElementById("businessPermit").value
-     );
-     formData.append(
-      "business_status",
-      document.getElementById("businessStatus").value
-     );
-     formData.append("street", document.getElementById("street").value);
-     formData.append("city", document.getElementById("city").value);
-     formData.append("zip", document.getElementById("zip").value);
-     formData.append(
-      "type_of_inspection",
-      document.getElementById("typeOfInspection").value
-     );
+               // Map form fields to backend expected names
+               formData.append(
+                  "owner_first_name",
+                  document.getElementById("ownerFirstName").value
+               );
+               formData.append(
+                  "owner_last_name",
+                  document.getElementById("ownerLastName").value
+               );
+               formData.append(
+                  "owner_email",
+                  document.getElementById("ownerEmail").value
+               );
+               formData.append(
+                  "owner_phone_number",
+                  document.getElementById("ownerPhoneNumber").value
+               );
+               formData.append(
+                  "business_name",
+                  document.getElementById("businessName").value
+               );
+               formData.append(
+                  "business_permit",
+                  document.getElementById("businessPermit").value
+               );
+               formData.append(
+                  "business_status",
+                  document.getElementById("businessStatus").value
+               );
+               formData.append(
+                  "street",
+                  document.getElementById("street").value
+               );
+               formData.append("city", document.getElementById("city").value);
+               formData.append("zip", document.getElementById("zip").value);
+               formData.append(
+                  "type_of_inspection",
+                  document.getElementById("typeOfInspection").value
+               );
 
-     // Handle with_violations
-     const withViolationsValue =
-      document.getElementById("withViolations").value;
-     formData.append("with_violations", withViolationsValue);
+               // Handle with_violations
+               const withViolationsValue =
+                  document.getElementById("withViolations").value;
+               formData.append("with_violations", withViolationsValue);
 
-     // Handle violations if "Yes" is selected
-     if (withViolationsValue === "true") {
-      const selectedViolations = Array.from(
-       document.querySelectorAll('input[name="natureOfViolation[]"]:checked')
-      ).map((cb) => cb.value);
+               // Handle violations if "Yes" is selected
+if (withViolationsValue === "true") {
+    const selectedViolations = Array.from(
+        document.querySelectorAll('input[name="natureOfViolation[]"]:checked')
+    ).map((cb) => cb.value);
 
-      selectedViolations.forEach((violation) => {
-       formData.append("nature_of_violations[]", violation);
-      });
+    selectedViolations.forEach((violation) => {
+        formData.append("nature_of_violations[]", violation);
+    });
 
-      formData.append(
-       "violation_receipt",
-       document.getElementById("violationReceipt").value
-      );
-      formData.append("due_date", document.getElementById("dueDate").value);
-     }
+    formData.append("violation_receipt", document.getElementById("violationReceipt").value);
+    // formData.append("due_date", document.getElementById("dueDate").value);
+    formData.append("violation_fee", document.getElementById("violationFee").value);
+}
 
-     // Handle file upload
-     const businessImage = document.getElementById("businessImage").files[0];
-     if (businessImage) {
-      formData.append("image", businessImage);
-     }
+               // Handle file upload
+               const businessImage =
+                  document.getElementById("businessImage").files[0];
+               if (businessImage) {
+                  formData.append("image", businessImage);
+               }
 
-     // Add inspection ID for updates
-     const inspectionId = document.getElementById("inspectionId").value;
-     if (currentlyEditing) {
-      formData.append("_method", "PUT");
-     }
+               // Add inspection ID for updates
+               const inspectionId =
+                  document.getElementById("inspectionId").value;
+               if (currentlyEditing) {
+                  formData.append("_method", "PUT");
+               }
 
-     const endpoint = currentlyEditing
-      ? `${apiUrl}/inspector/update-inspection/${inspectionId}`
-      : `${apiUrl}/inspector/add-inspection`;
+               const endpoint = currentlyEditing
+                  ? `${apiUrl}/inspector/update-inspection/${inspectionId}`
+                  : `${apiUrl}/inspector/add-inspection`;
 
-     const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-       Accept: "application/json",
-       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-      body: formData,
-     });
+               const response = await fetch(endpoint, {
+                  method: "POST",
+                  headers: {
+                     Accept: "application/json",
+                     Authorization: `Bearer ${localStorage.getItem(
+                        "authToken"
+                     )}`,
+                  },
+                  body: formData,
+               });
 
-     const responseData = await response.json();
+               const responseData = await response.json();
 
-     if (!response.ok) {
-      throw new Error(responseData.message || "An unexpected error occurred.");
-     }
+               if (!response.ok) {
+                  throw new Error(
+                     responseData.message || "An unexpected error occurred."
+                  );
+               }
 
-     // Hide the form modal
-     const violatorModal = bootstrap.Modal.getInstance(
-      document.getElementById("violatorModal")
-     );
-     violatorModal.hide();
+               // Hide the form modal
+               const violatorModal = bootstrap.Modal.getInstance(
+                  document.getElementById("violatorModal")
+               );
+               violatorModal.hide();
 
-     // Set success message with business details
-     const businessName =
-      responseData.inspection?.business?.business_name || "Business";
-     const ownerName = responseData.inspection?.business?.owner
-      ? `${responseData.inspection.business.owner.first_name} ${responseData.inspection.business.owner.last_name}`
-      : "Owner";
+               // Set success message with business details
+               const businessName =
+                  responseData.inspection?.business?.business_name ||
+                  "Business";
+               const ownerName = responseData.inspection?.business?.owner
+                  ? `${responseData.inspection.business.owner.first_name} ${responseData.inspection.business.owner.last_name}`
+                  : "Owner";
 
-     document.getElementById("successMessage").innerHTML = `
+               document.getElementById("successMessage").innerHTML = `
             <div class="mb-3">
                 <strong>${responseData.message}</strong>
                 <div class="mt-2 text-muted">
@@ -949,150 +1089,154 @@
             </div>
         `;
 
-     // Set SMS notification status
-     const smsStatusDiv = document.getElementById("notificationMessage");
-     if (responseData.sms_status === 200) {
-      smsStatusDiv.className = "text-success";
-      smsStatusDiv.style.backgroundColor = "#e8f5e9";
-      smsStatusDiv.innerHTML = `
+               // Set SMS notification status
+               const smsStatusDiv = document.getElementById(
+                  "notificationMessage"
+               );
+               if (responseData.sms_status === 200) {
+                  smsStatusDiv.className = "text-success";
+                  smsStatusDiv.style.backgroundColor = "#e8f5e9";
+                  smsStatusDiv.innerHTML = `
                 <i class="bi bi-check-circle-fill text-success me-2"></i>
                 ${responseData.sms_message}
             `;
-     } else {
-      smsStatusDiv.className = "text-warning";
-      smsStatusDiv.style.backgroundColor = "#fff3e0";
-      smsStatusDiv.innerHTML = `
+               } else {
+                  smsStatusDiv.className = "text-warning";
+                  smsStatusDiv.style.backgroundColor = "#fff3e0";
+                  smsStatusDiv.innerHTML = `
                 <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>
                 SMS notification could not be sent
             `;
-     }
+               }
 
-     // Show success modal
-     const successModal = new bootstrap.Modal(
-      document.getElementById("successNotificationModal")
-     );
-     successModal.show();
+               // Show success modal
+               const successModal = new bootstrap.Modal(
+                  document.getElementById("successNotificationModal")
+               );
+               successModal.show();
 
-     // Reset form and refresh table
-     resetForm();
-     fetchInspections(currentPage);
-    } catch (error) {
-     console.error("Submission error:", error);
+               // Reset form and refresh table
+               resetForm();
+               fetchInspections(currentPage);
+            } catch (error) {
+               console.error("Submission error:", error);
 
-     // Show error modal with detailed message
-     const errorModal = new bootstrap.Modal(
-      document.getElementById("errorModal")
-     );
-     document.getElementById("errorMessage").innerHTML = `
+               // Show error modal with detailed message
+               const errorModal = new bootstrap.Modal(
+                  document.getElementById("errorModal")
+               );
+               document.getElementById("errorMessage").innerHTML = `
             <div class="alert alert-danger mb-0">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 ${
-                 error.message ||
-                 "An unexpected error occurred while processing your request."
+                   error.message ||
+                   "An unexpected error occurred while processing your request."
                 }
             </div>
         `;
-     errorModal.show();
-    } finally {
-     submitButton.disabled = false;
-     submitButton.innerHTML = originalContent;
+               errorModal.show();
+            } finally {
+               submitButton.disabled = false;
+               submitButton.innerHTML = originalContent;
+            }
+         });
+
+         // Add event listeners for modal hidden events
+         document
+            .getElementById("violatorModal")
+            .addEventListener("hidden.bs.modal", function () {
+               cleanupModal();
+            });
+
+         document
+            .getElementById("successModal")
+            .addEventListener("hidden.bs.modal", function () {
+               cleanupModal();
+            });
+
+         // Add event listener for the violations select
+document.getElementById("withViolations").addEventListener("change", function () {
+    const violationsContainer = document.getElementById("natureOfViolationContainer");
+    const violationReceipt = document.getElementById("violationReceipt");
+    // const dueDate = document.getElementById("dueDate");
+    const violationFee = document.getElementById("violationFee");
+    const violationCheckboxes = document.querySelectorAll('input[name="natureOfViolation[]"]');
+
+    if (this.value === "true") {
+        violationsContainer.style.display = "block";
+        violationReceipt.required = true;
+        // dueDate.required = true;
+        violationFee.required = true;
+        // At least one violation checkbox should be checked
+        violationCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", validateViolations);
+        });
+    } else {
+        violationsContainer.style.display = "none";
+        violationReceipt.required = false;
+        // dueDate.required = false;
+        violationFee.required = false;
+        // Remove validation from checkboxes
+        violationCheckboxes.forEach((checkbox) => {
+            checkbox.removeEventListener("change", validateViolations);
+            checkbox.checked = false;
+        });
+        violationReceipt.value = "";
+        // dueDate.value = "";
+        violationFee.value = "";
     }
-   });
+});
 
-   // Add event listeners for modal hidden events
-   document
-    .getElementById("violatorModal")
-    .addEventListener("hidden.bs.modal", function () {
-     cleanupModal();
-    });
+         // Function to validate that at least one violation is checked
+         function validateViolations() {
+            const violationCheckboxes = document.querySelectorAll(
+               'input[name="natureOfViolation[]"]:checked'
+            );
+            if (violationCheckboxes.length === 0) {
+               // Show error message or handle validation
+               return false;
+            }
+            return true;
+         }
 
-   document
-    .getElementById("successModal")
-    .addEventListener("hidden.bs.modal", function () {
-     cleanupModal();
-    });
+         // Delete functionality
+         document.querySelectorAll(".delete-btn").forEach((button) => {
+            button.addEventListener("click", function () {
+               if (
+                  confirm("Are you sure you want to delete this inspection?")
+               ) {
+                  const row = this.closest("tr");
+                  const inspectionId = this.dataset.id;
+                  // Add your delete logic here
 
-   // Add event listener for the violations select
-   document
-    .getElementById("withViolations")
-    .addEventListener("change", function () {
-     const violationsContainer = document.getElementById(
-      "natureOfViolationContainer"
-     );
-     const violationReceipt = document.getElementById("violationReceipt");
-     const dueDate = document.getElementById("dueDate");
-     const violationCheckboxes = document.querySelectorAll(
-      'input[name="natureOfViolation[]"]'
-     );
+                  // Remove row from table
+                  row.remove();
+               }
+            });
+         });
 
-     if (this.value === "true") {
-      violationsContainer.style.display = "block";
-      violationReceipt.required = true;
-      dueDate.required = true;
-      // At least one violation checkbox should be checked
-      violationCheckboxes.forEach((checkbox) => {
-       checkbox.addEventListener("change", validateViolations);
-      });
-     } else {
-      violationsContainer.style.display = "none";
-      violationReceipt.required = false;
-      dueDate.required = false;
-      // Remove validation from checkboxes
-      violationCheckboxes.forEach((checkbox) => {
-       checkbox.removeEventListener("change", validateViolations);
-       checkbox.checked = false;
-      });
-      violationReceipt.value = "";
-      dueDate.value = "";
-     }
-    });
+         const renderTable = () => {
+            const inspectionsTbody =
+               document.getElementById("inspections-tbody");
+            inspectionsTbody.innerHTML = "";
 
-   // Function to validate that at least one violation is checked
-   function validateViolations() {
-    const violationCheckboxes = document.querySelectorAll(
-     'input[name="natureOfViolation[]"]:checked'
-    );
-    if (violationCheckboxes.length === 0) {
-     // Show error message or handle validation
-     return false;
-    }
-    return true;
-   }
-
-   // Delete functionality
-   document.querySelectorAll(".delete-btn").forEach((button) => {
-    button.addEventListener("click", function () {
-     if (confirm("Are you sure you want to delete this inspection?")) {
-      const row = this.closest("tr");
-      const inspectionId = this.dataset.id;
-      // Add your delete logic here
-
-      // Remove row from table
-      row.remove();
-     }
-    });
-   });
-
-   const renderTable = () => {
-    const inspectionsTbody = document.getElementById("inspections-tbody");
-    inspectionsTbody.innerHTML = "";
-
-    if (!inspectionsData || inspectionsData.length === 0) {
-     const noDataRow = document.createElement("tr");
-     noDataRow.innerHTML = `
+            if (!inspectionsData || inspectionsData.length === 0) {
+               const noDataRow = document.createElement("tr");
+               noDataRow.innerHTML = `
             <td colspan="6" class="text-center">No inspections found</td>
         `;
-     inspectionsTbody.appendChild(noDataRow);
-     return;
-    }
+               inspectionsTbody.appendChild(noDataRow);
+               return;
+            }
 
-    inspectionsData.forEach((inspection, index) => {
-     const row = document.createElement("tr");
-     row.className = "inspection-row";
-     row.style.cursor = "pointer";
-     const actualIndex = (currentPage - 1) * recordsPerPage + index + 1;
+            inspectionsData.forEach((inspection, index) => {
+               const row = document.createElement("tr");
+               row.className = "inspection-row";
+               row.style.cursor = "pointer";
+               const actualIndex =
+                  (currentPage - 1) * recordsPerPage + index + 1;
 
-     row.innerHTML = `
+               row.innerHTML = `
             <td>${actualIndex}</td>
             <td>${inspection.business?.business_name || "N/A"}</td>
             <td>${inspection.business?.status || "N/A"}</td>
@@ -1100,38 +1244,39 @@
             <td>${inspection.type_of_inspection || "N/A"}</td>
             <td class="align-middle">
                 <span class="badge ${
-                 inspection.with_violations ? "bg-danger" : "bg-success"
+                   inspection.with_violations ? "bg-danger" : "bg-success"
                 } py-2 px-3">
                     ${inspection.with_violations ? "Yes" : "No"}
                 </span>
             </td>
             <td class="align-middle text-end">
                 <a href="#" class="edit-icon" id="editButton" data-id="${
-                 inspection.inspection_id
+                   inspection.inspection_id
                 }">
                     <i class="bi bi-pencil-fill"></i> Edit
                 </a>
             </td>
         `;
 
-     // Update the row click handler to check if edit button was clicked
-     row.addEventListener("click", (e) => {
-      // Don't show details if clicking the edit button or its container
-      if (!e.target.closest(".edit-icon")) {
-       showInspectionDetails(inspection);
-      }
-     });
+               // Update the row click handler to check if edit button was clicked
+               row.addEventListener("click", (e) => {
+                  // Don't show details if clicking the edit button or its container
+                  if (!e.target.closest(".edit-icon")) {
+                     showInspectionDetails(inspection);
+                  }
+               });
 
-     inspectionsTbody.appendChild(row);
-    });
+               inspectionsTbody.appendChild(row);
+            });
 
-    renderPagination();
-   };
+            renderPagination();
+         };
 
-   const fetchInspections = async (page = 1) => {
-    try {
-     const inspectionsTbody = document.getElementById("inspections-tbody");
-     inspectionsTbody.innerHTML = `
+         const fetchInspections = async (page = 1) => {
+            try {
+               const inspectionsTbody =
+                  document.getElementById("inspections-tbody");
+               inspectionsTbody.innerHTML = `
              <tr>
                  <td colspan="7" class="text-center">
                      <div class="spinner-border text-primary" role="status">
@@ -1141,187 +1286,200 @@
              </tr>
          `;
 
-     const inspectionDate = document.getElementById("inspection-date").value;
-     const violation = document.getElementById("violation").value;
-     const receiptNo = document.getElementById("receipt-no").value;
-     const searchName = document.getElementById("search-name").value;
-     const sortOrder = document.getElementById("sort-order").value;
-     const sortOrderParam = sortOrder === "oldest" ? "asc" : "desc";
+               const inspectionDate =
+                  document.getElementById("inspection-date").value;
+               const violation = document.getElementById("violation").value;
+               const receiptNo = document.getElementById("receipt-no").value;
+               const searchName = document.getElementById("search-name").value;
+               const sortOrder = document.getElementById("sort-order").value;
+               const sortOrderParam = sortOrder === "oldest" ? "asc" : "desc";
 
-     const params = new URLSearchParams({
-      page: page,
-      ...(inspectionDate && { inspection_date: inspectionDate }),
-      ...(violation && { with_violations: violation }),
-      ...(receiptNo && { violation_receipt_no: receiptNo }),
-      ...(searchName && { business_name: searchName }),
-      sort_order: sortOrderParam,
-     });
+               const params = new URLSearchParams({
+                  page: page,
+                  ...(inspectionDate && { inspection_date: inspectionDate }),
+                  ...(violation && { with_violations: violation }),
+                  ...(receiptNo && { violation_receipt_no: receiptNo }),
+                  ...(searchName && { business_name: searchName }),
+                  sort_order: sortOrderParam,
+               });
 
-     const response = await fetch(
-      `${apiUrl}/inspector/inspections?${params.toString()}`,
-      {
-       method: "GET",
-       headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-       },
-      }
-     );
+               const response = await fetch(
+                  `${apiUrl}/inspector/inspections?${params.toString()}`,
+                  {
+                     method: "GET",
+                     headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${localStorage.getItem(
+                           "authToken"
+                        )}`,
+                     },
+                  }
+               );
 
-     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-     }
+               if (!response.ok) {
+                  throw new Error(
+                     `API request failed with status ${response.status}`
+                  );
+               }
 
-     const data = await response.json();
-     inspectionsData = data.inspections.data || [];
-     totalPages = data.inspections.last_page || 1;
-     currentPage = data.inspections.current_page || 1;
-     recordsPerPage = data.inspections.per_page || 15;
+               const data = await response.json();
+               inspectionsData = data.inspections.data || [];
+               totalPages = data.inspections.last_page || 1;
+               currentPage = data.inspections.current_page || 1;
+               recordsPerPage = data.inspections.per_page || 15;
 
-     renderTable();
-    } catch (error) {
-     console.error("Error fetching inspections:", error);
-     const inspectionsTbody = document.getElementById("inspections-tbody");
-     inspectionsTbody.innerHTML = `
+               renderTable();
+            } catch (error) {
+               console.error("Error fetching inspections:", error);
+               const inspectionsTbody =
+                  document.getElementById("inspections-tbody");
+               inspectionsTbody.innerHTML = `
              <tr>
                  <td colspan="7" class="text-center text-danger">
                      Error loading inspections. Please try again.
                  </td>
              </tr>
          `;
-    }
-   };
+            }
+         };
 
-   // First, define the debounce function at the top of your script
-   const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-     clearTimeout(timeoutId);
-     timeoutId = setTimeout(() => func.apply(null, args), delay);
-    };
-   };
+         // First, define the debounce function at the top of your script
+         const debounce = (func, delay) => {
+            let timeoutId;
+            return (...args) => {
+               clearTimeout(timeoutId);
+               timeoutId = setTimeout(() => func.apply(null, args), delay);
+            };
+         };
 
-   // Create a debounced version of fetchInspections
-   const debouncedFetchInspections = debounce((page = 1) => {
-    fetchInspections(page);
-   }, 300);
+         // Create a debounced version of fetchInspections
+         const debouncedFetchInspections = debounce((page = 1) => {
+            fetchInspections(page);
+         }, 300);
 
-   // Update your filter setup
-   const setupFilterListeners = () => {
-    const filterElements = [
-     "search-name",
-     "inspection-date",
-     "violation",
-     "receipt-no",
-     "sort-order",
-    ];
+         // Update your filter setup
+         const setupFilterListeners = () => {
+            const filterElements = [
+               "search-name",
+               "inspection-date",
+               "violation",
+               "receipt-no",
+               "sort-order",
+            ];
 
-    filterElements.forEach((elementId) => {
-     const element = document.getElementById(elementId);
-     if (element) {
-      // Remove any existing listeners first
-      const newElement = element.cloneNode(true);
-      element.parentNode.replaceChild(newElement, element);
+            filterElements.forEach((elementId) => {
+               const element = document.getElementById(elementId);
+               if (element) {
+                  // Remove any existing listeners first
+                  const newElement = element.cloneNode(true);
+                  element.parentNode.replaceChild(newElement, element);
 
-      // Add the new listener
-      newElement.addEventListener("input", () => {
-       currentPage = 1;
-       debouncedFetchInspections(currentPage);
-      });
+                  // Add the new listener
+                  newElement.addEventListener("input", () => {
+                     currentPage = 1;
+                     debouncedFetchInspections(currentPage);
+                  });
 
-      newElement.addEventListener("change", () => {
-       currentPage = 1;
-       debouncedFetchInspections(currentPage);
-      });
-     }
-    });
-   };
+                  newElement.addEventListener("change", () => {
+                     currentPage = 1;
+                     debouncedFetchInspections(currentPage);
+                  });
+               }
+            });
+         };
 
-   const renderPagination = () => {
-    const paginationControls = document.getElementById("pagination-controls");
-    paginationControls.innerHTML = "";
+         const renderPagination = () => {
+            const paginationControls = document.getElementById(
+               "pagination-controls"
+            );
+            paginationControls.innerHTML = "";
 
-    if (totalPages <= 1) return;
+            if (totalPages <= 1) return;
 
-    const prevPageButton = document.createElement("li");
-    prevPageButton.classList.add("page-item");
-    prevPageButton.innerHTML = `
+            const prevPageButton = document.createElement("li");
+            prevPageButton.classList.add("page-item");
+            prevPageButton.innerHTML = `
           <a class="page-link" href="#" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
           </a>
       `;
-    prevPageButton.addEventListener("click", (e) => {
-     e.preventDefault();
-     if (currentPage > 1) changePage(currentPage - 1);
-    });
-    if (currentPage === 1) prevPageButton.classList.add("disabled");
-    paginationControls.appendChild(prevPageButton);
+            prevPageButton.addEventListener("click", (e) => {
+               e.preventDefault();
+               if (currentPage > 1) changePage(currentPage - 1);
+            });
+            if (currentPage === 1) prevPageButton.classList.add("disabled");
+            paginationControls.appendChild(prevPageButton);
 
-    for (let i = 1; i <= totalPages; i++) {
-     const pageButton = document.createElement("li");
-     pageButton.classList.add("page-item");
-     if (i === currentPage) pageButton.classList.add("active");
-     pageButton.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-     pageButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      changePage(i);
-     });
-     paginationControls.appendChild(pageButton);
-    }
+            for (let i = 1; i <= totalPages; i++) {
+               const pageButton = document.createElement("li");
+               pageButton.classList.add("page-item");
+               if (i === currentPage) pageButton.classList.add("active");
+               pageButton.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+               pageButton.addEventListener("click", (e) => {
+                  e.preventDefault();
+                  changePage(i);
+               });
+               paginationControls.appendChild(pageButton);
+            }
 
-    const nextPageButton = document.createElement("li");
-    nextPageButton.classList.add("page-item");
-    nextPageButton.innerHTML = `
+            const nextPageButton = document.createElement("li");
+            nextPageButton.classList.add("page-item");
+            nextPageButton.innerHTML = `
           <a class="page-link" href="#" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
           </a>
       `;
-    nextPageButton.addEventListener("click", (e) => {
-     e.preventDefault();
-     if (currentPage < totalPages) changePage(currentPage + 1);
-    });
-    if (currentPage === totalPages) nextPageButton.classList.add("disabled");
-    paginationControls.appendChild(nextPageButton);
-   };
+            nextPageButton.addEventListener("click", (e) => {
+               e.preventDefault();
+               if (currentPage < totalPages) changePage(currentPage + 1);
+            });
+            if (currentPage === totalPages)
+               nextPageButton.classList.add("disabled");
+            paginationControls.appendChild(nextPageButton);
+         };
 
-   const changePage = (newPage) => {
-    currentPage = newPage; // Update the current page
-    fetchInspections(currentPage); // Fetch inspections for the new page
-   };
+         const changePage = (newPage) => {
+            currentPage = newPage; // Update the current page
+            fetchInspections(currentPage); // Fetch inspections for the new page
+         };
 
-   // Call the functions to set up the listeners and fetch initial data
-   setupFilterListeners();
-   fetchInspections();
+         // Call the functions to set up the listeners and fetch initial data
+         setupFilterListeners();
+         fetchInspections();
 
-   // Function to show inspection details in the modal
-   const getImageUrl = (imageUrl) => {
-    if (!imageUrl) return null;
-    return `${CONFIG.APP_URL}/storage/${imageUrl}`;
-   };
+         // Function to show inspection details in the modal
+         const getImageUrl = (imageUrl) => {
+            if (!imageUrl) return null;
+            return `${CONFIG.APP_URL}/storage/${imageUrl}`;
+         };
 
-   const showInspectionDetails = async (inspection) => {
-    try {
-     cleanupModal();
+         const showInspectionDetails = async (inspection) => {
+            try {
+               cleanupModal();
 
-     // Get the inspection details from the API
-     const response = await fetch(
-      `${apiUrl}/inspection/inspections/${inspection.inspection_id}`,
-      {
-       headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-       },
-      }
-     );
+               // Get the inspection details from the API
+               const response = await fetch(
+                  `${apiUrl}/inspection/inspections/${inspection.inspection_id}`,
+                  {
+                     headers: {
+                        Accept: "application/json",
+                        Authorization: `Bearer ${localStorage.getItem(
+                           "authToken"
+                        )}`,
+                     },
+                  }
+               );
 
-     if (!response.ok) {
-      throw new Error(`Failed to fetch inspection details: ${response.status}`);
-     }
+               if (!response.ok) {
+                  throw new Error(
+                     `Failed to fetch inspection details: ${response.status}`
+                  );
+               }
 
-     const data = await response.json();
-     const inspectionDetails = data.inspection;
+               const data = await response.json();
+               const inspectionDetails = data.inspection;
 
-     const detailedModalContent = `
+               const detailedModalContent = `
             <div class="modal fade" id="inspectionDetailModal" tabindex="-1">
                 <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content border-0 shadow-sm">
@@ -1335,23 +1493,23 @@
                             <!-- Business Image Section -->
                             <div class="text-center mb-4">
                                 ${
-                                 inspectionDetails.image_url
-                                  ? `<div class="position-relative d-inline-block">
+                                   inspectionDetails.image_url
+                                      ? `<div class="position-relative d-inline-block">
                                         <img src="${CONFIG.APP_URL}/storage/${
-                                     inspectionDetails.image_url
-                                    }" 
+                                           inspectionDetails.image_url
+                                        }" 
                                              alt="Business Image" 
                                              class="rounded-3 shadow-sm img-fluid" 
                                              style="max-height: 200px; width: auto; object-fit: cover" 
                                              onerror="this.src='/assets/images/no-image.png';">
                                         <div class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-75 text-white rounded-bottom w-100">
                                             <small>${
-                                             inspectionDetails.business
-                                              ?.business_name || "N/A"
+                                               inspectionDetails.business
+                                                  ?.business_name || "N/A"
                                             }</small>
                                         </div>
                                     </div>`
-                                  : `<div class="text-center p-4 bg-light rounded-3">
+                                      : `<div class="text-center p-4 bg-light rounded-3">
                                         <i class="bi bi-building-x display-1 text-muted"></i>
                                         <p class="text-muted mt-2">No inspection image available</p>
                                     </div>`
@@ -1369,37 +1527,39 @@
                                             <div class="mb-3">
                                                 <label class="text-muted small">Business Name</label>
                                                 <p class="fw-semibold mb-2">${
-                                                 inspectionDetails.business
-                                                  ?.business_name || "N/A"
+                                                   inspectionDetails.business
+                                                      ?.business_name || "N/A"
                                                 }</p>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="text-muted small">Business Permit</label>
                                                 <p class="fw-semibold mb-2">${
-                                                 inspectionDetails.business
-                                                  ?.business_permit || "N/A"
+                                                   inspectionDetails.business
+                                                      ?.business_permit || "N/A"
                                                 }</p>
                                             </div>
                                             <div>
                                                 <label class="text-muted small">Business Status</label>
                                                 <p class="mb-0">
                                                     <span class="badge ${
-                                                     inspectionDetails.business
-                                                      ?.status === "with_permit"
-                                                      ? "bg-success"
-                                                      : inspectionDetails
-                                                         .business?.status ===
-                                                        "low_income"
-                                                      ? "bg-warning"
-                                                      : "bg-danger"
+                                                       inspectionDetails
+                                                          .business?.status ===
+                                                       "with_permit"
+                                                          ? "bg-success"
+                                                          : inspectionDetails
+                                                               .business
+                                                               ?.status ===
+                                                            "low_income"
+                                                          ? "bg-warning"
+                                                          : "bg-danger"
                                                     } py-2 px-3">
                                                         ${(
-                                                         inspectionDetails
-                                                          .business?.status ||
-                                                         "N/A"
+                                                           inspectionDetails
+                                                              .business
+                                                              ?.status || "N/A"
                                                         )
-                                                         .replace(/_/g, " ")
-                                                         .toUpperCase()}
+                                                           .replace(/_/g, " ")
+                                                           .toUpperCase()}
                                                     </span>
                                                 </p>
                                             </div>
@@ -1417,19 +1577,19 @@
                                             <div class="mb-3">
                                                 <label class="text-muted small">Owner Name</label>
                                                 <p class="fw-semibold mb-2">${
-                                                 inspectionDetails.business
-                                                  ?.owner?.first_name || ""
+                                                   inspectionDetails.business
+                                                      ?.owner?.first_name || ""
                                                 } ${
-      inspectionDetails.business?.owner?.last_name || "N/A"
-     }</p>
+                  inspectionDetails.business?.owner?.last_name || "N/A"
+               }</p>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="text-muted small">
                                                     <i class="bi bi-envelope-fill me-1"></i>Email
                                                 </label>
                                                 <p class="fw-semibold mb-2">${
-                                                 inspectionDetails.business
-                                                  ?.owner?.email || "N/A"
+                                                   inspectionDetails.business
+                                                      ?.owner?.email || "N/A"
                                                 }</p>
                                             </div>
                                             <div>
@@ -1437,8 +1597,9 @@
                                                     <i class="bi bi-telephone-fill me-1"></i>Phone
                                                 </label>
                                                 <p class="fw-semibold mb-0">${
-                                                 inspectionDetails.business
-                                                  ?.owner?.phone_number || "N/A"
+                                                   inspectionDetails.business
+                                                      ?.owner?.phone_number ||
+                                                   "N/A"
                                                 }</p>
                                             </div>
                                         </div>
@@ -1456,24 +1617,25 @@
                                                 <div class="col-md-4 mb-3">
                                                     <label class="text-muted small">Inspection Date</label>
                                                     <p class="fw-semibold mb-0">${formatDate(
-                                                     inspectionDetails.inspection_date
+                                                       inspectionDetails.inspection_date
                                                     )}</p>
                                                 </div>
                                                 <div class="col-md-4 mb-3">
                                                     <label class="text-muted small">Type of Inspection</label>
                                                     <p class="fw-semibold mb-0">${
-                                                     inspectionDetails.type_of_inspection?.toUpperCase() ||
-                                                     "N/A"
+                                                       inspectionDetails.type_of_inspection?.toUpperCase() ||
+                                                       "N/A"
                                                     }</p>
                                                 </div>
                                                 <div class="col-md-4 mb-3">
                                                     <label class="text-muted small">Inspector</label>
                                                     <p class="fw-semibold mb-0">${
-                                                     inspectionDetails.inspector
-                                                      ?.first_name || ""
+                                                       inspectionDetails
+                                                          .inspector
+                                                          ?.first_name || ""
                                                     } ${
-      inspectionDetails.inspector?.last_name || "N/A"
-     }</p>
+                  inspectionDetails.inspector?.last_name || "N/A"
+               }</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -1482,39 +1644,39 @@
 
                                 <!-- Violations Section -->
                                 ${
-                                 inspectionDetails.violations &&
-                                 inspectionDetails.violations.length > 0
-                                  ? inspectionDetails.violations
-                                     .map(
-                                      (violation) => `
+                                   inspectionDetails.violations &&
+                                   inspectionDetails.violations.length > 0
+                                      ? inspectionDetails.violations
+                                           .map(
+                                              (violation) => `
                                         <div class="col-12">
                                             <div class="card soft-card">
                                                 <div class="card-body">
                                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                                         <div class="d-flex align-items-center">
                                                             <i class="bi bi-clipboard-x fs-4 ${
-                                                             violation.status ===
-                                                             "resolved"
-                                                              ? "text-success"
-                                                              : "text-danger"
+                                                               violation.status ===
+                                                               "resolved"
+                                                                  ? "text-success"
+                                                                  : "text-danger"
                                                             } me-2"></i>
                                                             <h6 class="card-title fw-bold mb-0">Violation Information</h6>
                                                         </div>
                                                         <span class="badge ${
-                                                         violation.status ===
-                                                         "pending"
-                                                          ? "bg-warning"
-                                                          : violation.status ===
-                                                            "resolved"
-                                                          ? "bg-success"
-                                                          : violation.status ===
-                                                            "overdue"
-                                                          ? "bg-danger"
-                                                          : "bg-secondary"
+                                                           violation.status ===
+                                                           "pending"
+                                                              ? "bg-warning"
+                                                              : violation.status ===
+                                                                "resolved"
+                                                              ? "bg-success"
+                                                              : violation.status ===
+                                                                "overdue"
+                                                              ? "bg-danger"
+                                                              : "bg-secondary"
                                                         } rounded-pill px-3 py-2">
                                                             ${
-                                                             violation.status?.toUpperCase() ||
-                                                             "N/A"
+                                                               violation.status?.toUpperCase() ||
+                                                               "N/A"
                                                             }
                                                         </span>
                                                     </div>
@@ -1525,8 +1687,8 @@
                                                             <div class="detail-item">
                                                                 <label class="text-muted small d-block">Receipt No.</label>
                                                                 <span class="fw-semibold">${
-                                                                 violation.violation_receipt_no ||
-                                                                 "N/A"
+                                                                   violation.violation_receipt_no ||
+                                                                   "N/A"
                                                                 }</span>
                                                             </div>
                                                         </div>
@@ -1534,7 +1696,7 @@
                                                             <div class="detail-item">
                                                                 <label class="text-muted small d-block">Violation Date</label>
                                                                 <span class="fw-semibold">${formatDate(
-                                                                 violation.violation_date
+                                                                   violation.violation_date
                                                                 )}</span>
                                                             </div>
                                                         </div>
@@ -1542,7 +1704,7 @@
                                                             <div class="detail-item">
                                                                 <label class="text-muted small d-block">Due Date</label>
                                                                 <span class="fw-semibold">${formatDate(
-                                                                 violation.due_date
+                                                                   violation.due_date
                                                                 )}</span>
                                                             </div>
                                                         </div>
@@ -1550,53 +1712,53 @@
 
                                                     <!-- Nature of Violations -->
                                                     ${
-                                                     violation.nature_of_violation
-                                                      ? `
+                                                       violation.nature_of_violation
+                                                          ? `
                                                         <div class="col-12">
                                                             <div class="violations-list p-3 ${
-                                                             violation.status ===
-                                                             "resolved"
-                                                              ? "bg-success bg-opacity-10"
-                                                              : "bg-danger bg-opacity-10"
+                                                               violation.status ===
+                                                               "resolved"
+                                                                  ? "bg-success bg-opacity-10"
+                                                                  : "bg-danger bg-opacity-10"
                                                             } rounded-3">
                                                                 <div class="d-flex align-items-center mb-3">
                                                                     <i class="bi bi-exclamation-diamond-fill ${
-                                                                     violation.status ===
-                                                                     "resolved"
-                                                                      ? "text-success"
-                                                                      : "text-danger"
+                                                                       violation.status ===
+                                                                       "resolved"
+                                                                          ? "text-success"
+                                                                          : "text-danger"
                                                                     } me-2"></i>
                                                                     <h6 class="fw-bold mb-0">Nature of Violations</h6>
                                                                 </div>
                                                                 <div class="ps-4">
                                                                     ${
-                                                                     Array.isArray(
-                                                                      violation.nature_of_violation
-                                                                     )
-                                                                      ? `<div class="row g-2">
+                                                                       Array.isArray(
+                                                                          violation.nature_of_violation
+                                                                       )
+                                                                          ? `<div class="row g-2">
                                                                             ${violation.nature_of_violation
-                                                                             .map(
-                                                                              (
-                                                                               nature
-                                                                              ) => `
+                                                                               .map(
+                                                                                  (
+                                                                                     nature
+                                                                                  ) => `
                                                                                 <div class="col-md-6">
                                                                                     <div class="d-flex align-items-start">
                                                                                         <i class="bi bi-dot ${
-                                                                                         violation.status ===
-                                                                                         "resolved"
-                                                                                          ? "text-success"
-                                                                                          : "text-danger"
+                                                                                           violation.status ===
+                                                                                           "resolved"
+                                                                                              ? "text-success"
+                                                                                              : "text-danger"
                                                                                         } mt-1 me-2"></i>
                                                                                         <span class="text-uppercase small">${nature.trim()}</span>
                                                                                     </div>
                                                                                 </div>
                                                                             `
-                                                                             )
-                                                                             .join(
-                                                                              ""
-                                                                             )}
+                                                                               )
+                                                                               .join(
+                                                                                  ""
+                                                                               )}
                                                                       </div>`
-                                                                      : `<div class="text-muted">
+                                                                          : `<div class="text-muted">
                                                                             <i class="bi bi-info-circle me-2"></i>No violations listed
                                                                           </div>`
                                                                     }
@@ -1604,40 +1766,40 @@
                                                             </div>
                                                         </div>
                                                     `
-                                                      : ""
+                                                          : ""
                                                     }
 
                                                     <!-- SMS Notification Status -->
                                                     ${
-                                                     violation.notifications
-                                                      ? `
+                                                       violation.notifications
+                                                          ? `
                                                         <small class="d-block text-muted mt-3" style="background-color: #f8f9fa; padding: 6px; border-radius: 4px; font-size: 0.85em;">
                                                             <i class="bi bi-info-circle me-1"></i>
                                                             ${
-                                                             violation
-                                                              .notifications
-                                                              .initial_notice
-                                                              ? `Initial Notice: ${violation.notifications.initial_notice.message}`
-                                                              : ""
+                                                               violation
+                                                                  .notifications
+                                                                  .initial_notice
+                                                                  ? `Initial Notice: ${violation.notifications.initial_notice.message}`
+                                                                  : ""
                                                             }
                                                             ${
-                                                             violation
-                                                              .notifications
-                                                              .reminder
-                                                              ? `<br><i class="bi bi-info-circle me-1"></i>Reminder: ${violation.notifications.reminder.message}`
-                                                              : ""
+                                                               violation
+                                                                  .notifications
+                                                                  .reminder
+                                                                  ? `<br><i class="bi bi-info-circle me-1"></i>Reminder: ${violation.notifications.reminder.message}`
+                                                                  : ""
                                                             }
                                                         </small>
                                                     `
-                                                      : ""
+                                                          : ""
                                                     }
                                                 </div>
                                             </div>
                                         </div>
                                     `
-                                     )
-                                     .join("")
-                                  : `<div class="col-12">
+                                           )
+                                           .join("")
+                                      : `<div class="col-12">
                                         <div class="card soft-card">
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center">
@@ -1658,210 +1820,223 @@
             </div>
         `;
 
-     document.body.insertAdjacentHTML("beforeend", detailedModalContent);
-     const detailedModal = new bootstrap.Modal(
-      document.getElementById("inspectionDetailModal")
-     );
+               document.body.insertAdjacentHTML(
+                  "beforeend",
+                  detailedModalContent
+               );
+               const detailedModal = new bootstrap.Modal(
+                  document.getElementById("inspectionDetailModal")
+               );
 
-     document
-      .getElementById("inspectionDetailModal")
-      .addEventListener("hidden.bs.modal", function () {
-       cleanupModal();
-      });
+               document
+                  .getElementById("inspectionDetailModal")
+                  .addEventListener("hidden.bs.modal", function () {
+                     cleanupModal();
+                  });
 
-     detailedModal.show();
-    } catch (error) {
-     console.error("Error showing inspection details:", error);
-     alert("Error loading inspection details. Please try again.");
-    }
-   };
+               detailedModal.show();
+            } catch (error) {
+               console.error("Error showing inspection details:", error);
+               alert("Error loading inspection details. Please try again.");
+            }
+         };
 
-   // Example: Add event listeners to inspection rows or buttons
-   document.querySelectorAll(".inspection-row").forEach((row) => {
-    row.addEventListener("click", () => {
-     const inspectionId = row.dataset.inspectionId;
-     // Fetch the inspection data using the ID
-     const inspection = getInspectionById(inspectionId); // Implement this function to fetch data
-     showInspectionDetails(inspection);
-    });
-   });
+         // Example: Add event listeners to inspection rows or buttons
+         document.querySelectorAll(".inspection-row").forEach((row) => {
+            row.addEventListener("click", () => {
+               const inspectionId = row.dataset.inspectionId;
+               // Fetch the inspection data using the ID
+               const inspection = getInspectionById(inspectionId); // Implement this function to fetch data
+               showInspectionDetails(inspection);
+            });
+         });
 
-   // Function to fetch inspection data by ID (example implementation)
-   function getInspectionById(id) {
-    // This is a placeholder function. Replace with actual data fetching logic.
-    return inspectionsData.find((inspection) => inspection.id === id);
-   }
+         // Function to fetch inspection data by ID (example implementation)
+         function getInspectionById(id) {
+            // This is a placeholder function. Replace with actual data fetching logic.
+            return inspectionsData.find((inspection) => inspection.id === id);
+         }
 
-   // Ensure that the modal is initialized correctly
-   document
-    .getElementById("inspectionDetailModal")
-    .addEventListener("show.bs.modal", function () {
-     // Bootstrap handles the body overflow automatically
-    });
+         // Ensure that the modal is initialized correctly
+         document
+            .getElementById("inspectionDetailModal")
+            .addEventListener("show.bs.modal", function () {
+               // Bootstrap handles the body overflow automatically
+            });
 
-   document
-    .getElementById("inspectionDetailModal")
-    .addEventListener("hidden.bs.modal", function () {
-     // Bootstrap handles the body overflow automatically
-    });
+         document
+            .getElementById("inspectionDetailModal")
+            .addEventListener("hidden.bs.modal", function () {
+               // Bootstrap handles the body overflow automatically
+            });
 
-   let isEditing = false;
+         let isEditing = false;
 
-   const resetForm = () => {
-    const form = document.getElementById("inspectionForm");
-    const modalActionText = document.getElementById("modalActionText");
-    const submitButtonText = document.getElementById("submitButtonText");
-    const natureOfViolationContainer = document.getElementById(
-     "natureOfViolationContainer"
-    );
-    const inspectionId = document.getElementById("inspectionId");
+         const resetForm = () => {
+            const form = document.getElementById("inspectionForm");
+            const modalActionText = document.getElementById("modalActionText");
+            const submitButtonText =
+               document.getElementById("submitButtonText");
+            const natureOfViolationContainer = document.getElementById(
+               "natureOfViolationContainer"
+            );
+            const inspectionId = document.getElementById("inspectionId");
 
-    if (form) form.reset();
-    if (inspectionId) inspectionId.value = "";
-    if (natureOfViolationContainer)
-     natureOfViolationContainer.style.display = "none";
+            if (form) form.reset();
+            if (inspectionId) inspectionId.value = "";
+            if (natureOfViolationContainer)
+               natureOfViolationContainer.style.display = "none";
 
-    isEditing = false;
+            isEditing = false;
 
-    // Safely update text content
-    if (modalActionText) modalActionText.textContent = "Add";
-    if (submitButtonText) submitButtonText.textContent = "Create Inspection";
-   };
+            // Safely update text content
+            if (modalActionText) modalActionText.textContent = "Add";
+            if (submitButtonText)
+               submitButtonText.textContent = "Create Inspection";
+         };
 
-   const populateForm = (inspection) => {
-    // Basic fields
-    document.getElementById("ownerFirstName").value =
-     inspection.business?.owner?.first_name || "";
-    document.getElementById("ownerLastName").value =
-     inspection.business?.owner?.last_name || "";
-    document.getElementById("ownerEmail").value =
-     inspection.business?.owner?.email || "";
-    document.getElementById("ownerPhoneNumber").value =
-     inspection.business?.owner?.phone_number || "";
-    document.getElementById("businessName").value =
-     inspection.business?.business_name || "";
-    document.getElementById("businessPermit").value =
-     inspection.business?.business_permit || "";
-    document.getElementById("businessStatus").value =
-     inspection.business?.status || "";
+         const populateForm = (inspection) => {
+            // Basic fields
+            document.getElementById("ownerFirstName").value =
+               inspection.business?.owner?.first_name || "";
+            document.getElementById("ownerLastName").value =
+               inspection.business?.owner?.last_name || "";
+            document.getElementById("ownerEmail").value =
+               inspection.business?.owner?.email || "";
+            document.getElementById("ownerPhoneNumber").value =
+               inspection.business?.owner?.phone_number || "";
+            document.getElementById("businessName").value =
+               inspection.business?.business_name || "";
+            document.getElementById("businessPermit").value =
+               inspection.business?.business_permit || "";
+            document.getElementById("businessStatus").value =
+               inspection.business?.status || "";
 
-    // Address fields
-    document.getElementById("street").value =
-     inspection.business?.address?.street_address || "";
-    document.getElementById("city").value =
-     inspection.business?.address?.city || "";
-    document.getElementById("zip").value =
-     inspection.business?.address?.postal_code || "";
+            // Address fields
+            document.getElementById("street").value =
+               inspection.business?.address?.street_address || "";
+            document.getElementById("city").value =
+               inspection.business?.address?.city || "";
+            document.getElementById("zip").value =
+               inspection.business?.address?.postal_code || "";
 
-    // Inspection fields
-    document.getElementById("typeOfInspection").value =
-     inspection.type_of_inspection;
-    document.getElementById("withViolations").value = inspection.with_violations
-     ? "true"
-     : "false";
+            // Inspection fields
+            document.getElementById("typeOfInspection").value =
+               inspection.type_of_inspection;
+            document.getElementById("withViolations").value =
+               inspection.with_violations ? "true" : "false";
 
-    // Handle violations
-    if (
-     inspection.with_violations &&
-     inspection.violations &&
-     Array.isArray(inspection.violations)
-    ) {
-     document.getElementById("withViolations").value = "true";
-     document.getElementById("natureOfViolationContainer").style.display =
-      "block";
+            // Handle violations
+            if (
+               inspection.with_violations &&
+               inspection.violations &&
+               Array.isArray(inspection.violations)
+            ) {
+               document.getElementById("withViolations").value = "true";
+               document.getElementById(
+                  "natureOfViolationContainer"
+               ).style.display = "block";
 
-     // Reset all checkboxes first
-     document
-      .querySelectorAll('input[name="natureOfViolation[]"]')
-      .forEach((cb) => (cb.checked = false));
+               // Reset all checkboxes first
+               document
+                  .querySelectorAll('input[name="natureOfViolation[]"]')
+                  .forEach((cb) => (cb.checked = false));
 
-     // Check the relevant violations
-     inspection.violations.forEach((violation) => {
-      if (Array.isArray(violation.nature_of_violation)) {
-       violation.nature_of_violation.forEach((nature) => {
-        const checkbox = Array.from(
-         document.querySelectorAll('input[name="natureOfViolation[]"]')
-        ).find((cb) => cb.value.toLowerCase() === nature.toLowerCase());
-        if (checkbox) checkbox.checked = true;
-       });
+               // Check the relevant violations
+               inspection.violations.forEach((violation) => {
+                  if (Array.isArray(violation.nature_of_violation)) {
+                     violation.nature_of_violation.forEach((nature) => {
+                        const checkbox = Array.from(
+                           document.querySelectorAll(
+                              'input[name="natureOfViolation[]"]'
+                           )
+                        ).find(
+                           (cb) =>
+                              cb.value.toLowerCase() === nature.toLowerCase()
+                        );
+                        if (checkbox) checkbox.checked = true;
+                     });
 
-       if (violation.violation_receipt_no) {
-        document.getElementById("violationReceipt").value =
-         violation.violation_receipt_no;
-       }
-       if (violation.due_date) {
-        document.getElementById("dueDate").value =
-         violation.due_date.split("T")[0];
-       }
-      }
-     });
-    } else {
-     document.getElementById("withViolations").value = "false";
-     document.getElementById("natureOfViolationContainer").style.display =
-      "none";
-    }
+                     if (violation.violation_receipt_no) {
+                        document.getElementById("violationReceipt").value =
+                           violation.violation_receipt_no;
+                     }
+                     //    if (violation.due_date) {
+                     //     document.getElementById("dueDate").value =
+                     //      violation.due_date.split("T")[0];
+                     //    }
+                  }
+               });
+            } else {
+               document.getElementById("withViolations").value = "false";
+               document.getElementById(
+                  "natureOfViolationContainer"
+               ).style.display = "none";
+            }
 
-    isEditing = true;
-    document.getElementById("modalActionText").textContent = "Update";
-    document.getElementById("submitButtonText").textContent =
-     "Update Inspection";
-   };
+            isEditing = true;
+            document.getElementById("modalActionText").textContent = "Update";
+            document.getElementById("submitButtonText").textContent =
+               "Update Inspection";
+         };
 
-   setupFilterListeners();
-   fetchInspections(currentPage);
+         setupFilterListeners();
+         fetchInspections(currentPage);
 
-   // Add click handler for edit buttons
-   document.addEventListener("click", async function (e) {
-    if (e.target.closest(".edit-icon")) {
-     e.preventDefault();
-     e.stopPropagation();
+         // Add click handler for edit buttons
+         document.addEventListener("click", async function (e) {
+            if (e.target.closest(".edit-icon")) {
+               e.preventDefault();
+               e.stopPropagation();
 
-     const button = e.target.closest(".edit-icon");
-     const inspectionId = button.dataset.id;
+               const button = e.target.closest(".edit-icon");
+               const inspectionId = button.dataset.id;
 
-     try {
-      const response = await fetch(
-       `${apiUrl}/inspection/inspections/${inspectionId}`,
-       {
-        headers: {
-         Accept: "application/json",
-         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-       }
-      );
+               try {
+                  const response = await fetch(
+                     `${apiUrl}/inspection/inspections/${inspectionId}`,
+                     {
+                        headers: {
+                           Accept: "application/json",
+                           Authorization: `Bearer ${localStorage.getItem(
+                              "authToken"
+                           )}`,
+                        },
+                     }
+                  );
 
-      if (!response.ok)
-       throw new Error(`HTTP error! status: ${response.status}`);
+                  if (!response.ok)
+                     throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data = await response.json();
-      document.getElementById("inspectionId").value = inspectionId;
+                  const data = await response.json();
+                  document.getElementById("inspectionId").value = inspectionId;
 
-      populateForm(data.inspection);
+                  populateForm(data.inspection);
 
-      const modal = new bootstrap.Modal(
-       document.getElementById("violatorModal")
-      );
-      modal.show();
-     } catch (error) {
-      console.error("Error fetching inspection details:", error);
-     }
-    }
-   });
+                  const modal = new bootstrap.Modal(
+                     document.getElementById("violatorModal")
+                  );
+                  modal.show();
+               } catch (error) {
+                  console.error("Error fetching inspection details:", error);
+               }
+            }
+         });
 
-   // New helper function to render notification status
-   const renderNotificationStatus = (notifications) => {
-    if (!notifications) return "";
+         // New helper function to render notification status
+         const renderNotificationStatus = (notifications) => {
+            if (!notifications) return "";
 
-    const { initial_notice, reminder } = notifications;
+            const { initial_notice, reminder } = notifications;
 
-    return `
+            return `
       <div class="notification-status mb-4">
         <!-- Initial Notice Status -->
         ${
-         initial_notice
-          ? `
+           initial_notice
+              ? `
           <div class="alert ${getAlertClass(
-           initial_notice.status
+             initial_notice.status
           )} d-flex align-items-center mb-2">
             <i class="bi ${getIconClass(initial_notice.status)} fs-5 me-2"></i>
             <div>
@@ -1869,15 +2044,15 @@
             </div>
           </div>
         `
-          : ""
+              : ""
         }
 
         <!-- Reminder Status -->
         ${
-         reminder
-          ? `
+           reminder
+              ? `
           <div class="alert ${getAlertClass(
-           reminder.status
+             reminder.status
           )} d-flex align-items-center">
             <i class="bi ${getIconClass(reminder.status)} fs-5 me-2"></i>
             <div>
@@ -1885,49 +2060,50 @@
             </div>
           </div>
         `
-          : ""
+              : ""
         }
       </div>
     `;
-   };
+         };
 
-   // Helper function to determine alert class based on status
-   const getAlertClass = (status) => {
-    switch (status) {
-     case "sent":
-      return "alert-success";
-     case "failed":
-      return "alert-danger";
-     default:
-      return "alert-warning";
-    }
-   };
+         // Helper function to determine alert class based on status
+         const getAlertClass = (status) => {
+            switch (status) {
+               case "sent":
+                  return "alert-success";
+               case "failed":
+                  return "alert-danger";
+               default:
+                  return "alert-warning";
+            }
+         };
 
-   // Helper function to determine icon class based on status
-   const getIconClass = (status) => {
-    switch (status) {
-     case "sent":
-      return "bi-check-circle-fill";
-     case "failed":
-      return "bi-exclamation-triangle-fill";
-     default:
-      return "bi-info-circle-fill";
-    }
-   };
+         // Helper function to determine icon class based on status
+         const getIconClass = (status) => {
+            switch (status) {
+               case "sent":
+                  return "bi-check-circle-fill";
+               case "failed":
+                  return "bi-exclamation-triangle-fill";
+               default:
+                  return "bi-info-circle-fill";
+            }
+         };
 
-   // Update the openModalBtn click handler to set initial state for new inspection
-   document
-    .getElementById("openModalBtn")
-    .addEventListener("click", function () {
-     isEditing = false;
-     document.getElementById("modalActionText").textContent = "Add";
-     document.getElementById("submitButtonText").textContent =
-      "Create Inspection";
-     document.getElementById("inspectionForm").reset();
-     document.getElementById("inspectionId").value = "";
-     document.getElementById("natureOfViolationContainer").style.display =
-      "none";
-    });
-  </script>
- </body>
+         // Update the openModalBtn click handler to set initial state for new inspection
+         document
+            .getElementById("openModalBtn")
+            .addEventListener("click", function () {
+               isEditing = false;
+               document.getElementById("modalActionText").textContent = "Add";
+               document.getElementById("submitButtonText").textContent =
+                  "Create Inspection";
+               document.getElementById("inspectionForm").reset();
+               document.getElementById("inspectionId").value = "";
+               document.getElementById(
+                  "natureOfViolationContainer"
+               ).style.display = "none";
+            });
+      </script>
+   </body>
 </html>
