@@ -883,37 +883,47 @@
          });
 
          // Function to toggle required attributes based on the "With Violations" selection
-const toggleViolationFields = () => {
-    const withViolationsSelect = document.getElementById("withViolations");
-    const violationReceiptInput = document.getElementById("violationReceipt");
-    // const dueDateInput = document.getElementById("dueDate");
-    const violationFeeInput = document.getElementById("violationFee");
-    const violationCheckboxes = document.querySelectorAll('input[name="natureOfViolation[]"]');
-    const violationContainer = document.querySelector(".violation-checkboxes");
+         const toggleViolationFields = () => {
+            const withViolationsSelect =
+               document.getElementById("withViolations");
+            const violationReceiptInput =
+               document.getElementById("violationReceipt");
+            // const dueDateInput = document.getElementById("dueDate");
+            const violationFeeInput = document.getElementById("violationFee");
+            const violationCheckboxes = document.querySelectorAll(
+               'input[name="natureOfViolation[]"]'
+            );
+            const violationContainer = document.querySelector(
+               ".violation-checkboxes"
+            );
 
-    const hasViolations = withViolationsSelect.value === "true";
+            const hasViolations = withViolationsSelect.value === "true";
 
-    // Remove required from individual checkboxes but add custom validation
-    violationCheckboxes.forEach(checkbox => checkbox.required = false);
-    violationReceiptInput.required = hasViolations;
-    // dueDateInput.required = hasViolations;
-    violationFeeInput.required = hasViolations;
+            // Remove required from individual checkboxes but add custom validation
+            violationCheckboxes.forEach(
+               (checkbox) => (checkbox.required = false)
+            );
+            violationReceiptInput.required = hasViolations;
+            // dueDateInput.required = hasViolations;
+            violationFeeInput.required = hasViolations;
 
-    // Add custom validation on form submit
-    const form = withViolationsSelect.closest("form");
-    form.onsubmit = (e) => {
-        if (hasViolations) {
-            const checkedViolations = document.querySelectorAll('input[name="natureOfViolation[]"]:checked');
-            if (checkedViolations.length === 0) {
-                e.preventDefault();
-                alert("Please select at least one violation");
-                violationContainer.scrollIntoView({ behavior: "smooth" });
-                return false;
-            }
-        }
-        return true;
-    };
-};
+            // Add custom validation on form submit
+            const form = withViolationsSelect.closest("form");
+            form.onsubmit = (e) => {
+               if (hasViolations) {
+                  const checkedViolations = document.querySelectorAll(
+                     'input[name="natureOfViolation[]"]:checked'
+                  );
+                  if (checkedViolations.length === 0) {
+                     e.preventDefault();
+                     alert("Please select at least one violation");
+                     violationContainer.scrollIntoView({ behavior: "smooth" });
+                     return false;
+                  }
+               }
+               return true;
+            };
+         };
 
          // Add event listener to the "With Violations" select element
          document
@@ -1012,19 +1022,27 @@ const toggleViolationFields = () => {
                formData.append("with_violations", withViolationsValue);
 
                // Handle violations if "Yes" is selected
-if (withViolationsValue === "true") {
-    const selectedViolations = Array.from(
-        document.querySelectorAll('input[name="natureOfViolation[]"]:checked')
-    ).map((cb) => cb.value);
+               if (withViolationsValue === "true") {
+                  const selectedViolations = Array.from(
+                     document.querySelectorAll(
+                        'input[name="natureOfViolation[]"]:checked'
+                     )
+                  ).map((cb) => cb.value);
 
-    selectedViolations.forEach((violation) => {
-        formData.append("nature_of_violations[]", violation);
-    });
+                  selectedViolations.forEach((violation) => {
+                     formData.append("nature_of_violations[]", violation);
+                  });
 
-    formData.append("violation_receipt", document.getElementById("violationReceipt").value);
-    // formData.append("due_date", document.getElementById("dueDate").value);
-    formData.append("violation_fee", document.getElementById("violationFee").value);
-}
+                  formData.append(
+                     "violation_receipt",
+                     document.getElementById("violationReceipt").value
+                  );
+                  // formData.append("due_date", document.getElementById("dueDate").value);
+                  formData.append(
+                     "violation_fee",
+                     document.getElementById("violationFee").value
+                  );
+               }
 
                // Handle file upload
                const businessImage =
@@ -1155,37 +1173,44 @@ if (withViolationsValue === "true") {
             });
 
          // Add event listener for the violations select
-document.getElementById("withViolations").addEventListener("change", function () {
-    const violationsContainer = document.getElementById("natureOfViolationContainer");
-    const violationReceipt = document.getElementById("violationReceipt");
-    // const dueDate = document.getElementById("dueDate");
-    const violationFee = document.getElementById("violationFee");
-    const violationCheckboxes = document.querySelectorAll('input[name="natureOfViolation[]"]');
+         document
+            .getElementById("withViolations")
+            .addEventListener("change", function () {
+               const violationsContainer = document.getElementById(
+                  "natureOfViolationContainer"
+               );
+               const violationReceipt =
+                  document.getElementById("violationReceipt");
+               // const dueDate = document.getElementById("dueDate");
+               const violationFee = document.getElementById("violationFee");
+               const violationCheckboxes = document.querySelectorAll(
+                  'input[name="natureOfViolation[]"]'
+               );
 
-    if (this.value === "true") {
-        violationsContainer.style.display = "block";
-        violationReceipt.required = true;
-        // dueDate.required = true;
-        violationFee.required = true;
-        // At least one violation checkbox should be checked
-        violationCheckboxes.forEach((checkbox) => {
-            checkbox.addEventListener("change", validateViolations);
-        });
-    } else {
-        violationsContainer.style.display = "none";
-        violationReceipt.required = false;
-        // dueDate.required = false;
-        violationFee.required = false;
-        // Remove validation from checkboxes
-        violationCheckboxes.forEach((checkbox) => {
-            checkbox.removeEventListener("change", validateViolations);
-            checkbox.checked = false;
-        });
-        violationReceipt.value = "";
-        // dueDate.value = "";
-        violationFee.value = "";
-    }
-});
+               if (this.value === "true") {
+                  violationsContainer.style.display = "block";
+                  violationReceipt.required = true;
+                  // dueDate.required = true;
+                  violationFee.required = true;
+                  // At least one violation checkbox should be checked
+                  violationCheckboxes.forEach((checkbox) => {
+                     checkbox.addEventListener("change", validateViolations);
+                  });
+               } else {
+                  violationsContainer.style.display = "none";
+                  violationReceipt.required = false;
+                  // dueDate.required = false;
+                  violationFee.required = false;
+                  // Remove validation from checkboxes
+                  violationCheckboxes.forEach((checkbox) => {
+                     checkbox.removeEventListener("change", validateViolations);
+                     checkbox.checked = false;
+                  });
+                  violationReceipt.value = "";
+                  // dueDate.value = "";
+                  violationFee.value = "";
+               }
+            });
 
          // Function to validate that at least one violation is checked
          function validateViolations() {
@@ -1683,7 +1708,7 @@ document.getElementById("withViolations").addEventListener("change", function ()
 
                                                     <!-- Key Information -->
                                                     <div class="row g-4">
-                                                        <div class="col-md-4">
+                                                        <div class="col-md-3">
                                                             <div class="detail-item">
                                                                 <label class="text-muted small d-block">Receipt No.</label>
                                                                 <span class="fw-semibold">${
@@ -1692,7 +1717,15 @@ document.getElementById("withViolations").addEventListener("change", function ()
                                                                 }</span>
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-4">
+                                                        <div class="col-md-3">
+                                                        <div class="detail-item">
+                                                                <label class="text-muted small d-block">Violation Fee</label>
+                                                                <span class="fw-semibold">${
+                                                                   violation.violation_fee
+                                                                }</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
                                                             <div class="detail-item">
                                                                 <label class="text-muted small d-block">Violation Date</label>
                                                                 <span class="fw-semibold">${formatDate(
@@ -1700,7 +1733,7 @@ document.getElementById("withViolations").addEventListener("change", function ()
                                                                 )}</span>
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-4">
+                                                        <div class="col-md-3">
                                                             <div class="detail-item">
                                                                 <label class="text-muted small d-block">Due Date</label>
                                                                 <span class="fw-semibold">${formatDate(
@@ -1965,6 +1998,10 @@ document.getElementById("withViolations").addEventListener("change", function ()
                      //     document.getElementById("dueDate").value =
                      //      violation.due_date.split("T")[0];
                      //    }
+                     if (violation.violation_fee) {
+                        document.getElementById("violationFee").value =
+                           violation.violation_fee;
+                     }
                   }
                });
             } else {
