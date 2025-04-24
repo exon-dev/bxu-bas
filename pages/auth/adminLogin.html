@@ -1,206 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
- <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BXU BAS: Admin Login</title>
-  <!-- Add Bootstrap CSS -->
-  <link
-   href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-   rel="stylesheet"
-   integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-   crossorigin="anonymous"
-  />
-  <!-- Add Poppins font -->
-  <link
-   href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
-   rel="stylesheet"
-  />
-  <!-- Add Toastify CSS -->
-  <link
-   rel="stylesheet"
-   href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
-  />
-  <style>
-   body {
-    font-family: "Poppins", sans-serif;
-   }
-   img {
-    max-height: 100%; /* Prevents overflow */
-    max-width: 100%; /* Ensures responsiveness */
-    object-fit: contain; /* Maintains aspect ratio */
-   }
-  </style>
- </head>
- <body class="vh-100">
-  <div class="container-fluid h-100">
-   <div class="row h-100">
-    <!-- Left column with background (larger) -->
-    <div
-     class="col-lg-8 d-flex align-items-center justify-content-center text-white"
-    >
-     <img
-      src="../../assets/adminLoginPicture.jpg"
-      alt="BXU Logo"
-      class="vh-100"
-     />
-    </div>
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>BXU BAS: Admin Login</title>
+      <!-- Add Bootstrap CSS -->
+      <link
+         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+         rel="stylesheet"
+         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+         crossorigin="anonymous"
+      />
+      <!-- Add Poppins font -->
+      <link
+         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+         rel="stylesheet"
+      />
+      <!-- Add Toastify CSS -->
+      <link
+         rel="stylesheet"
+         href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+      />
+      <style>
+         body {
+            font-family: "Poppins", sans-serif;
+            height: 100vh;
+            margin: 0;
+            color: #0d6efd;
+         }
 
-    <!-- Right column with login form (smaller) -->
-    <div
-     class="col-lg-4 d-flex align-items-center justify-content-center bg-light"
-    >
-     <div class="card shadow-sm rounded-4" style="min-width: 400px">
-      <div class="card-body p-5">
-       <h4 class="card-title text-center mb-4">Admin Login</h4>
+         .left-panel {
+            position: relative;
+            background-image: url("/assets/bxuCityHall.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+         }
 
-       <form id="adminLoginForm">
-        <div class="mb-3">
-         <label for="email" class="form-label small">Email</label>
-         <input type="text" class="form-control small" id="email" required />
-        </div>
+         .left-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(100, 100, 100, 0.6); /* grayish overlay */
+            z-index: 1;
+         }
 
-        <div class="mb-3">
-         <label for="password" class="form-label small">Password</label>
-         <input
-          type="password"
-          class="form-control small"
-          id="password"
-          required
-         />
-        </div>
+         .left-panel-content {
+            position: relative;
+            z-index: 2;
+            color: white;
+         }
+         .logo {
+            width: 80px;
+            height: 60px;
+         }
+      </style>
+   </head>
+   <body class="vh-100">
+      <div class="container-fluid h-100">
+         <div class="row h-100">
+            <!-- Left column with background (larger) -->
+            <div
+               class="col-lg-8 d-flex align-items-center justify-content-center left-panel"
+            >
+               <div class="left-panel-content text-center">
+                  <h1 class="display-6 fw-bold">
+                     Welcome to the Butuan Business <br />
+                     Authority Sentinel
+                  </h1>
+                  <p class="h6">
+                     "Overseeing business registrations, permits, compliance
+                     enforcement, and violator <br> management — ensuring transparent
+                     and responsible governance in Butuan City.
+                  </p>
+               </div>
+            </div>
 
-        <!-- <div class="mb-3 form-check">
-         <input type="checkbox" class="form-check-input" id="rememberMe" />
-         <label class="form-check-label small" for="rememberMe"
-          >Remember me</label
-         >
-        </div> -->
+            <!-- Right column with login form (smaller) -->
+            <div
+               class="col-lg-4 d-flex flex-column align-items-center justify-content-center bg-light"
+            >
+               <div class="card shadow-sm rounded-4" style="min-width: 400px">
+                  <div class="card-body p-5">
+                     <div class="d-flex align-items-center mb-4">
+                        <img src="/assets/BXUBASLOGO.png" alt="" class="logo" />
+                        <h4 class="card-title text-center">Admin Login</h4>
+                     </div>
 
-        <button
-         type="submit"
-         class="btn btn-primary w-100 mb-3"
-         id="loginButton"
-        >
-         <span id="buttonText">Login</span>
-         <div
-          class="spinner-border spinner-border-sm text-light d-none"
-          id="loadingSpinner"
-          role="status"
-         >
-          <span class="visually-hidden">Loading...</span>
+                     <form id="adminLoginForm">
+                        <div class="mb-3">
+                           <label for="email" class="form-label small"
+                              >Email</label
+                           >
+                           <input
+                              type="text"
+                              class="form-control small"
+                              id="email"
+                              required
+                           />
+                        </div>
+
+                        <div class="mb-3">
+                           <label for="password" class="form-label small"
+                              >Password</label
+                           >
+                           <input
+                              type="password"
+                              class="form-control small"
+                              id="password"
+                              required
+                           />
+                        </div>
+                        <button
+                           type="submit"
+                           class="btn btn-primary w-100 mb-3"
+                           id="loginButton"
+                        >
+                           <span id="buttonText">Login</span>
+                           <div
+                              class="spinner-border spinner-border-sm text-light d-none"
+                              id="loadingSpinner"
+                              role="status"
+                           >
+                              <span class="visually-hidden">Loading...</span>
+                           </div>
+                        </button>
+
+                        <div class="text-center">
+                           <a
+                              href="forgotPassword.html?role=admin"
+                              class="text-decoration-none small"
+                              >Forgot Password?</a
+                           >
+                        </div>
+                        <div class="text-center">
+                           <a
+                              href="index.html"
+                              class="text-decoration-none small text-secondary"
+                              >back</a
+                           >
+                        </div>
+                     </form>
+                  </div>
+               </div>
+            </div>
          </div>
-        </button>
-
-        <div class="text-center">
-         <a
-          href="forgotPassword.html?role=admin"
-          class="text-decoration-none small"
-          >Forgot Password?</a
-         >
-        </div>
-        <div class="text-center">
-         <a href="index.html" class="text-decoration-none small text-secondary"
-          >back</a
-         >
-        </div>
-       </form>
       </div>
-     </div>
-    </div>
-   </div>
-  </div>
-  <!-- Add Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Add Toastify JS -->
-  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <!-- API script -->
-  <script type="module">
-   import CONFIG from "/scripts/config.js";
+      <!-- Add Bootstrap JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      <!-- Add Toastify JS -->
+      <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+      <!-- API script -->
+      <script type="module">
+         import CONFIG from "/scripts/config.js";
 
-   const adminLoginForm = document.getElementById("adminLoginForm");
-   const loginButton = document.getElementById("loginButton");
-   const loadingSpinner = document.getElementById("loadingSpinner");
+         const adminLoginForm = document.getElementById("adminLoginForm");
+         const loginButton = document.getElementById("loginButton");
+         const loadingSpinner = document.getElementById("loadingSpinner");
 
-   adminLoginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+         adminLoginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-    // Disable the login button and show the spinner
-    loginButton.disabled = true;
-    document.getElementById("buttonText").textContent = "Loading...";
-    loadingSpinner.classList.remove("d-none");
+            // Disable the login button and show the spinner
+            loginButton.disabled = true;
+            document.getElementById("buttonText").textContent = "Loading...";
+            loadingSpinner.classList.remove("d-none");
 
-    try {
-     // Get the values from the form fields
-     const email = document.getElementById("email").value;
-     const password = document.getElementById("password").value;
-     const apiUrl = CONFIG.API_BASE_URL;
+            try {
+               // Get the values from the form fields
+               const email = document.getElementById("email").value;
+               const password = document.getElementById("password").value;
+               const apiUrl = CONFIG.API_BASE_URL;
 
-     // Send the login data to the backend
-     const response = await fetch(CONFIG.API_BASE_URL + "/admin-login", {
-      method: "POST",
-      headers: {
-       Accept: "applicaton/json",
-       "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-       email,
-       password,
-      }),
-     });
+               // Send the login data to the backend
+               const response = await fetch(
+                  CONFIG.API_BASE_URL + "/admin-login",
+                  {
+                     method: "POST",
+                     headers: {
+                        Accept: "applicaton/json",
+                        "Content-Type": "application/json",
+                     },
+                     body: JSON.stringify({
+                        email,
+                        password,
+                     }),
+                  }
+               );
 
-     const data = await response.json();
-     // Check if the login is successful
-     if (response.ok) {
-      const token = data.token.split("|")[1]; // This gets everything after the
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("role", "admin");
-      localStorage.setItem("email", data.user.email);
-      localStorage.setItem("firstName", data.user.first_name);
-      localStorage.setItem("lastName", data.user.last_name);
-      localStorage.setItem("admin_id", data.user.admin_id);
+               const data = await response.json();
+               // Check if the login is successful
+               if (response.ok) {
+                  const token = data.token.split("|")[1]; // This gets everything after the
+                  localStorage.setItem("authToken", token);
+                  localStorage.setItem("role", "admin");
+                  localStorage.setItem("email", data.user.email);
+                  localStorage.setItem("firstName", data.user.first_name);
+                  localStorage.setItem("lastName", data.user.last_name);
+                  localStorage.setItem("admin_id", data.user.admin_id);
 
-      Toastify({
-       text: "Login Successful! Redirecting...",
-       duration: 3000,
-       gravity: "top", // Position of the toast
-       position: "center", // Center alignment
-       close: true, // Show close button
-      }).showToast();
-      setTimeout(() => {
-       window.location.href = "../admin/admin.html";
-      }, 3000);
-     } else {
-      // Show a Toastify notification for invalid login
-      Toastify({
-       text: data.message,
-       duration: 3000,
-       gravity: "top", // Position of the toast
-       position: "center", // Center alignment
-       close: true, // Show close button
-       style: {
-        background: "red", // Red background for error
-       },
-      }).showToast();
-     }
-    } catch (err) {
-     Toastify({
-      text: "Internal server error, please try again later",
-      duration: 3000,
-      gravity: "top", // Position of the toast
-      position: "center", // Center alignment
-      close: true, // Show close button
-      style: {
-       background: "red", // Red background for error
-      },
-     }).showToast();
-    } finally {
-     // Enable the login button and hide the spinner
-     loginButton.disabled = false;
-     loadingSpinner.classList.add("d-none");
-     document.getElementById("buttonText").textContent = "Login"; // Reset button text
-    }
-   });
-  </script>
- </body>
+                  Toastify({
+                     text: "Login Successful! Redirecting...",
+                     duration: 3000,
+                     gravity: "top", // Position of the toast
+                     position: "center", // Center alignment
+                     close: true, // Show close button
+                  }).showToast();
+                  setTimeout(() => {
+                     window.location.href = "../admin/admin.html";
+                  }, 3000);
+               } else {
+                  // Show a Toastify notification for invalid login
+                  Toastify({
+                     text: data.message,
+                     duration: 3000,
+                     gravity: "top", // Position of the toast
+                     position: "center", // Center alignment
+                     close: true, // Show close button
+                     style: {
+                        background: "red", // Red background for error
+                     },
+                  }).showToast();
+               }
+            } catch (err) {
+               Toastify({
+                  text: "Internal server error, please try again later",
+                  duration: 3000,
+                  gravity: "top", // Position of the toast
+                  position: "center", // Center alignment
+                  close: true, // Show close button
+                  style: {
+                     background: "red", // Red background for error
+                  },
+               }).showToast();
+            } finally {
+               // Enable the login button and hide the spinner
+               loginButton.disabled = false;
+               loadingSpinner.classList.add("d-none");
+               document.getElementById("buttonText").textContent = "Login"; // Reset button text
+            }
+         });
+      </script>
+   </body>
 </html>
