@@ -12,53 +12,77 @@
          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
          rel="stylesheet"
       />
-      <!-- Add Poppins font -->
       <link
-         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
          rel="stylesheet"
       />
       <style>
          body {
             font-family: "Poppins", sans-serif;
-            background-image: linear-gradient(
-                  rgba(30, 30, 30, 0.6),
-                  rgba(30, 30, 30, 0.6)
+            background: linear-gradient(
+                  rgba(15, 23, 42, 0.8),
+                  rgba(15, 23, 42, 0.5)
                ),
-               url("/assets/bxuCityHall.jpg");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: white;
+               url("/assets/bxuCityHall.jpg") center/cover no-repeat;
+            color: #f1f5f9;
+            min-height: 100vh;
+            overflow-x: hidden;
          }
-
-         h1,
-         p {
-            color: white;
-         }
-
          .main-card {
-            background: white;
+            background: #ffffff; /* solid white background */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            max-width: 750px; /* a bit smaller */
+            margin: 0 auto;
+            color: gray; /* darker text inside */
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+         }
+         .logo {
+            width: 100px; /* slightly smaller logo */
+            height: auto;
+         }
+         .header-content h1 {
+            font-size: 2rem;
+            font-weight: 700;
+         }
+         .header-content p {
+            font-size: 1rem;
+            color: #d1d5db;
+         }
+         .mission-vision {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 17px;
+            margin-top: 1rem;
+            justify-content: center;
+         }
+         .mission-vision div {
+            color: #0f172a;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            flex: 1 1 280px;
+            text-align: center;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            color: white;
+         }
+         .role-card {
+            transition: 0.3s all;
+            background: #ffffff; /* solid white */
+            border: 1px solid rgb(232, 232, 232); /* thickness + style + color */
             border-radius: 1rem;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-            padding: 30px;
-            max-width: 800px;
-            width: 100%;
-            margin: auto;
-            color: #0d6efd;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
          }
 
-         .role-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-         }
          .role-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
          }
          .role-card.selected {
-            background-color: rgba(13, 110, 253, 0.05);
             border-color: #0d6efd;
+            background: #e7f1ff;
          }
          .role-card.selected .card-title,
          .role-card.selected .card-text,
@@ -67,108 +91,103 @@
          }
          .continue-btn {
             transition: all 0.3s ease;
-            color: white !important;
+            color: white;
          }
          .continue-btn.disabled {
-            background-color: #6c757d !important;
-            border-color: #6c757d !important;
-            opacity: 0.65;
+            background: #6c757d;
+            border-color: #6c757d;
+            opacity: 0.7;
             cursor: not-allowed;
-            color: white !important;
          }
-         .logo {
-            width: 150px; /* Adjust the logo size */
-            height: auto; /* Maintain aspect ratio */
-            border-radius: 15px;
-         }
-
-         .text-content {
-            text-align: left; /* Align the text to the left of the image */
-         }
-
          @media (max-width: 768px) {
-            .text-center {
+            .header-content {
                text-align: center;
             }
-
-            .d-flex {
-               flex-direction: column; /* Stack the logo and text vertically on smaller screens */
-               align-items: center;
+            .main-card {
+               padding: 1rem;
             }
-
-            .logo {
-               margin-bottom: 10px; /* Adds space below the logo when stacked */
-            }
-
-            .text-content {
-               text-align: center; /* Center the text on small screens */
+            .role-card {
+               padding: 1rem;
             }
          }
       </style>
    </head>
    <body
-      class="vh-100 d-flex align-items-center justify-content-center bg-light"
+      class="d-flex flex-column justify-content-center align-items-center py-5"
    >
       <div class="container">
-         <!-- Header Section Outside the Card -->
-         <div
-            class="text-center mb-5 d-flex align-items-center justify-content-center"
-         >
-            <img src="/assets/BXUBASWIDTH.png" alt="Logo" class="logo me-3" />
-            <div class="text-content">
-               <h1 class="fw-bold text-white mb-3">
-                  Butuan Business Authority Sentinel
-               </h1>
-               <p class="text-light fs-5 mb-1">
-                  A system to streamline business authority operations in Butuan
-                  City
-               </p>
+         <!-- Header Section -->
+         <div class="text-center mb-3">
+            <img
+               src="/assets/BXUBASWIDTH.png"
+               alt="Logo"
+               class="logo mb-3 rounded-3"
+            />
+            <div class="header-content">
+               <h1>Butuan Business Authority Sentinel</h1>
+               <p>Streamlining business authority operations in Butuan City</p>
+            </div>
+            <div class="mission-vision">
+               <div>
+                  <h6 class="fw-semibold text-white">MISSION</h6>
+                  <p class="m-0">
+                     We want Butuan to be a VIBRANT, COMPETITIVE, LIVABLE AND
+                     SUSTAINABLE Smart Eco City
+                  </p>
+               </div>
+               <div>
+                  <h6 class="fw-semibold text-white">VISION</h6>
+                  <p class="m-0">
+                     A Great Hub City of Opportunities for all that spurs and
+                     supports Caraga’s sustainable growth and development.
+                  </p>
+               </div>
             </div>
          </div>
 
-         <!-- Role Selection Container -->
+         <!-- Role Selection -->
          <div class="main-card">
-            <div class="text-center mb-3">
-               <p class="text-secondary fs-5 fw-medium">
-                  Please select a role to proceed
-               </p>
+            <div class="text-center mb-2">
+               <p class="fs-6 fw-semibold">Please select a role to proceed</p>
             </div>
-            <div class="row justify-content-center g-4 mt-2">
-               <!-- Administrator Card -->
-               <div class="col-md-5 d-flex">
+
+            <div class="row g-4">
+               <!-- Administrator -->
+               <div class="col-md-6">
                   <div
-                     class="card role-card w-100 shadow rounded-4 border-0 hover-shadow h-100 d-flex flex-column"
+                     class="card role-card h-100 p-4 text-center"
                      onclick="selectRole(this, 'adminLogin.html')"
                   >
                      <div
-                        class="card-body text-center p-5 d-flex flex-column justify-content-center"
+                        class="card-body d-flex flex-column align-items-center justify-content-center"
                      >
                         <i
                            class="bi bi-person-workspace fs-1 mb-3 text-primary"
                         ></i>
-                        <h4 class="card-title fw-semibold">Administrator</h4>
+                        <h4 class="card-title fw-bold mb-2">Administrator</h4>
                         <p class="card-text text-muted">
-                           Manage system users, settings, and business data.
+                           Manage users, settings, and business data securely.
                         </p>
                      </div>
                   </div>
                </div>
 
-               <!-- Inspector Card -->
-               <div class="col-md-5 d-flex">
+               <!-- Inspector -->
+               <div class="col-md-6">
                   <div
-                     class="card role-card w-100 shadow rounded-4 border-0 hover-shadow h-100 d-flex flex-column"
+                     class="card role-card h-100 p-4 text-center"
                      onclick="selectRole(this, 'inspectorLogin.html')"
                   >
                      <div
-                        class="card-body text-center p-5 d-flex flex-column justify-content-center"
+                        class="card-body d-flex flex-column align-items-center justify-content-center"
                      >
                         <i
                            class="bi bi-clipboard-check fs-1 mb-3 text-success"
                         ></i>
-                        <h4 class="card-title fw-semibold">Inspector</h4>
+                        <h4 class="card-title fw-bold mb-2">Inspector</h4>
                         <p class="card-text text-muted">
-                           Conduct field inspections and submit reports.
+                           Perform field inspections and submit real-time
+                           reports.
                         </p>
                      </div>
                   </div>
@@ -176,46 +195,42 @@
             </div>
 
             <!-- Continue Button -->
-            <div class="mt-4 text-center">
+            <div class="text-center mt-4">
                <button
                   id="continueBtn"
-                  class="btn btn-lg continue-btn disabled"
+                  class="btn btn-primary btn-md continue-btn disabled"
                   disabled
                   onclick="proceedToLogin()"
                >
-                  Continue <i class="bi bi-arrow-right"></i>
+                  Continue <i class="bi bi-arrow-right ms-2"></i>
                </button>
             </div>
          </div>
+         <p class="text-center mt-4">
+            © All Rights Reserved, City Business Permit and Licensing Department
+         </p>
       </div>
-   </body>
 
-   <script>
-      let selectedRole = null;
+      <script>
+         let selectedRole = null;
 
-      function selectRole(card, redirectUrl) {
-         // Remove selected class from all cards
-         document.querySelectorAll(".role-card").forEach((card) => {
-            card.classList.remove("selected");
-         });
+         function selectRole(card, redirectUrl) {
+            document
+               .querySelectorAll(".role-card")
+               .forEach((c) => c.classList.remove("selected"));
+            card.classList.add("selected");
+            selectedRole = redirectUrl;
 
-         // Add selected class to clicked card
-         card.classList.add("selected");
-
-         // Store the redirect URL
-         selectedRole = redirectUrl;
-
-         // Enable the continue button
-         const continueBtn = document.getElementById("continueBtn");
-         continueBtn.classList.remove("disabled");
-         continueBtn.classList.add("btn-primary");
-         continueBtn.disabled = false;
-      }
-
-      function proceedToLogin() {
-         if (selectedRole) {
-            window.location.href = selectedRole;
+            const continueBtn = document.getElementById("continueBtn");
+            continueBtn.classList.remove("disabled");
+            continueBtn.disabled = false;
          }
-      }
-   </script>
+
+         function proceedToLogin() {
+            if (selectedRole) {
+               window.location.href = selectedRole;
+            }
+         }
+      </script>
+   </body>
 </html>
